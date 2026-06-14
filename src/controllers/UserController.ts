@@ -37,3 +37,16 @@ export const updateUser = (req: Request, res: Response): void => {
   users[userIndex] = { ...users[userIndex], ...req.body, dni }; // Preserve original DNI
   res.status(200).json(users[userIndex]);
 };
+
+export const deleteUser = (req: Request, res: Response): void => {
+  const dni = parseInt(req.params['dni'] as string);
+  const user = users.findIndex(u => u.dni === dni);
+
+  if (user === -1) {
+    res.status(404).json({ mensaje: 'Usuario no encontrada' });
+    return;
+  }
+
+  users.splice(user, 1);
+  res.status(204).send();
+};
