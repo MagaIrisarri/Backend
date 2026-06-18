@@ -2,7 +2,9 @@ import express from 'express';
 const app = express();
 app.use(express.json()); // para parsear el body JSON
 import userRoutes from './routes/UserRoute.js';
+import { parkingRouter } from './parking/ParkingRouter.js';
 app.use('/api/users', userRoutes);
+app.use('/api/parkings', parkingRouter);
 // acá van tus rutas, por ejemplo:
 // import userRoutes from './routes/userRoutes';
 // app.use('/api/users', userRoutes);
