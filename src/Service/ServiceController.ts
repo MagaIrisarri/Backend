@@ -1,5 +1,5 @@
 import { Request, Response} from 'express';
-import { Service } from '../Service.ts';
+import { Service } from './Service.js';
 
 const Services: Service[] = []; // En memoria (reemplazar con BD)
 
