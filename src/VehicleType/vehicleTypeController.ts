@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {vehicleType} from '../models/vehicleType.js';
+import {vehicleType} from '../vehicleType.js';
 
 const vehicleTypes: vehicleType[] = [];
 
