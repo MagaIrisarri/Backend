@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { User } from '../User.js';
+import { User } from '../User.ts';
 
 const users: User[] = []; // En memoria (reemplazar con BD)
 
