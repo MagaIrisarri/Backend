@@ -5,7 +5,7 @@ const app = express();
 
 app.use(express.json()); // para parsear el body JSON
 
-import userRoutes from './routes/UserRoute.js';
+import userRoutes from './UserRoute.js';
 
 app.use('/api/users', userRoutes);
 
