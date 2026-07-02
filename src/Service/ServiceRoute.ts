@@ -4,7 +4,7 @@ import {
         getServices, 
         getServiceById, 
         updateService, 
-        deleteService } from '../controllers/ServiceController.js';
+        deleteService } from '../ServiceController.js';
 
 
 const router = Router();
