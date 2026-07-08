@@ -21,7 +21,10 @@ export const findOne = (req: Request, res: Response) => {
 export const add = (req: Request, res: Response) => {
     const user = service.add(req.body.sanitizedUserInput);
 
-    return res.status(201).json({ message: "User added", data: user });
+    if (!user)
+        return res.status(404).send({ message: "User not found" });
+
+    return res.json(user);
 }
 
 export const update = (req: Request, res: Response) => {
@@ -42,4 +45,15 @@ export const remove = (req: Request, res: Response) => {
         return res.status(500).json({ message: "There was an internal error deleting the user" })
 
     return res.json({ message: `User with id: ${result.id} successfully deleted` })
+}
+
+export const findOneForEmail = (req: Request, res: Response) => {
+    const email = req.body.email as string;
+    const password = req.body.password as string;
+    const user = service.login(email, password);
+
+    if (!user)
+        return res.status(404).send({ message: "User not found" });
+
+    return res.json(user);
 }
