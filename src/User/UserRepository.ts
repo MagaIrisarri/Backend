@@ -40,5 +40,8 @@ export class UserRepository implements Repository<User> {
         }
 
     }
+    public findOneForEmail(email: string): User | undefined {
+        return users.find((user) => user.email === email);
+    }
 
 }

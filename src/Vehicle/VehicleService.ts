@@ -34,6 +34,10 @@ export class VehicleService {
     remove(id: string): { id: string } | undefined {
         return this.repo.remove({ id });
     }
+
+    findByUser(userId: string): Vehicle[] {
+        return this.repo.findByUser(userId);
+    }
 }
 
 

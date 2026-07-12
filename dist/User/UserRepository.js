@@ -27,5 +27,8 @@ export class UserRepository {
             return undefined;
         }
     }
+    findOneForEmail(email) {
+        return users.find((user) => user.email === email);
+    }
 }
 //# sourceMappingURL=UserRepository.js.map

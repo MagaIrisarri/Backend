@@ -44,4 +44,13 @@ export class VehicleRepository implements Repository<Vehicle> {
         return vehicles.find((vehicle) => vehicle.licensePlate === licensePlate);
     }
 
-}
+    public findByUser(userId: string): Vehicle[] {
+        const vehiclesUser: Vehicle[] = []
+
+        vehicles.forEach((vehicle) => {if(vehicle.userId === userId) {vehiclesUser.push(vehicle);}})
+        return vehiclesUser;
+    }
+    
+    
+    }
+    

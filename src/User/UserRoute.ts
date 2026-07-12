@@ -1,14 +1,16 @@
 import { Router } from 'express';
-import { sanitizeUserInput } from "./UserValidations.js";
-import { add, findAll, findOne, update, remove } from './UserController.js';
+import { sanitizeUserInput, validateUserSchema} from "./UserValidations.js";
+import { add, findAll, findOne, update, remove, findOneForEmail } from './UserController.js';
+
 
 const UserRouter = Router();
 
-UserRouter.post('/',sanitizeUserInput, add);
+UserRouter.post('/',sanitizeUserInput,validateUserSchema, add);
 UserRouter.get('/', findAll);
 UserRouter.get('/:id', findOne);
 UserRouter.put('/:id',sanitizeUserInput, update);
 UserRouter.patch('/:id',sanitizeUserInput, update);
 UserRouter.delete('/:id', remove);
+UserRouter.post('/login', findOneForEmail);
 
 export default UserRouter;
