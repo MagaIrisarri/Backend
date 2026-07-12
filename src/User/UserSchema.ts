@@ -25,7 +25,7 @@ export const UserSchema = z.object({
 
   password: z.string()
     .trim()
-    .min(1, "Contraseña es requerida"),
+    .min(8, "La contraseña debe tener al menos 8 caracteres"),
 
   file: z.string().optional(),
   type: z.string().optional(),

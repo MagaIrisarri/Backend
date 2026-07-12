@@ -18,8 +18,8 @@ export const findOne = (req: Request, res: Response) => {
     return res.json(user);
 }
 
-export const add = (req: Request, res: Response) => {
-    const user = service.add(req.body.sanitizedUserInput);
+export const add = async (req: Request, res: Response) => {
+    const user = await service.add(req.body.sanitizedUserInput);
 
     if (!user)
         return res.status(404).send({ message: "User not found" });
@@ -47,10 +47,10 @@ export const remove = (req: Request, res: Response) => {
     return res.json({ message: `User with id: ${result.id} successfully deleted` })
 }
 
-export const findOneForEmail = (req: Request, res: Response) => {
+export const findOneForEmail = async (req: Request, res: Response) => {
     const email = req.body.email as string;
     const password = req.body.password as string;
-    const user = service.login(email, password);
+    const user = await service.login(email, password);
 
     if (!user)
         return res.status(404).send({ message: "User not found" });
