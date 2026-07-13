@@ -21,6 +21,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "argon2": "^0.44.0",
     "axios": "^1.18.1",
     "cors": "^2.8.6",
     "cross-spawn": "^7.0.6",

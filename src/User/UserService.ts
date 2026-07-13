@@ -36,6 +36,20 @@ export class UserService {
         return this.repo.update({ id, ...input } as User);
     }
 
+    async updatePassword(id: string, currentPassword: string, newPassword: string): Promise<User | undefined> {
+        const user = this.repo.findOne({ id });
+        if (!user) return undefined;
+
+        const passwordMatches = await argon2.verify(user.password, currentPassword);
+        if (!passwordMatches) return undefined;
+
+        const passworNewSame =  await argon2.verify(newPassword, currentPassword);
+        if (!passworNewSame) return undefined;
+
+        const hashedPassword = await argon2.hash(newPassword);
+        return this.repo.update({ id, password: hashedPassword } as User);
+    }
+
     remove(id: string): { id: string } | undefined {
         return this.repo.remove({ id });
     }
