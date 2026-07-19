@@ -8,8 +8,10 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json()); // para parsear el body JSON
 
 import userRoutes from './User/UserRoute.js';
+import VehicleRouter from './Vehicle/VehicleRoute.js'; 
 
 app.use('/api/users', userRoutes);
+app.use('/api/vehicles', VehicleRouter);
 
 // acá van tus rutas, por ejemplo:
 // import userRoutes from './routes/userRoutes';
