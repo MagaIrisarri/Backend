@@ -13,7 +13,9 @@ export const findOne = (req, res) => {
 };
 export const add = (req, res) => {
     const user = service.add(req.body.sanitizedUserInput);
-    return res.status(201).json({ message: "User added", data: user });
+    if (!user)
+        return res.status(404).send({ message: "User not found" });
+    return res.json(user);
 };
 export const update = (req, res) => {
     const id = req.params.id;
@@ -28,5 +30,13 @@ export const remove = (req, res) => {
     if (!result)
         return res.status(500).json({ message: "There was an internal error deleting the user" });
     return res.json({ message: `User with id: ${result.id} successfully deleted` });
+};
+export const findOneForEmail = (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+    const user = service.login(email, password);
+    if (!user)
+        return res.status(404).send({ message: "User not found" });
+    return res.json(user);
 };
 //# sourceMappingURL=UserController.js.map

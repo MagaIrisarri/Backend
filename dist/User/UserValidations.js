@@ -1,3 +1,4 @@
+import { UserSchema } from "./UserSchema.js";
 export const sanitizeUserInput = (req, res, next) => {
     req.body.sanitizedUserInput = {
         dni: req.body.dni,
@@ -15,6 +16,14 @@ export const sanitizeUserInput = (req, res, next) => {
             delete req.body.sanitizedUserInput[key];
         }
     });
+    next();
+};
+export const validateUserSchema = async (req, res, next) => {
+    const result = await UserSchema.safeParseAsync(req.body.sanitizedUserInput);
+    if (!result.success) {
+        return res.status(400).json({ message: "Validation error", error: result.error });
+    }
+    req.body.sanitizedUserInput = result.data;
     next();
 };
 //# sourceMappingURL=UserValidations.js.map
