@@ -1,9 +1,7 @@
 import { z } from "zod";
 
 export const ParkingSchema = z.object({
-  id: z.string()
-    .min(1, 'ID is required')
-    .regex(/^\d+$/),
+  id: z.string().optional(),
 
   locality: z.string()
     .min(3, 'Locality must have at least 3 characters'),
@@ -30,8 +28,6 @@ export const ParkingSchema = z.object({
 
 export const ParkingIdSchema = z.object({
   id: z.string()
-    .min(1, 'ID is required')
-    .regex(/^\d+$/)
   });
 
 export type Parking = z.infer<typeof ParkingSchema>;
