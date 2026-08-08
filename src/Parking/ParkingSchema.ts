@@ -30,4 +30,4 @@ export const ParkingIdSchema = z.object({
   id: z.string()
   });
 
-export type Parking = z.infer<typeof ParkingSchema>;
+export const UpdateParkingSchema = ParkingSchema.partial();

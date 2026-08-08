@@ -1,5 +1,4 @@
 export interface CreateParkingDto {
-  id?: string;
   locality: string;
   postalCode: string;
   address: string;
@@ -11,4 +10,5 @@ export interface ParkingIdDto {
   id: string;
 }
 
-export interface UpdateParkingDto extends Partial<CreateParkingDto> {}
+export interface UpdateParkingDto 
+  extends Partial<CreateParkingDto> {}

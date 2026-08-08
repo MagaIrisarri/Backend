@@ -1,46 +1,60 @@
-import { Parking } from "./ParkingEntity.js";
-import { CreateParkingDto, ParkingIdDto, UpdateParkingDto } from "./ParkingDto.js";
+import { Parking } from "./Parking.Entity.js";
+import { EntityManager } from "@mikro-orm/core"; 
+import { CreateParkingDto, 
+  ParkingIdDto, 
+  UpdateParkingDto } from "./ParkingDto.js";
 
 export class ParkingService {
-  private parkings: Parking[] = [];
+  private readonly em: EntityManager;
+
+  constructor(em: EntityManager) {
+    this.em = em;
+  }
 
   async createParking(data: CreateParkingDto): Promise<Parking> {
-    const newParking = new Parking(
-      data.id,
-      data.locality,
-      data.postalCode,
-      data.address,
-      data.carCapacity,
-      data.motorcycleCapacity
-    );
-    this.parkings.push(newParking);
+    const newParking = this.em.create(Parking, data);
+
+    this.em.persist(newParking);
+    await this.em.flush();
+    
     return newParking;
   }
 
-  async findAllParking(): Promise<Parking[] | null> {
-    return this.parkings.length > 0 ? this.parkings : null;
+  async findAllParking(): Promise<Parking[]> {
+    return this.em.findAll(Parking);
   }
 
   async findParkingById(id: ParkingIdDto): Promise<Parking | null> {
-    return this.parkings.find(p => p.id === id.id) ?? null;
+    return this.em.findOne(Parking, id);
   }
 
-  async updateParking(id: ParkingIdDto, data: UpdateParkingDto): Promise<Parking | null> {
-    const index = this.parkings.findIndex(p => p.id === id.id);
-    if(index !== -1) {
-      this.parkings[index] = { ...this.parkings[index], ...data };
-      return this.parkings[index];
-    }
-    return null;
+  async updateParking(
+    id: ParkingIdDto, 
+    data: UpdateParkingDto
+  ): Promise<Parking | null> {
+
+    const updatedParking = await this.em.findOne(Parking, id);
+
+    if(!updatedParking) {
+      return null;
+    } 
+
+    this.em.assign(updatedParking, data);
+    await this.em.flush();
+    
+    return updatedParking;
   }
 
   async deleteParking(id: ParkingIdDto): Promise<boolean> {
-    const index = this.parkings.findIndex(p => p.id === id.id);
-    if (index !== -1) {
-      this.parkings.splice(index, 1);
-      return true;
+    const deletedParking = await this.em.findOne(Parking, id);
+    
+    if (!deletedParking) {
+      return false;  
     }
-    return false;
+    
+    this.em.remove(deletedParking);
+    await this.em.flush()
+    
+    return true;
   }
-
 }
