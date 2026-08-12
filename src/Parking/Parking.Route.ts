@@ -1,11 +1,11 @@
-import {Router} from 'express';
+import {Router} from "express";
 import{
   add,
   findAll,
   findOneById,
   update,
   remove,
-} from './ParkingController.js';
+} from "./Parking.Controller.js";
 
 const ParkingRouter = Router();
 

@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import {  orm } from '../Shared/db/orm.js'
-import { ParkingService } from './ParkingService.js';
+import { ParkingService } from './Parking.Service.js';
 import {
   ParkingSchema,
   ParkingIdSchema,
   UpdateParkingSchema,
-} from './ParkingSchema.js';
+} from './Parking.Schema.js';
 
 const parkingService = new ParkingService(orm.em);
 

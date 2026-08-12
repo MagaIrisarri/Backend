@@ -2,7 +2,7 @@ import { Parking } from "./Parking.Entity.js";
 import { EntityManager } from "@mikro-orm/core"; 
 import { CreateParkingDto, 
   ParkingIdDto, 
-  UpdateParkingDto } from "./ParkingDto.js";
+  UpdateParkingDto } from "./Parking.Dto.js";
 
 export class ParkingService {
   private readonly em: EntityManager;
@@ -25,7 +25,9 @@ export class ParkingService {
   }
 
   async findParkingById(id: ParkingIdDto): Promise<Parking | null> {
-    return this.em.findOne(Parking, id);
+    return this.em.findOne(Parking, {
+      id: id.id
+    });
   }
 
   async updateParking(
@@ -33,7 +35,8 @@ export class ParkingService {
     data: UpdateParkingDto
   ): Promise<Parking | null> {
 
-    const updatedParking = await this.em.findOne(Parking, id);
+    const updatedParking = await this.em.findOne(Parking, {
+      id: id.id});
 
     if(!updatedParking) {
       return null;
@@ -46,7 +49,9 @@ export class ParkingService {
   }
 
   async deleteParking(id: ParkingIdDto): Promise<boolean> {
-    const deletedParking = await this.em.findOne(Parking, id);
+    const deletedParking = await this.em.findOne(Parking, {
+      id: id.id
+    });
     
     if (!deletedParking) {
       return false;  

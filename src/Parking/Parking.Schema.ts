@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const ParkingSchema = z.object({
+  
   id: z.string().optional(),
 
   locality: z.string()
@@ -27,7 +28,9 @@ export const ParkingSchema = z.object({
 });
 
 export const ParkingIdSchema = z.object({
+  
   id: z.string()
-  });
+
+});
 
 export const UpdateParkingSchema = ParkingSchema.partial();

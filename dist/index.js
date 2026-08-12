@@ -7,9 +7,11 @@ app.use((req, res, next) => {
     RequestContext.create(orm.em, next);
 });
 import userRoutes from './User/UserRoute.js';
-import parkingRoutes from './Parking/ParkingRoute.js';
+import parkingRoutes from './Parking/Parking.Route.js';
+import parkingpricesRoutes from './ParkingPrice/ParkingPrice.Route.js';
 app.use('/api/users', userRoutes);
 app.use('/api/parkings', parkingRoutes);
+app.use('/api', parkingpricesRoutes);
 // acá van tus rutas, por ejemplo:
 // import userRoutes from './routes/userRoutes';
 // app.use('/api/users', userRoutes);

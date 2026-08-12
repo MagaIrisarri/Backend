@@ -1,6 +1,7 @@
-import { Cascade, Collection, Rel, } from "@mikro-orm/core"
-import { Entity, PrimaryKey, Property, } from "@mikro-orm/decorators/legacy";
-import crypto from "node:crypto"
+import { Cascade, Collection } from "@mikro-orm/core"
+import { Entity, OneToMany, PrimaryKey, Property, } from "@mikro-orm/decorators/legacy";
+import crypto from "node:crypto";
+import { ParkingPrice } from "../ParkingPrice/ParkingPrice.Entity.js";
 
 @Entity()
 export class Parking {
@@ -23,6 +24,12 @@ export class Parking {
   @Property({ type: 'number', nullable: true })
   motorcycleCapacity!: number;
 
+  @OneToMany(() => ParkingPrice, (parkingprice) => parkingprice.parking, {
+    mappedBy: 'parking',
+    cascade: [Cascade.REMOVE],
+  })
+  parkingpriceHistory = new Collection<ParkingPrice>(this)
+
   toJSON() {
     return {
       id: this.id,
@@ -34,31 +41,3 @@ export class Parking {
     };
   }
 }
-
-
-/*
-export class Parking {
-  id: string;
-  locality: string;
-  postalCode: string;
-  address: string;
-  carCapacity: number;
-  motorcycleCapacity: number;
-  
-  constructor(
-    id: string = crypto.randomUUID(),
-    locality: string,
-    postalCode: string,
-    address: string,
-    carCapacity: number,
-    motorcycleCapacity: number,
-  ) {
-    this.id = id;
-    this.locality = locality;
-    this.postalCode = postalCode;
-    this.address = address;
-    this.carCapacity = carCapacity;
-    this.motorcycleCapacity = motorcycleCapacity;
-  }
-}
-*/
