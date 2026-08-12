@@ -55,6 +55,7 @@ export const remove = (req: Request, res: Response) => {
     const result = service.remove(id);
 
     if (!result)
+        
         return res.status(500).json({ message: "There was an internal error deleting the user" })
 
     return res.json({ message: `User with id: ${result.id} successfully deleted` })
@@ -65,8 +66,13 @@ export const findOneForEmail = async (req: Request, res: Response) => {
     const password = req.body.password as string;
     const user = await service.login(email, password);
 
-    if (!user)
-        return res.status(404).send({ message: "User not found" });
-
-    return res.json(user);
+    if ("error" in user){
+        if (user.error === "not found")
+            {return res.status(404).send({ message: "User not found" });}
+        if (user.error === "user not ACTIVO") 
+           { return res.status(401).send({ message: "El usuario no esta activo" });}
+        if (user.error === "password incorrect") 
+           { return res.status(401).send({ message: "Contraseña incorrecta" });}
+    }
+    else return res.json(user);
 }

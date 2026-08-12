@@ -5,16 +5,26 @@ import argon2 from 'argon2';
 export class UserService {
     constructor(private repo: UserRepository) { }
 
-    findAll(): User[] | undefined {
-        return this.repo.findAll();
+    findAll(): Omit<User, "password">[] | undefined{
+        const users = this.repo.findAll();
+        return users?.map(({ password, ...rest }) => rest);
+    
     }
 
-    findOne(id: string): User | undefined {
-        return this.repo.findOne({ id });
+    findOne(id: string): Omit<User, "password"> | undefined {
+        const user = this.repo.findOne({ id });
+        if (!user){
+            return undefined;
+        }
+        else{
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        }
     }
 
     async add(input: Omit<User, "id">): Promise<User | undefined> {
         const hashedPassword = await argon2.hash(input.password);
+        const status = "ACTIVO"
         const userNew = new User(
           input.dni,
           input.last_name,
@@ -25,6 +35,7 @@ export class UserService {
           hashedPassword,
           input.file,
           input.type,
+          status,
         );
         const user = this.repo.findOneForEmail (input.email);
         if(!user){
@@ -43,8 +54,8 @@ export class UserService {
         const passwordMatches = await argon2.verify(user.password, currentPassword);
         if (!passwordMatches) return undefined;
 
-        const passworNewSame =  await argon2.verify(newPassword, currentPassword);
-        if (!passworNewSame) return undefined;
+        const isSameAsCurrent = await argon2.verify(user.password, newPassword);
+        if (isSameAsCurrent) return undefined;
 
         const hashedPassword = await argon2.hash(newPassword);
         return this.repo.update({ id, password: hashedPassword } as User);
@@ -54,16 +65,19 @@ export class UserService {
         return this.repo.remove({ id });
     }
 
-    async login(email: string, password: string): Promise<Omit<User, "password"> | undefined> {
+    async login(email: string, password: string): Promise<Omit<User, "password"> | {error: string} >{{
         const user = this.repo.findOneForEmail (email);
         if (user){
-            const passwordMatches = await argon2.verify(user.password, password);
-            if (user.email === email && passwordMatches){
-                const { password, ...userWithoutPassword } = user;
-                return userWithoutPassword;
-        }}
-        else return;
+            if (user.status === "ACTIVO"){
+                const passwordMatches = await argon2.verify(user.password, password);
+                if (passwordMatches){
+                    const { password, ...userWithoutPassword } = user;
+                    return userWithoutPassword;}
+                else return {error: "password incorrect"}
+            }
+            else return {error: "user not ACTIVO"}}
+        else return {error: "not found"};
     }
 }
 
-
+}

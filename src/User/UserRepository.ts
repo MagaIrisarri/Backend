@@ -32,7 +32,7 @@ export class UserRepository implements Repository<User> {
         const userIndex = users.findIndex((user) => user.id === item.id);
 
         if (userIndex >= 0) {
-            users.splice(userIndex, 1);
+            users[userIndex].status = "BAJA";
             return { id: item.id }
         }
         else {

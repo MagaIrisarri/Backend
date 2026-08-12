@@ -11,6 +11,7 @@ export class User {
   public password: string,
   public file: string,
   public type: string,
+  public status: string,
   public id = crypto.randomUUID(),
 ) {}
 }

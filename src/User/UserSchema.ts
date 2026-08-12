@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const UserStatusSchema = z.enum([
+  "ACTIVO",
+  "BAJA",
+])
+
 export const UserSchema = z.object({
   dni: z.string()
     .regex(/^\d{7,8}$/, "DNI debe contener solo números y tener 7 u 8 dígitos"),
@@ -29,6 +34,7 @@ export const UserSchema = z.object({
 
   file: z.string().optional(),
   type: z.string().optional(),
+  status: UserStatusSchema.optional(),
 });
 
 export type UserInput = z.infer<typeof UserSchema>;
