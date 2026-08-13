@@ -8,10 +8,12 @@ app.use((req, res, next) => {
 });
 import userRoutes from './User/UserRoute.js';
 import parkingRoutes from './Parking/Parking.Route.js';
-import parkingpricesRoutes from './ParkingPrice/ParkingPrice.Route.js';
+import parkingpriceRoutes from './ParkingPrice/ParkingPrice.Route.js';
+import parkingspaceRoutes from './ParkingSpace/ParkingSpace.Route.js';
 app.use('/api/users', userRoutes);
 app.use('/api/parkings', parkingRoutes);
-app.use('/api', parkingpricesRoutes);
+app.use('/api', parkingpriceRoutes);
+app.use('/api/parkings', parkingspaceRoutes);
 // acá van tus rutas, por ejemplo:
 // import userRoutes from './routes/userRoutes';
 // app.use('/api/users', userRoutes);

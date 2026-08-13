@@ -2,6 +2,7 @@ import { Cascade, Collection } from "@mikro-orm/core"
 import { Entity, OneToMany, PrimaryKey, Property, } from "@mikro-orm/decorators/legacy";
 import crypto from "node:crypto";
 import { ParkingPrice } from "../ParkingPrice/ParkingPrice.Entity.js";
+import { ParkingSpace } from "../ParkingSpace/ParkingSpace.Entity.js";
 
 @Entity()
 export class Parking {
@@ -29,6 +30,12 @@ export class Parking {
     cascade: [Cascade.REMOVE],
   })
   parkingpriceHistory = new Collection<ParkingPrice>(this)
+
+  @OneToMany(() => ParkingSpace, (parkingspace) => parkingspace.parking, {
+    mappedBy: 'parking',
+    cascade: [Cascade.REMOVE],
+  })
+  parkingSpaces = new Collection<ParkingSpace>(this)
 
   toJSON() {
     return {
