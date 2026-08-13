@@ -8,21 +8,20 @@ export const orm = await MikroORM.init({
   entitiesTs: ['src/**/*.Entity.ts'], 
 
 
-  dbName: 'vehiculosdb',
+  dbName: 'parkingdb',
   driver: MySqlDriver,
 
   user: 'root',                         
-  password: '1234',            
+  password: 'pass',            
   host: 'localhost',
   port: 3306,
-  clientUrl: 'mysql://root:pass@localhost:3306/vehiculosdb', 
+  clientUrl: 'mysql://root:pass@localhost:3306/parkingdb', 
   highlighter: new SqlHighlighter(),
   debug: ['query', 'schema'],
   
   allowGlobalContext: true 
 });
 
-// Función opcional para sincronizar la base de datos automáticamente al arrancar
 export const syncSchema = async () => {
   try {
     await orm.schema.update(); 
