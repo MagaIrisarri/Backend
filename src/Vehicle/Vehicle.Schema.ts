@@ -1,42 +1,25 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const VehicleSchema = z.object({
-  patente: z.string({
-    message: "La patente es requerida y debe ser un texto",
+// Esquema para crear un vehículo
+export const createVehicleSchema = z.object({
+  body: z.object({
+    plate: z.string().min(6, "La patente debe tener al menos 6 caracteres").transform(val => val.toUpperCase().replace(/\s/g, '')),
+    color: z.string().optional(),
+    year: z.number().int().optional(),
+    observations: z.string().optional(),
+    brandId: z.string().uuid("ID de marca inválido"),
+    modelId: z.string().uuid("ID de modelo inválido"),
+    vehicleTypeId: z.string().uuid("ID de tipo de vehículo inválido"),
+    insuranceId: z.string().uuid("ID de seguro inválido").optional(),
   })
-    .min(6, 'La patente debe tener al menos 6 caracteres')
-    .max(7, 'La patente no puede tener más de 7 caracteres'),
-
-  marca: z.string({
-    message: "La marca es requerida",
-  })
-    .min(2, 'La marca debe tener al menos 2 caracteres'),
-
-  modelo: z.string({
-    message: "El modelo es requerido",
-  })
-    .min(2, 'El modelo debe tener al menos 2 caracteres'),
-
-  seguro: z.string({
-    message: "El seguro es requerido",
-  })
-    .min(2, 'El seguro debe tener al menos 2 caracteres'),
-
-  id_tipoVehiculo: z.string({
-    message: "El ID del tipo de vehículo es requerido",
-  })
-    .min(1, 'El ID del tipo de vehículo no puede estar vacío')
 });
 
+// Esquema para actualizar (hace que todos los campos del body sean opcionales)
+export const UpdateVehicleSchema = createVehicleSchema.partial();
+
+// Esquema para validar que el ID que viaja en la URL sea un UUID correcto
 export const VehicleIdSchema = z.object({
-  id: z.string({
-    message: "El ID  texto",
+  params: z.object({
+    id: z.string().uuid("El ID de la URL no es válido")
   })
 });
-
-// Reutilizamos el esquema principal pero hacemos todos sus campos opcionales para los métodos PUT/PATCH
-export const UpdateVehicleSchema = VehicleSchema.partial();
-
-// Exportamos los tipos inferidos por si los necesitas en el Servicio o Controlador
-export type VehicleInput = z.infer<typeof VehicleSchema>;
-export type UpdateVehicleInput = z.infer<typeof UpdateVehicleSchema>;

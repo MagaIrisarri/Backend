@@ -1,26 +1,12 @@
 import { Request, Response } from 'express';
 import { orm } from '../Shared/db/orm.js';
 import { VehicleService } from './Vehicle.Service.js';
-import {
-  VehicleSchema,
-  VehicleIdSchema,
-  UpdateVehicleSchema,
-} from './Vehicle.Schema.js'; 
 
 const vehicleService = new VehicleService(orm.em);
 
 async function add(req: Request, res: Response) {
-  const vehicleInput = await VehicleSchema.safeParseAsync(req.body);
-
-  if (!vehicleInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: vehicleInput.error, 
-    });
-  }
-
   try {
-    const vehicle = await vehicleService.createVehicle(vehicleInput.data);
+    const vehicle = await vehicleService.createVehicle(req.body);
 
     return res.status(201).json({ 
       message: "Vehicle created successfully", 
@@ -38,8 +24,7 @@ async function findAll(req: Request, res: Response) {
   try {
     const vehicleList = await vehicleService.findAllVehicle();
 
-    const message =
-      vehicleList.length === 0
+    const message = vehicleList.length === 0
         ? 'No vehicles found'
         : 'Vehicles found';
     
@@ -55,17 +40,8 @@ async function findAll(req: Request, res: Response) {
 }
 
 async function findOneById(req: Request, res: Response) {
-  const idInput = await VehicleIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: idInput.error,
-    });
-  }
-
   try {
-    const vehicle = await vehicleService.findVehicleById(idInput.data);
+    const vehicle = await vehicleService.findVehicleById({ id: req.params.id as string});
 
     if(!vehicle) {
       return res.status(404).json({
@@ -85,28 +61,10 @@ async function findOneById(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  const idInput = await VehicleIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({
-      message: "ID validation error",
-      error: idInput.error,
-    });
-  }
-
-  const vehicleInput = await UpdateVehicleSchema.safeParseAsync(req.body);
-  
-  if (!vehicleInput.success) {
-    return res.status(400).json({
-      message: "Vehicle validation error",
-      error: vehicleInput.error,
-    });
-  }
-
   try {
     const vehicle = await vehicleService.updateVehicle(
-      idInput.data, 
-      vehicleInput.data
+      { id: req.params.id as string }, 
+      req.body
     );
 
     if(!vehicle) {
@@ -127,17 +85,8 @@ async function update(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
-  const idInput = await VehicleIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: idInput.error,
-    });
-  }
-  
   try {
-    const deleted = await vehicleService.deleteVehicle(idInput.data);
+    const deleted = await vehicleService.deleteVehicle({ id: req.params.id as string });
 
     if (!deleted) {
       return res.status(404).json({ 

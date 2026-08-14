@@ -1,21 +1,23 @@
 import { Router } from "express";
-import {
-  add,
-  findAll,
-  findOneById,
-  update,
-  remove,
-} from "./Vehicle.Controller.js";
+import { add, findAll, findOneById, update, remove } from "./Vehicle.Controller.js";
+import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
+import { createVehicleSchema, UpdateVehicleSchema, VehicleIdSchema } from './Vehicle.Schema.js';
 
-const VehicleRouter = Router();
+export const VehicleRouter = Router();
 
-VehicleRouter.post('/', add);
+VehicleRouter.post('/', validateSchema(createVehicleSchema), add);
 
 VehicleRouter.get('/', findAll);
-VehicleRouter.get('/:id', findOneById);
 
-VehicleRouter.put('/:id', update);
+VehicleRouter.get('/:id', validateSchema(VehicleIdSchema), findOneById);
 
-VehicleRouter.delete('/:id', remove);
+VehicleRouter.put(
+  '/:id', 
+  validateSchema(VehicleIdSchema), 
+  validateSchema(UpdateVehicleSchema), 
+  update
+);
+
+VehicleRouter.delete('/:id', validateSchema(VehicleIdSchema), remove);
 
 export default VehicleRouter;
