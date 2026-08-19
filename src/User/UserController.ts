@@ -18,8 +18,23 @@ export const findOne = (req: Request, res: Response) => {
     return res.json(user);
 }
 
-export const add = async (req: Request, res: Response) => {
-    const user = await service.add(req.body.sanitizedUserInput);
+export const findEmployeesByOwner = (req: Request, res: Response) => {
+    const ownerId = req.params.ownerId as string
+    res.json(service.findEmployeesByOwner(ownerId));
+}
+
+export const addPublicUser = async (req: Request, res: Response) => {
+    const user = await service.addPublicUser(req.body.sanitizedUserInput);
+
+    if (!user)
+        return res.status(404).send({ message: "User not found" });
+
+    return res.json(user);
+}
+
+export const addEmployee = async (req: Request, res: Response) => {
+    const ownerId = req.params.ownerId as string
+    const user = await service.addPEmployee(req.body.sanitizedUserInput, ownerId);
 
     if (!user)
         return res.status(404).send({ message: "User not found" });

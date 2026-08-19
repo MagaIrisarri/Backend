@@ -12,6 +12,7 @@ export const sanitizeUserInput = (req: Request, res: Response, next: NextFunctio
         password: req.body.password,
         file: req.body.file,
         type: req.body.type,
+        ownerId: req.params.ownerId,
     }
 
     Object.keys(req.body.sanitizedUserInput).forEach((key) => {

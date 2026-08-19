@@ -22,7 +22,7 @@ export class UserService {
         }
     }
 
-    async add(input: Omit<User, "id">): Promise<User | undefined> {
+    async addPublicUser(input: Omit<User, "id">): Promise<User | undefined> {
         const hashedPassword = await argon2.hash(input.password);
         const status = "ACTIVO"
         const userNew = new User(
@@ -41,6 +41,32 @@ export class UserService {
         if(!user){
             this.repo.add(userNew);
             return userNew;};
+    }
+
+    async addPEmployee(input: Omit<User, "id">, ownerId: string): Promise<User | undefined> {
+        const hashedPassword = await argon2.hash(input.password);
+        const status = "ACTIVO"
+        const type = "EMPLEADO"
+        const userNew = new User(
+          input.dni,
+          input.last_name,
+          input.name,
+          input.date_of_brthdate,
+          input.email,
+          input.phone,
+          hashedPassword,
+          input.file,
+          type,
+          status,
+          ownerId,
+        );
+        const user = this.repo.findOneForEmail (input.email);
+        const ownerUser = this.repo.findOne({ id: ownerId });
+        if(!user){
+            if (ownerUser?.status === "ACTIVO" && ownerUser.type === "DUEÑO"){
+                this.repo.add(userNew);
+                return userNew;}
+            };
     }
 
     update(id: string, input: Partial<User>): User | undefined {
@@ -77,7 +103,13 @@ export class UserService {
             }
             else return {error: "user not ACTIVO"}}
         else return {error: "not found"};
+        }
     }
-}
+
+    public findEmployeesByOwner(ownerId: string): Omit<User, "password">[] | undefined {
+        const users = this.repo.findByOwner(ownerId);
+        return users?.map(({ password, ...rest }) => rest);
+    }
+
 
 }

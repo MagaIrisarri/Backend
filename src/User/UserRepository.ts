@@ -44,4 +44,15 @@ export class UserRepository implements Repository<User> {
         return users.find((user) => user.email === email);
     }
 
+    public findByOwner(ownerId: string): User[] | undefined{
+        const employees: User[] = []
+        for (let i=0; i < users.length; i++) {
+            if (users[i].type === "EMPLEADO" && users[i].ownerId === ownerId){
+                employees.push(users[i])
+            }
+        }
+        return employees;
+        
+    }
+
 }
