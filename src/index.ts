@@ -30,7 +30,7 @@ app.use('/api/models', modelRouter);
 
 async function startServer() {
   try {
-    await syncSchema(); //never in production
+    await syncSchema(); 
     await seedDatabase(orm.em.fork());
     app.listen(3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');

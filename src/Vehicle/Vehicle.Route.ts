@@ -11,12 +11,7 @@ VehicleRouter.get('/', findAll);
 
 VehicleRouter.get('/:id', validateSchema(VehicleIdSchema), findOneById);
 
-VehicleRouter.put(
-  '/:id', 
-  validateSchema(VehicleIdSchema), 
-  validateSchema(UpdateVehicleSchema), 
-  update
-);
+VehicleRouter.put('/:id', validateSchema(VehicleIdSchema), validateSchema(UpdateVehicleSchema), update);
 
 VehicleRouter.delete('/:id', validateSchema(VehicleIdSchema), remove);
 

@@ -1,21 +1,49 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Vehicle } from './Vehicle.Entity.js';
+import { Model } from './Model/Model.Entity.js';
 
 export class VehicleService {
   constructor(private em: EntityManager) {}
 
   async createVehicle(data: any): Promise<Vehicle> {
-    const vehicle = this.em.create(Vehicle, data);
+    const model = await this.em.findOne(Model, 
+      { id: data.modelId }, 
+      { populate: ['vehicleType', 'brand'] }
+    );
+    if (!model) {
+      throw new Error("El modelo seleccionado no existe en la base de datos.");
+    }
+   
+    if (model.brand.id !== data.brandId) {
+      throw new Error("Marca y modelo no coinciden");
+    }
+
+
+    const vehicleData = {
+      ...data,               // Trae plate, color, year, observations
+      brand: data.brandId,   // Asignamos el ID a la propiedad que MikroORM espera
+      model: data.modelId,
+      vehicleType: model.vehicleType.id,
+      insurance: data.insuranceId,
+    };
+
+    // 3. Creamos y guardamos el vehículo
+    const vehicle = this.em.create(Vehicle, vehicleData);
     await this.em.flush();
+    
     return vehicle;
   }
 
   async findAllVehicle(): Promise<Vehicle[]> {
-    return await this.em.find(Vehicle, {});
+    return await this.em.find(Vehicle, 
+      {isActive: true},
+      { populate: ['brand', 'model', 'vehicleType', 'insurance'] });
   }
 
   async findVehicleById(params: { id: string }): Promise<Vehicle | null> {
-    return await this.em.findOne(Vehicle, { id: params.id });
+    return await this.em.findOne(Vehicle,
+       { id: params.id, isActive: true },
+       { populate: ['brand', 'model', 'vehicleType', 'insurance'] });
   }
 
   async updateVehicle(params: { id: string }, data: any): Promise<Vehicle | null> {
@@ -34,7 +62,7 @@ export class VehicleService {
     
     if (!vehicle) return false;
     
-    this.em.remove(vehicle);
+    vehicle.isActive = false;
     await this.em.flush();
     
     return true;

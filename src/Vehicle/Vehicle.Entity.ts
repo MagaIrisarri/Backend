@@ -10,7 +10,6 @@ export class Vehicle {
   @PrimaryKey({ type: 'string' })
   id: string = v4();
 
-  // Atributos propios del vehículo físico
   @Property({ type: 'string', unique: true })
   plate!: string;
 
@@ -22,8 +21,10 @@ export class Vehicle {
 
   @Property({ type: 'string', nullable: true })
   observations?: string;
-
-  // Relaciones (Foreign Keys) a tus catálogos
+  
+  @Property({ type: 'boolean' })
+  isActive: boolean = true;
+  
   @ManyToOne(() => Brand)
   brand!: Brand;
 
@@ -32,13 +33,10 @@ export class Vehicle {
 
   @ManyToOne(() => VehicleType)
   vehicleType!: VehicleType;
-
   
-  //  "nullable: false" si en tu negocio es obligatorio.
   @ManyToOne(() => Insurance, { nullable: true })
   insurance?: Insurance;
 
-  // Timestamps de auditoría
   @Property({ type: 'date' })
   createdAt: Date = new Date();
 

@@ -11,11 +11,10 @@ export class Model {
   @Property({ type: 'string' })
   name!: string; 
 
-  // Relación: Muchos modelos pertenecen a UNA marca
   @ManyToOne(() => Brand)
   brand!: Brand;
 
-  // Relación: Muchos modelos son de UN tipo de vehículo
+
   @ManyToOne(() => VehicleType)
   vehicleType!: VehicleType;
 }
