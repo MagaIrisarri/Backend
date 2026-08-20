@@ -1,5 +1,5 @@
 import { Repository } from "../Shared/base.Repository.js";
-import { User } from "./UserEntity.js";
+import { User } from "./User.Entity.js";
 
 export class UserService {
     constructor(private repo: Repository<User>) { }
@@ -14,15 +14,7 @@ export class UserService {
 
     add(input: Omit<User, "id">): User {
         const user = new User(
-          input.dni,  
-          input.last_name,  
-          input.name,  
-          input.date_of_brthdate, 
-          input.email, 
-          input.phone,
-          input.password,  
-          input.file, 
-          input.type,
+        
         );
         this.repo.add(user);
         return user;

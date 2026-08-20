@@ -6,15 +6,17 @@ const vehicleService = new VehicleService(orm.em);
 
 async function add(req: Request, res: Response) {
   try {
-    const vehicle = await vehicleService.createVehicle(req.body);
+    const userId = req.params.userId as string;
+
+    const vehicle = await vehicleService.createVehicle(req.body, userId);
 
     return res.status(201).json({ 
-      message: "Vehicle created successfully", 
+      message: "Vehiculo creado exitosamente", 
       data: vehicle, 
     });
   } catch (error: any) {
     return res.status(500).json({ 
-      message: "Error creating vehicle", 
+      message: "Error al crear el vehiculo", 
       error: error.message,
     });
   }
@@ -25,8 +27,8 @@ async function findAll(req: Request, res: Response) {
     const vehicleList = await vehicleService.findAllVehicle();
 
     const message = vehicleList.length === 0
-        ? 'No vehicles found'
-        : 'Vehicles found';
+        ? "No se encontraron vehiculos"
+        : "Vehiculos encontrados";
     
     return res.status(200).json({
       message,
@@ -45,12 +47,12 @@ async function findOneById(req: Request, res: Response) {
 
     if(!vehicle) {
       return res.status(404).json({
-        message: 'Vehicle not found'
+        message: "No se encontró el vehiculo",
       })
     }
 
     return res.status(200).json({ 
-      message: 'Vehicle found', 
+      message: "Vehiculo encontrado", 
       data: vehicle, 
     });
   } catch (error: any) {
@@ -69,12 +71,12 @@ async function update(req: Request, res: Response) {
 
     if(!vehicle) {
       return res.status(404).json({
-        message: 'Vehicle not found',
+        message: "No se encontró el vehiculo",
       });
     }
 
     return res.status(200).json({
-      message: 'Vehicle updated successfully',
+      message: "Vehiculo actualizado exitosamente",
       data: vehicle,
     });
   } catch (error: any) {
@@ -86,16 +88,16 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
-    const deleted = await vehicleService.deleteVehicle({ id: req.params.id as string });
+    const deleted = await vehicleService.deleteVehicle({ id: req.params.id as any });
 
     if (!deleted) {
       return res.status(404).json({ 
-        message: 'Vehicle not found', 
+        message: "No se encontró el vehiculo", 
       });
     }
 
     return res.status(200).json({ 
-      message: "Vehicle deleted successfully", 
+      message: "Vehiculo eliminado exitosamente", 
     });
   } catch (error: any) {
     return res.status(500).json({ 

@@ -1,11 +1,12 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Vehicle } from './Vehicle.Entity.js';
 import { Model } from './Model/Model.Entity.js';
+import { User } from '../User/User.Entity.js';
 
 export class VehicleService {
-  constructor(private em: EntityManager) {}
+  constructor(private readonly em: EntityManager) {}
 
-  async createVehicle(data: any): Promise<Vehicle> {
+  async createVehicle(data: any, userId: string): Promise<Vehicle> {
     const model = await this.em.findOne(Model, 
       { id: data.modelId }, 
       { populate: ['vehicleType', 'brand'] }
@@ -20,14 +21,14 @@ export class VehicleService {
 
 
     const vehicleData = {
-      ...data,               // Trae plate, color, year, observations
-      brand: data.brandId,   // Asignamos el ID a la propiedad que MikroORM espera
+      ...data,               
+      brand: data.brandId,   
       model: data.modelId,
       vehicleType: model.vehicleType.id,
       insurance: data.insuranceId,
+      client: this.em.getReference(User, userId as any),
     };
 
-    // 3. Creamos y guardamos el vehículo
     const vehicle = this.em.create(Vehicle, vehicleData);
     await this.em.flush();
     

@@ -12,11 +12,18 @@ export const createVehicleSchema = z.object({
   })
 });
 
+export type CreateVehicleInput = z.infer<typeof createVehicleSchema>;
+
 export const UpdateVehicleSchema = createVehicleSchema.partial();
 
+export const ClientIdSchema = z.object({
+  params: z.object({
+    userId: z.string().uuid("El ID del cliente no es válido")
+  })
+});
 
 export const VehicleIdSchema = z.object({
   params: z.object({
-    id: z.string().uuid("El ID de la URL no es válido")
+    id: z.string().uuid("El ID del vehículo no es válido")
   })
 });

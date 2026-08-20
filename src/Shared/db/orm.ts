@@ -3,10 +3,8 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { MySqlDriver } from '@mikro-orm/mysql';
 
 export const orm = await MikroORM.init({
-
   entities: ['dist/**/*.Entity.js'], 
   entitiesTs: ['src/**/*.Entity.ts'], 
-
 
   dbName: 'parkingdb',
   driver: MySqlDriver,
@@ -25,8 +23,8 @@ export const orm = await MikroORM.init({
 export const syncSchema = async () => {
   try {
     await orm.schema.update(); 
-    console.log('✔️ Base de datos sincronizada con MikroORM');
+    console.log('Base de datos sincronizada con MikroORM y MySQL');
   } catch (error) {
-    console.error('❌ Error al sincronizar la base de datos:', error);
+    console.error('Error al sincronizar la base de datos:', error);
   }
 };

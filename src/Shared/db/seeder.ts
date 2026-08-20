@@ -5,22 +5,40 @@ import { VehicleType } from '../../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Insurance } from '../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../Vehicle/Brand/Brand.Entity.js';
 import { Model } from '../../Vehicle/Model/Model.Entity.js';
+import { User } from '../../User/User.Entity.js';
 
 export const seedDatabase = async (em: EntityManager) => {
+  console.log('Iniciando seeding de un usuario de prueba');
+  const userExists = await em.findOne(User, { id: "550e8400-e29b-41d4-a716-446655440000" });
+  
+  if (!userExists) {
+    em.create (User, {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      dni: 12345678,
+      name: "Juan",
+      last_name: "Pérez",
+      date_of_birth: new Date("1990-01-01"),
+      email: "juanperez@hotmail.com",
+      phone: "1234567890",
+      password: "password123",
+      file: "client",
+    });
+  await em.flush()
+  console.log('Usuario de prueba cargado');
+  }
+
   const count = await em.count(VehicleType, {});
   if (count > 0) {
-    console.log('Omitiendo seeding...');
+    console.log('Omitiendo seeding de vehiculos');
     return;
   }
 
-  console.log('Iniciando seeding...');
+  console.log('Iniciando seeding de Marcas, Modelos, Tipos de Vehículos y Aseguradoras');
 
-  // 1. Crear Tipos de Vehículo
   const tipoAuto = em.create(VehicleType, { name: 'Auto' });
   const tipoMoto = em.create(VehicleType, { name: 'Moto' });
   const tipoUtilitario = em.create(VehicleType, { name: 'Utilitario' });
 
-  // 2. Crear Seguros
   const aseguradoras = [
     'La Caja', 
     'San Cristóbal', 
@@ -32,24 +50,19 @@ export const seedDatabase = async (em: EntityManager) => {
     em.create(Insurance, { name });
   }
 
-  // 3. Leer el archivo JSON (process.cwd() busca en la raíz de tu proyecto)
   const jsonPath = path.resolve(process.cwd(), 'vehiculos.json');
   const rawData = fs.readFileSync(jsonPath, 'utf-8');
   const vehiculosData = JSON.parse(rawData);
 
-  console.log(`⏳ Cargando ${vehiculosData.length} marcas a la base de datos... Esto puede tardar unos segundos.`);
+  console.log(`Cargando ${vehiculosData.length} marcas a la base de datos`);
 
-  
   for (const item of vehiculosData) {
-    
     const marca = em.create(Brand, { name: item.marca });
 
-    
     for (const mod of item.modelos) {
-      let tipoAsignado = tipoAuto; // Por defecto es Auto
-      const tipoOriginal = mod.tipoOriginal.toUpperCase();
+      let tipoAsignado = tipoAuto; 
+      const tipoOriginal = mod.tipoOriginal?.toUpperCase() ?? '';
 
-      // Clasificador automático según el texto de la DNRPA
       if (
         tipoOriginal.includes('PICK-UP') || 
         tipoOriginal.includes('FURGON') || 
@@ -63,7 +76,6 @@ export const seedDatabase = async (em: EntityManager) => {
         tipoAsignado = tipoMoto;
       }
 
-      // Creamos el modelo y lo vinculamos a su marca y tipo
       em.create(Model, { 
         name: mod.nombre, 
         brand: marca, 
@@ -72,8 +84,6 @@ export const seedDatabase = async (em: EntityManager) => {
     }
   }
 
-  
   await em.flush();
-  
   console.log('Parque Automotor Cargado');
 };

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ModelController } from './Model.Controller.js';
+import { ModelService } from './Model.Service.js';
 import { orm } from '../../Shared/db/orm.js'; 
 import { validateSchema } from '../../Shared/middlewares/ValidateSchemas.js'; 
 import { 
@@ -11,7 +12,9 @@ import {
 
 export const modelRouter = Router();
 
-const modelController = new ModelController(orm.em);
+const modelService = new ModelService(orm.em.fork());
+
+const modelController = new ModelController(modelService);
 
 
 modelRouter.get('/', validateSchema(ModelQuerySchema), modelController.findAll);

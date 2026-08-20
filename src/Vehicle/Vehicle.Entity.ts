@@ -4,6 +4,7 @@ import { Brand } from './Brand/Brand.Entity.js';
 import { Model } from './Model/Model.Entity.js';
 import { VehicleType } from './VehicleType/VehicleType.Entity.js';
 import { Insurance } from './Insurance/Insurance.Entity.js';
+import { User } from '../User/User.Entity.js'; 
 
 @Entity()
 export class Vehicle {
@@ -37,6 +38,9 @@ export class Vehicle {
   @ManyToOne(() => Insurance, { nullable: true })
   insurance?: Insurance;
 
+  @ManyToOne(() => User)
+  client!: User;
+  
   @Property({ type: 'date' })
   createdAt: Date = new Date();
 

@@ -1,13 +1,8 @@
 import { Request, Response } from 'express';
-import { EntityManager } from '@mikro-orm/core';
 import { ModelService } from './Model.Service.js';
 
 export class ModelController {
-  private modelService: ModelService;
-
-  constructor(em: EntityManager) {
-    this.modelService = new ModelService(em);
-  }
+ constructor(private modelService: ModelService) {}
 
   public findAll = async (req: Request, res: Response) => {
     try {

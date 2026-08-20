@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { EntityManager } from '@mikro-orm/core';
-import { VehicleType } from './VehicleType.Entity.js'; 
+import { VehicleTypeService } from './VehicleType.Service.js';
+// Borramos la importación de la entidad porque ya no se usa acá
 
 export class VehicleTypeController {
-  constructor(private em: EntityManager) {}
+  constructor(private vehicleTypeService: VehicleTypeService) {}
 
   getAll = async (req: Request, res: Response) => {
     try {
-      const vehicleTypes = await this.em.find(VehicleType, {});
+      const vehicleTypes = await this.vehicleTypeService.findAll();
       res.status(200).json(vehicleTypes);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -16,8 +16,7 @@ export class VehicleTypeController {
 
   create = async (req: Request, res: Response) => {
     try {
-      const vehicleType = this.em.create(VehicleType, req.body);
-      await this.em.flush();
+      const vehicleType = await this.vehicleTypeService.create(req.body);
       res.status(201).json({ message: 'Tipo de vehículo creado', data: vehicleType });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -26,13 +25,16 @@ export class VehicleTypeController {
 
   delete = async (req: Request, res: Response) => {
     try {
-      const vehicleType = await this.em.findOne(VehicleType, { id: req.params.id });
-      if (!vehicleType) {
+      const id = req.params.id as string;
+
+      const isDeleted = await this.vehicleTypeService.delete(id);
+      
+      if (!isDeleted) {
         return res.status(404).json({ message: 'Tipo de vehículo no encontrado' });
       }
-      this.em.remove(vehicleType);
-      await this.em.flush();
-      res.status(200).json({ message: 'Tipo de vehículo eliminado correctamente' });
+      
+      return res.status(200).json({ message: 'Tipo de vehículo eliminado correctamente' });
+      
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

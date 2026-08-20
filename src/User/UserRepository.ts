@@ -1,5 +1,5 @@
 import { Repository } from "../Shared/base.Repository.js";
-import { User } from './UserEntity.js';
+import { User } from './User.Entity.js';
 
 const users: User[] = []; // En memoria (reemplazar con BD)
 

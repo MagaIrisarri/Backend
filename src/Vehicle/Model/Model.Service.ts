@@ -64,6 +64,7 @@ export class ModelService {
     
     if (!model) return false;
     
+    this.em.remove(model);
     await this.em.flush();
     
     return true;

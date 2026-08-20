@@ -1,4 +1,5 @@
 import express from 'express';
+import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
 import { seedDatabase } from './Shared/db/seeder.js'; 
 
@@ -7,14 +8,11 @@ import { vehicleTypeRouter } from './Vehicle/VehicleType/VehicleType.Route.js';
 import { insuranceRouter } from './Vehicle/Insurance/Insurance.Route.js';
 import { brandRouter } from './Vehicle/Brand/Brand.Route.js';
 import { modelRouter } from './Vehicle/Model/Model.Route.js';
-
-// ... tu código de express ...
-
+import  userRoutes from './User/UserRoute.js';
 
 const app = express();
-app.use(express.json()); // para parsear el body JSON
+app.use(express.json()); 
 
-import userRoutes from './User/UserRoute.js';
 
 
 app.use('/api/users', userRoutes);
@@ -24,14 +22,12 @@ app.use('/api/insurances', insuranceRouter);
 app.use('/api/brands', brandRouter);
 app.use('/api/models', modelRouter);
 
-// acá van tus rutas, por ejemplo:
-// import userRoutes from './routes/userRoutes';
-// app.use('/api/users', userRoutes);
 
 async function startServer() {
   try {
     await syncSchema(); 
     await seedDatabase(orm.em.fork());
+
     app.listen(3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');
     });
