@@ -33,7 +33,6 @@ export class UserService {
           input.email,
           input.phone,
           hashedPassword,
-          input.file,
           input.type,
           status,
         );
@@ -55,7 +54,6 @@ export class UserService {
           input.email,
           input.phone,
           hashedPassword,
-          input.file,
           type,
           status,
           ownerId,
@@ -88,7 +86,8 @@ export class UserService {
     }
 
     remove(id: string): { id: string } | undefined {
-        return this.repo.remove({ id });
+        return this.repo.remove({ id })
+
     }
 
     async login(email: string, password: string): Promise<Omit<User, "password"> | {error: string} >{{

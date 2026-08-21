@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { UserSchema } from "./UserSchema.js"
+import { ZodType } from "zod"
 
 export const sanitizeUserInput = (req: Request, res: Response, next: NextFunction) => {
     req.body.sanitizedUserInput = {
@@ -24,8 +24,8 @@ export const sanitizeUserInput = (req: Request, res: Response, next: NextFunctio
     next()
 }
 
-export const validateUserSchema = async (req: Request, res: Response, next: NextFunction) => {
-    const result = await UserSchema.safeParseAsync(req.body.sanitizedUserInput);
+export const validateUserSchema = (schema: ZodType) => async (req: Request, res: Response, next: NextFunction) => {
+    const result = await schema.safeParseAsync(req.body.sanitizedUserInput);
 
     if (!result.success) {
         return res.status(400).json({ message: "Validation error", error: result.error });
