@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express"
+import { ZodType } from "zod"
 
 export const sanitizeUserInput = (req: Request, res: Response, next: NextFunction) => {
     req.body.sanitizedUserInput = {
@@ -11,6 +12,7 @@ export const sanitizeUserInput = (req: Request, res: Response, next: NextFunctio
         password: req.body.password,
         file: req.body.file,
         type: req.body.type,
+        ownerId: req.params.ownerId,
     }
 
     Object.keys(req.body.sanitizedUserInput).forEach((key) => {
@@ -20,4 +22,15 @@ export const sanitizeUserInput = (req: Request, res: Response, next: NextFunctio
     })
 
     next()
+}
+
+export const validateUserSchema = (schema: ZodType) => async (req: Request, res: Response, next: NextFunction) => {
+    const result = await schema.safeParseAsync(req.body.sanitizedUserInput);
+
+    if (!result.success) {
+        return res.status(400).json({ message: "Validation error", error: result.error });
+    }
+
+    req.body.sanitizedUserInput = result.data;
+    next();
 }

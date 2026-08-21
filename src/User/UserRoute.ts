@@ -1,14 +1,25 @@
 import { Router } from 'express';
-import { sanitizeUserInput } from "./UserValidations.js";
-import { add, findAll, findOne, update, remove } from './UserController.js';
+import { sanitizeUserInput, validateUserSchema} from "./UserValidations.js";
+import { UserCreateSchema, UserUpdateSchema } from "./UserSchema.js";
+import { addPublicUser, addEmployee, findAll, findOne,findEmployeesByOwner, update, updatePassword, remove, findOneForEmail } from './UserController.js';
+
 
 const UserRouter = Router();
 
-UserRouter.post('/',sanitizeUserInput, add);
+UserRouter.post('/',sanitizeUserInput,validateUserSchema(UserCreateSchema), addPublicUser);
+UserRouter.post('/:ownerId/employee',sanitizeUserInput,validateUserSchema(UserCreateSchema), addEmployee);
+UserRouter.post('/login', findOneForEmail);
+
 UserRouter.get('/', findAll);
 UserRouter.get('/:id', findOne);
-UserRouter.put('/:id',sanitizeUserInput, update);
-UserRouter.patch('/:id',sanitizeUserInput, update);
+UserRouter.get('/:ownerId/employee', findEmployeesByOwner);
+
+UserRouter.put('/:id',sanitizeUserInput,validateUserSchema(UserUpdateSchema), update);
+
+UserRouter.patch('/:id',sanitizeUserInput,validateUserSchema(UserUpdateSchema), update);
+UserRouter.patch('/:id/password', updatePassword);
+
 UserRouter.delete('/:id', remove);
+
 
 export default UserRouter;

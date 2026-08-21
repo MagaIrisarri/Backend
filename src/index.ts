@@ -1,10 +1,13 @@
 import express from 'express';
 import { orm, syncSchema } from './Shared/db/orm.js'
 import { RequestContext } from '@mikro-orm/core';
+import cors from 'cors';
+
 
 const app = express();
 
-app.use(express.json()); // para parsear el body JSON
+app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.json()); 
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -14,15 +17,15 @@ import userRoutes from './User/UserRoute.js';
 import parkingRoutes from './Parking/Parking.Route.js';
 import parkingpriceRoutes from './ParkingPrice/ParkingPrice.Route.js';
 import parkingspaceRoutes from './ParkingSpace/ParkingSpace.Route.js';
+import VehicleRouter from './Vehicle/VehicleRoute.js'; 
+import  reservationRouter  from './Reservation/ReservationRoutes.js';
 
 app.use('/api/users', userRoutes);
 app.use('/api/parkings', parkingRoutes);
 app.use('/api', parkingpriceRoutes);
 app.use('/api/parkings', parkingspaceRoutes);
-
-// acá van tus rutas, por ejemplo:
-// import userRoutes from './routes/userRoutes';
-// app.use('/api/users', userRoutes);
+app.use('/api/vehicles', VehicleRouter);
+app.use('/api/reservations', reservationRouter);
 
 async function startServer() {
   try {

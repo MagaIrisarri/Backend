@@ -9,8 +9,9 @@ export class User {
   public email: string,
   public phone: string,
   public password: string,
-  public file: string,
   public type: string,
+  public status: string,
+  public ownerId?: string, 
   public id = crypto.randomUUID(),
 ) {}
 }

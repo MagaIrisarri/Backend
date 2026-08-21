@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.3",
     "nodemon": "^3.1.14",
@@ -24,6 +25,9 @@
     "@mikro-orm/decorators": "^7.1.11",
     "@mikro-orm/mysql": "^7.1.11",
     "@mikro-orm/sql-highlighter": "1.0.1",
+    "argon2": "^0.44.0",
+    "axios": "^1.18.1",
+    "cors": "^2.8.6",
     "cross-spawn": "^7.0.6",
     "duplexer": "^0.1.2",
     "event-stream": "^3.3.4",
