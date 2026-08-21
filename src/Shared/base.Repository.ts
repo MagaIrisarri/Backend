@@ -1,7 +1,7 @@
 export interface Repository<T> {
-    findAll(): T[] | undefined,
-    findOne(item: { id: string }): T | undefined,
-    add(item: T): T | undefined,
-    update(item: T): T | undefined,
-    remove(item: { id: string }): { id: string } | undefined
+  findAll(): Promise<T[]>;
+  findOne(item: { id: string }): Promise<T | null>;
+  add(item: Partial<T>): Promise<T>;
+  update(id: string, item: Partial<T>): Promise<T | null>;
+  remove(item: { id: string }): Promise<boolean>;
 }

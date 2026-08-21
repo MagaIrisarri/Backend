@@ -1,25 +1,18 @@
-import { EntityManager } from '@mikro-orm/core';
+import { BrandRepository } from './Brand.Repository.js';
 import { Brand } from './Brand.Entity.js';
 
 export class BrandService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private brandRepository: BrandRepository) {}
 
   async findAll(): Promise<Brand[]> {
-    return await this.em.find(Brand, {}, { orderBy: { name: 'ASC' } });
+    return await this.brandRepository.findAll();
   }
 
   async create(data: { name: string }): Promise<Brand> {
-    const brand = this.em.create(Brand, data);
-    await this.em.flush();
-    return brand;
+    return await this.brandRepository.create(data);
   }
 
   async delete(id: string): Promise<boolean> {
-    const brand = await this.em.findOne(Brand, { id });
-    if (!brand) return false;
-
-    this.em.remove(brand);
-    await this.em.flush();
-    return true;
+    return await this.brandRepository.delete(id);
   }
 }

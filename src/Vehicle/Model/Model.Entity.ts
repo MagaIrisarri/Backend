@@ -14,7 +14,6 @@ export class Model {
   @ManyToOne(() => Brand)
   brand!: Brand;
 
-
   @ManyToOne(() => VehicleType)
   vehicleType!: VehicleType;
 }

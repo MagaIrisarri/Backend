@@ -1,25 +1,18 @@
-import { EntityManager } from '@mikro-orm/core';
+import { InsuranceRepository } from './Insurance.Repository.js';
 import { Insurance } from './Insurance.Entity.js';
 
 export class InsuranceService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private insuranceRepository: InsuranceRepository) {}
 
   async findAll(): Promise<Insurance[]> {
-    return await this.em.find(Insurance, {}, { orderBy: { name: 'ASC' } });
+    return await this.insuranceRepository.findAll();
   }
 
   async create(data: { name: string }): Promise<Insurance> {
-    const insurance = this.em.create(Insurance, data);
-    await this.em.flush();
-    return insurance;
+    return await this.insuranceRepository.create(data);
   }
 
   async delete(id: string): Promise<boolean> {
-    const insurance = await this.em.findOne(Insurance, { id });
-    if (!insurance) return false;
-
-    this.em.remove(insurance);
-    await this.em.flush();
-    return true;
+    return await this.insuranceRepository.delete(id);
   }
 }

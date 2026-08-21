@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import { orm } from '../Shared/db/orm.js';
 import { VehicleService } from './Vehicle.Service.js';
+import { VehicleRepository } from './Vehicle.Repository.js'
 
-const vehicleService = new VehicleService(orm.em);
+const vehicleRepository = new VehicleRepository(orm.em);
+const vehicleService = new VehicleService(vehicleRepository);
 
 async function add(req: Request, res: Response) {
   try {
@@ -15,6 +17,11 @@ async function add(req: Request, res: Response) {
       data: vehicle, 
     });
   } catch (error: any) {
+    if (error.code === '23505' || error.message.includes('unique') || error.message.includes('duplicate')) {
+      return res.status(409).json({ 
+        message: "Ya existe un vehículo registrado con esa patente.",
+      });
+    }
     return res.status(500).json({ 
       message: "Error al crear el vehiculo", 
       error: error.message,

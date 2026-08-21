@@ -1,25 +1,24 @@
-import { EntityManager } from '@mikro-orm/core';
-import { VehicleType } from './VehicleType.Entity.js';
+import { VehicleTypeRepository } from './VehicleType.Repository.js';
 
 export class VehicleTypeService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly repository: VehicleTypeRepository) {}
 
   async findAll() {
-    return await this.em.find(VehicleType, {});
+    return await this.repository.findAll();
   }
 
   async create(data: any) {
-    const vehicleType = this.em.create(VehicleType, data);
-    await this.em.flush();
+    const vehicleType = this.repository.create(data);
+    await this.repository.flush();
     return vehicleType;
   }
 
   async delete(id: string) {
-    const vehicleType = await this.em.findOne(VehicleType, { id });
+    const vehicleType = await this.repository.findById(id);
     if (!vehicleType) return false;
     
-    this.em.remove(vehicleType);
-    await this.em.flush();
+    this.repository.remove(vehicleType);
+    await this.repository.flush();
     return true;
   }
 }
