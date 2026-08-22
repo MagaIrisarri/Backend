@@ -9,3 +9,7 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.dbgit 
 *.tsbuildinfo
+.claude/
+.postman/
+*.postman_environment.json
+*.postman_collection.json
