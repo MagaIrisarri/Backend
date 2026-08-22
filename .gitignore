@@ -10,6 +10,9 @@ pnpm-debug.log*
 Thumbs.dbgit 
 *.tsbuildinfo
 .claude/
+<<<<<<< HEAD
 .postman/
 *.postman_environment.json
 *.postman_collection.json
+=======
+>>>>>>> 6c2bdd909e06c9207ae45c3e5271d9c5fea019fe
