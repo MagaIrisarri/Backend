@@ -1,5 +1,5 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/decorators/legacy';
-import { v4 } from 'uuid';
+import crypto from "node:crypto";
 import { Brand } from './Brand/Brand.Entity.js';
 import { Model } from './Model/Model.Entity.js';
 import { VehicleType } from './VehicleType/VehicleType.Entity.js';
@@ -9,7 +9,7 @@ import { User } from '../User/User.Entity.js';
 @Entity()
 export class Vehicle {
   @PrimaryKey({ type: 'string' })
-  id: string = v4();
+  id: string = crypto.randomUUID();
 
   @Property({ type: 'string', unique: true })
   plate!: string;

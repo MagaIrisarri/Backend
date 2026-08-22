@@ -1,21 +1,35 @@
 node_modules/
 dist/
 build/
-.venv/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+temp/
+.mikro-orm-cache/
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
 .DS_Store
-Thumbs.dbgit 
-*.tsbuildinfo
-.claude/
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
 .postman/
 *.postman_environment.json
 *.postman_collection.json
-=======
->>>>>>> 6c2bdd909e06c9207ae45c3e5271d9c5fea019fe
-=======
->>>>>>> main

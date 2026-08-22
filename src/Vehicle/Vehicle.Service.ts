@@ -2,11 +2,14 @@ import { Vehicle } from './Vehicle.Entity.js';
 import { VehicleRepository } from './Vehicle.Repository.js';
 
 export class VehicleService {
-  // Inyectamos el repositorio en lugar del EntityManager
   constructor(private readonly vehicleRepository: VehicleRepository) {}
+  
+  async findVehiclesByUserId(userId: string): Promise<Vehicle[]> {
+  return await this.vehicleRepository.findActiveByUserId(userId);
+  }
 
   async createVehicle(data: any, userId: string): Promise<Vehicle> {
-    const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
+  const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
     
     if (!model) {
       throw new Error("El modelo seleccionado no existe en la base de datos.");

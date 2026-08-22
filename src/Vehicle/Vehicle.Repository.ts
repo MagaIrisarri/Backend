@@ -6,6 +6,13 @@ import { User } from '../User/User.Entity.js';
 export class VehicleRepository {
   constructor(private readonly em: EntityManager) {}
 
+  
+  async findActiveByUserId(userId: string): Promise<Vehicle[]> {
+    return await this.em.find(Vehicle,
+      { client: userId as any, isActive: true },
+      { populate: ['brand', 'model', 'vehicleType', 'insurance', 'client'] }
+    );
+}
   async findModelWithDetails(modelId: string): Promise<Model | null> {
     return await this.em.findOne(Model, 
       { id: modelId }, 
@@ -28,7 +35,7 @@ export class VehicleRepository {
   async findAllActive(): Promise<Vehicle[]> {
     return await this.em.find(Vehicle, 
       { isActive: true },
-      { populate: ['brand', 'model', 'vehicleType', 'insurance'] }
+      { populate: ['brand', 'model', 'vehicleType', 'insurance','client'] }
     );
   }
 

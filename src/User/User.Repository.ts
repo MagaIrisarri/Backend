@@ -32,8 +32,17 @@ export class UserRepository implements Repository<User> {
     const user = await this.em.findOne(User, { id: item.id });
     if (!user) return false;
 
-    this.em.remove(user);
+
+    user.status = "BAJA"
     await this.em.flush();
     return true;
   }
-}
+
+  async findOneForEmail (email: string): Promise<User | null>{
+    return await this.em.findOne(User, { email });
+  }
+
+  async findByOwner(ownerId: string): Promise<User[]> {
+      return await this.em.find(User, { type: 'EMPLEADO', ownerId, status: 'ACTIVO' });
+    }
+  }

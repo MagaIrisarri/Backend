@@ -5,7 +5,7 @@ export class VehicleTypeRepository {
   constructor(private readonly em: EntityManager) {}
 
   async findAll() {
-    return await this.em.find(VehicleType, {});
+    return await this.em.find(VehicleType, { isActive: true });
   }
 
   create(data: any) {
@@ -13,11 +13,16 @@ export class VehicleTypeRepository {
   }
 
   async findById(id: string) {
-    return await this.em.findOne(VehicleType, { id });
+    return await this.em.findOne(VehicleType, { id, isActive: true });
   }
 
-  remove(vehicleType: VehicleType) {
-    this.em.remove(vehicleType);
+  async delete(id: string): Promise<boolean> {
+    const vehicleType = await this.findById(id);
+    if (!vehicleType) return false;
+
+    vehicleType.isActive = false;
+    await this.em.flush();
+    return true;
   }
 
   async flush() {

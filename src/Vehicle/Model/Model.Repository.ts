@@ -11,7 +11,9 @@ export class ModelRepository {
   }
 
   async findAll(brandId?: string): Promise<Model[]> {
-    const query = brandId ? { brand: brandId } : {};
+    const query: Record<string, any> = { isActive: true };
+    if (brandId) query.brand = brandId;
+
     return await this.em.find(Model, query, {
       populate: ['brand', 'vehicleType'],
       orderBy: { name: 'ASC' }
@@ -19,13 +21,13 @@ export class ModelRepository {
   }
 
   async findById(id: string): Promise<Model | null> {
-    return await this.em.findOne(Model, { id }, {
+    return await this.em.findOne(Model, { id, isActive: true }, {
       populate: ['brand', 'vehicleType']
     });
   }
 
   async update(id: string, data: any): Promise<Model | null> {
-    const model = await this.em.findOne(Model, { id });
+    const model = await this.em.findOne(Model, { id, isActive: true });
     if (!model) return null;
 
     if (data.name) model.name = data.name;
@@ -37,10 +39,10 @@ export class ModelRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const model = await this.em.findOne(Model, { id });
+    const model = await this.em.findOne(Model, { id, isActive: true });
     if (!model) return false;
 
-    this.em.remove(model);
+    model.isActive = false;
     await this.em.flush();
     return true;
   }

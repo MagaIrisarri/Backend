@@ -5,11 +5,11 @@ export class InsuranceRepository {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Insurance[]> {
-    return await this.em.find(Insurance, {}, { orderBy: { name: 'ASC' } });
+    return await this.em.find(Insurance, { isActive: true }, { orderBy: { name: 'ASC' } });
   }
 
   async findById(id: string): Promise<Insurance | null> {
-    return await this.em.findOne(Insurance, { id });
+    return await this.em.findOne(Insurance, { id, isActive: true });
   }
 
   async create(data: { name: string }): Promise<Insurance> {
@@ -19,10 +19,10 @@ export class InsuranceRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const insurance = await this.em.findOne(Insurance, { id });
+    const insurance = await this.em.findOne(Insurance, { id, isActive: true });
     if (!insurance) return false;
 
-    this.em.remove(insurance);
+    insurance.isActive = false;
     await this.em.flush();
     return true;
   }

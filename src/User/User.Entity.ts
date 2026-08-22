@@ -1,25 +1,26 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
-import { v4 } from 'uuid';
+import crypto from "node:crypto";
+
+
 @Entity()
 export class User {
-
   @PrimaryKey({ type: 'string' })
-  id: string = v4();
+  id: string = crypto.randomUUID();
 
-  @Property({ type: 'number', unique: true })
-  dni!: number;
-
-  @Property({ type: 'string' })
-  last_name!: string;
+  @Property({ type: 'string', unique: true })
+  dni!: string;
 
   @Property({ type: 'string' })
   name!: string;
 
-  @Property({ type: 'date' })
-  date_of_birth!: Date;
+  @Property({ type: 'string' })
+  last_name!: string;
 
   @Property({ type: 'string', unique: true })
   email!: string;
+
+  @Property({ type: 'date' })
+  date_of_birth!: Date;
 
   @Property({ type: 'string', unique: true })
   phone!: string;
@@ -27,16 +28,12 @@ export class User {
   @Property({ type: 'string' })
   password!: string;
 
-  @Property({ type: 'string' })
-  file!: string;
- /* 
-  @Property({ type: 'date' })
-  createdAt: Date = new Date();
+  @Property({ type: 'string', default: 'CLIENTE' })
+  type!: string; // 'CLIENTE', 'DUEÑO', 'EMPLEADO'
+   
+  @Property({ type: 'string', default: 'ACTIVO' })
+  status!: string; // 'ACTIVO', 'BAJA'
 
-  @Property({ type: 'date', onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
-*/
-
-  }
-
-
+  @Property({ type: 'string', nullable: true })
+  ownerId?: string;
+}

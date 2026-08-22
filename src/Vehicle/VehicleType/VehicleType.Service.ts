@@ -14,11 +14,6 @@ export class VehicleTypeService {
   }
 
   async delete(id: string) {
-    const vehicleType = await this.repository.findById(id);
-    if (!vehicleType) return false;
-    
-    this.repository.remove(vehicleType);
-    await this.repository.flush();
-    return true;
+    return await this.repository.delete(id);
   }
 }

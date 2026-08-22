@@ -5,11 +5,11 @@ export class BrandRepository {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Brand[]> {
-    return await this.em.find(Brand, {}, { orderBy: { name: 'ASC' } });
+    return await this.em.find(Brand, { isActive: true }, { orderBy: { name: 'ASC' } });
   }
 
   async findById(id: string): Promise<Brand | null> {
-    return await this.em.findOne(Brand, { id });
+    return await this.em.findOne(Brand, { id, isActive: true });
   }
 
   async create(data: { name: string }): Promise<Brand> {
@@ -19,10 +19,10 @@ export class BrandRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const brand = await this.em.findOne(Brand, { id });
+    const brand = await this.em.findOne(Brand, { id, isActive: true });
     if (!brand) return false;
 
-    this.em.remove(brand);
+    brand.isActive = false;
     await this.em.flush();
     return true;
   }

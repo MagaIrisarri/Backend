@@ -18,7 +18,7 @@ export const seedDatabase = async (em: EntityManager) => {
 
   await em.transactional(async (forkEm) => {
     // 1. Usuario de prueba
-    const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
+/*    const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
     if (!userExists) {
       forkEm.create(User, {
         id: '550e8400-e29b-41d4-a716-446655440000',
@@ -32,7 +32,7 @@ export const seedDatabase = async (em: EntityManager) => {
         file: 'client',
       });
     }
-
+*/
     // 2. Tipos de vehículos
     const tipoAuto = forkEm.create(VehicleType, { name: 'Auto' });
     const tipoMoto = forkEm.create(VehicleType, { name: 'Moto' });
