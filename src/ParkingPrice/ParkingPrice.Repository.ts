@@ -6,8 +6,6 @@ import { Repository } from '../Shared/base.Repository.js';
 export class ParkingPriceRepository implements Repository<ParkingPrice> {
   constructor(private em: EntityManager) {}
 
-  // --- Métodos de la Interfaz Genérica ---
-
   async findAll(): Promise<ParkingPrice[]> {
     return await this.em.find(ParkingPrice, {}, { populate: ['parking'] as any });
   }
@@ -50,7 +48,6 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     return true;
   }
 
-  // --- Métodos Específicos del Negocio ---
 
   async findParking(parkingId: string): Promise<Parking | null> {
     return await this.em.findOne(Parking, { id: parkingId, isActive: true });

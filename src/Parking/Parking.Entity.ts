@@ -41,7 +41,6 @@ export class Parking {
 
   @Property({ type: 'number', default: 1 })
   reservationMargin: number = 1; // Margen en horas entre reservas
-  // ---------------------------------
 
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;

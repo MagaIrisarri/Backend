@@ -24,19 +24,16 @@ export const createUserSchema = z.object({
   }),
 });
 
-// Schema para actualización parcial
 export const updateUserSchema = z.object({
   body: createUserSchema.shape.body.partial(),
 });
 
-// Schema para validar el ID pasado por URL (UUID)
 export const userIdSchema = z.object({
   params: z.object({
     id: z.string().uuid('ID de usuario inválido'),
   }),
 });
 
-// Schema para el login
 export const loginSchema = z.object({
   body: z.object({
     email: z.string().trim().email('Email inválido'),
@@ -44,7 +41,6 @@ export const loginSchema = z.object({
   }),
 });
 
-// Schema para cambio de contraseña
 export const updatePasswordSchema = z.object({
   params: userIdSchema.shape.params,
   body: z.object({

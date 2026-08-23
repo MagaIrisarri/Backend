@@ -8,7 +8,6 @@ export class ParkingPriceService {
     const parking = await this.repo.findParking(parkingId);
     if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
-    // Desactivamos la tarifa vigente si existe
     const currentActivePrice = await this.repo.findActive(parkingId, data.vehicleType);
     if (currentActivePrice) {
       await this.repo.remove({ id: currentActivePrice.id });

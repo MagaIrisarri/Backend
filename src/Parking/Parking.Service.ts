@@ -22,7 +22,6 @@ export class ParkingService {
   }
 
   async remove(id: string): Promise<boolean> {
-    // Delegamos directo al repo pasando el formato de objeto
     return await this.repo.remove({ id });
   }
 }
