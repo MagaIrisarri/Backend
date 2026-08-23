@@ -1,8 +1,9 @@
-import { Cascade, Collection } from "@mikro-orm/core";
-import { Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/decorators/legacy";
+import { Cascade, Collection, Rel } from "@mikro-orm/core";
+import { Entity, ManyToOne, OneToMany, PrimaryKey, Property } from "@mikro-orm/decorators/legacy";
 import crypto from "node:crypto";
 import { ParkingPrice } from "../ParkingPrice/ParkingPrice.Entity.js";
 import { ParkingSpace } from "../ParkingSpace/ParkingSpace.Entity.js";
+import { User } from "../User/User.Entity.js";
 
 @Entity()
 export class Parking {
@@ -28,10 +29,10 @@ export class Parking {
   truckCapacity?: number;
 
   @Property({ type: 'time' })
-  openingTime!: string; // Ej: '08:00:00'
+  openingTime!: string;
 
   @Property({ type: 'time' })
-  closingTime!: string; // Ej: '22:00:00'
+  closingTime!: string;
 
   @Property({ type: 'number', default: 1 })
   minReservationHours: number = 1;
@@ -40,10 +41,13 @@ export class Parking {
   maxReservationHours!: number;
 
   @Property({ type: 'number', default: 1 })
-  reservationMargin: number = 1; // Margen en horas entre reservas
+  reservationMargin: number = 1;
 
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;
+
+  @ManyToOne(() => User)
+  owner!: Rel<User>;
 
   @OneToMany(() => ParkingPrice, (parkingprice) => parkingprice.parking, {
     mappedBy: 'parking',
@@ -72,6 +76,7 @@ export class Parking {
       maxReservationHours: this.maxReservationHours,
       reservationMargin: this.reservationMargin,
       isActive: this.isActive,
+      owner: this.owner,
     };
   }
 }

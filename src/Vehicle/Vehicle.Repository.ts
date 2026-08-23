@@ -56,4 +56,8 @@ export class VehicleRepository implements Repository<Vehicle> {
   getUserReference(userId: string): User {
     return this.em.getReference(User, userId);
   }
+  
+  async getUserById(userId: string): Promise<User | null> {
+  return await this.em.findOne(User, { id: userId });
+}
 }

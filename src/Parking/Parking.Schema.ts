@@ -3,6 +3,7 @@ import { z } from "zod";
 const TimeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
 
 const parkingBodyBaseSchema = z.object({
+  ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
   locality: z.string().min(3, "La localidad debe tener al menos 3 caracteres"),
   postalCode: z
     .string()

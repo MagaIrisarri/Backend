@@ -1,43 +1,38 @@
 import { z } from "zod";
 
-const vehicleTypeEnum = z.enum(['AUTO', 'MOTOCICLETA'], {
-  message: 'Tipo de vehículo no válido',
-});
-
-export const createParkingSpaceSchema = z.object({
+export const createSpaceSchema = z.object({
   body: z.object({
-    vehicleType: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .pipe(vehicleTypeEnum),
-  }),
-  params: z.object({
-    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
+    spaceCode: z.string().min(1, "El código de plaza es requerido"),
+    vehicleType: z.string().min(2, "El tipo de vehículo es requerido"),
   }),
 });
 
-export const parkingSpaceIdSchema = z.object({
-  params: z.object({
-    id: z.string().uuid('El ID de la plaza debe ser un UUID válido'),
+export const createBulkSpaceSchema = z.object({
+  body: z.object({
+    vehicleType: z.string().min(2, "El tipo de vehículo es requerido"),
+    count: z.number().int().min(1, "Debe agregar al menos 1 plaza"),
   }),
 });
 
-export const parkingIdParamSchema = z.object({
-  params: z.object({
-    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
+export const updateSpaceSchema = z.object({
+  body: z.object({
+    spaceCode: z.string().min(1).optional(),
+    vehicleType: z.string().min(2).optional(),
+    state: z.enum(["LIBRE", "OCUPADO", "MANTENIMIENTO"]).optional(),
   }),
 });
 
-export const availableSpacesByVehicleTypeSchema = z.object({
+export const spaceIdSchema = z.object({
   params: z.object({
-    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
-    vehicleType: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .pipe(vehicleTypeEnum),
+    id: z.string().uuid("ID de plaza inválido"),
   }),
 });
 
-export type CreateParkingSpaceInput = z.infer<typeof createParkingSpaceSchema>['body'];
+export const parkingSpaceQuerySchema = z.object({
+  params: z.object({
+    parkingId: z.string().uuid("ID de estacionamiento inválido"),
+  }),
+  query: z.object({
+    vehicleType: z.string().optional(),
+  }).optional(),
+});

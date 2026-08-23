@@ -1,7 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Reservation } from './Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
-import { ParkingSpace } from '../ParkingSpace/ParkingSpace.Entity.js';
+import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
@@ -67,7 +67,7 @@ export class ReservationRepository implements Repository<Reservation> {
       const marginMs = parking.reservationMargin * 60 * 60 * 1000;
       const startWithMargin = new Date(reqStartTime.getTime() - marginMs);
       const endWithMargin = new Date(reqEndTime.getTime() + marginMs);
-      const allSpaces = await txEm.find(ParkingSpace, { parking, vehicleType: vehicle.vehicleType.name, state: 'LIBRE'});
+      const allSpaces = await txEm.find(ParkingSpace, { parking, vehicleType: vehicle.vehicleType.name, state: SpaceState.LIBRE });
 
       if (allSpaces.length === 0) {
         throw new Error("No hay plazas para este tipo de vehículo en el estacionamiento");

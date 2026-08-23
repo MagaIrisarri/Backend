@@ -14,29 +14,37 @@ export class ReservationService {
   }
 
   async create(data: CreateReservationInput): Promise<Reservation> {
-    const { parking, vehicle } = await this.repo.getDependencies(data.parkingId, data.vehicleId);
-    
-    if (!parking) throw new Error("Estacionamiento no encontrado");
-    if (!vehicle) throw new Error("Vehículo no encontrado");
+  const startTime = new Date(data.startTime);
+  const endTime = new Date(data.endTime);
 
-    const durationHours = (data.endTime.getTime() - data.startTime.getTime()) / (1000 * 60 * 60);
-    
-    if (durationHours < parking.minReservationHours) {
-      throw new Error(`La duración mínima de la reserva es de ${parking.minReservationHours} hora(s)`);
-    }
-    if (durationHours > parking.maxReservationHours) {
-      throw new Error(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`);
-    }
+  const { parking, vehicle } = await this.repo.getDependencies(data.parkingId, data.vehicleId);
+  
+  if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
+  if (!vehicle) throw new Error("Vehículo no encontrado o inactivo");
 
-    const requestedStartTimeString = data.startTime.toTimeString().split(' ')[0];
-    const requestedEndTimeString = data.endTime.toTimeString().split(' ')[0];
-
-    if (requestedStartTimeString < parking.openingTime || requestedEndTimeString > parking.closingTime) {
-      throw new Error(`El horario de reserva está fuera del horario de atención (${parking.openingTime} a ${parking.closingTime})`);
-    }
-
-    return await this.repo.createReservationAtomically( parking, vehicle, data.startTime, data.endTime );
+  const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+  
+  if (durationHours < parking.minReservationHours) {
+    throw new Error(`La duración mínima de la reserva es de ${parking.minReservationHours} hora(s)`);
   }
+  if (durationHours > parking.maxReservationHours) {
+    throw new Error(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`);
+  }
+
+  const requestedStartTimeString = startTime.toTimeString().split(' ')[0];
+  const requestedEndTimeString = endTime.toTimeString().split(' ')[0];
+
+  if (requestedStartTimeString < parking.openingTime || requestedEndTimeString > parking.closingTime) {
+    throw new Error(`El horario de reserva está fuera del horario de atención (${parking.openingTime} a ${parking.closingTime})`);
+  }
+
+  return await this.repo.createReservationAtomically(
+    parking,
+    vehicle,
+    startTime,
+    endTime
+  );
+}
 
   async update(id: string, data: UpdateReservationInput): Promise<Reservation | null> {
     return await this.repo.update(id, data);

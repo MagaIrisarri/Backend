@@ -17,6 +17,14 @@ export class VehicleService {
   }
 
   async create(data: any, userId: string): Promise<Vehicle> {
+    const user = await this.vehicleRepository.getUserById(userId);
+    if (!user || user.status !== 'ACTIVO') {
+      throw new Error("Cliente no encontrado o inactivo");
+    }
+
+    if (user.type === 'EMPLEADO') {
+      throw new Error("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO");
+    }
     const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
     
     if (!model) {

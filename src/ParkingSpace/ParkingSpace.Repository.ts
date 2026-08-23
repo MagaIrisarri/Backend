@@ -1,27 +1,22 @@
-import { EntityManager } from '@mikro-orm/core';
-import { ParkingSpace } from './ParkingSpace.Entity.js';
-import { Parking } from '../Parking/Parking.Entity.js';
-import { Repository } from '../Shared/base.Repository.js';
+import { EntityManager } from "@mikro-orm/core";
+import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
+import { Repository } from "../Shared/base.Repository.js";
 
 export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   constructor(private em: EntityManager) {}
-  
+
   async findAll(): Promise<ParkingSpace[]> {
-    return await this.em.find(ParkingSpace, { state: { $ne: 'BAJA' } });
+    return await this.em.find(ParkingSpace, { isActive: true });
   }
 
   async findOne(item: { id: string }): Promise<ParkingSpace | null> {
-    return await this.em.findOne(ParkingSpace, { id: item.id, state: { $ne: 'BAJA' } });
+    return await this.em.findOne(ParkingSpace, { id: item.id, isActive: true });
   }
 
   async add(data: any): Promise<ParkingSpace> {
-    const newParkingSpace = this.em.create(ParkingSpace, { spaceCode: data.spaceCode,
-      state: 'LIBRE',
-      vehicleType: data.vehicleType,
-      parking: data.parking,
-    });
+    const space = this.em.create(ParkingSpace, { ...data, isActive: true });
     await this.em.flush();
-    return newParkingSpace;
+    return space;
   }
 
   async update(id: string, data: any): Promise<ParkingSpace | null> {
@@ -36,33 +31,28 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   async remove(item: { id: string }): Promise<boolean> {
     const space = await this.findOne({ id: item.id });
     if (!space) return false;
-    
-    space.state = 'BAJA';
+
+    space.isActive = false;
     await this.em.flush();
     return true;
   }
 
-  async findParking(parkingId: string): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: parkingId, isActive: true });
+
+  async findByParking(parkingId: string): Promise<ParkingSpace[]> {
+    return await this.em.find(ParkingSpace, { parking: parkingId as any, isActive: true }, { orderBy: { spaceCode: 'ASC' } });
   }
 
-  async countActiveSpacesByType(parking: Parking, vehicleType: string): Promise<number> {
-    return await this.em.count(ParkingSpace, { parking, vehicleType, state: { $ne: 'BAJA' }});
+  async findAvailableByParking(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
+    const filter: any = { parking: parkingId, state: SpaceState.LIBRE, isActive: true };
+    if (vehicleType) filter.vehicleType = vehicleType;
+    return await this.em.find(ParkingSpace, filter);
   }
 
-  async findBySpaceCode(parking: Parking, spaceCode: string): Promise<ParkingSpace | null> {
-    return await this.em.findOne(ParkingSpace, { parking, spaceCode, state: { $ne: 'BAJA' }});
-  }
-
-  async findByParking(parking: Parking): Promise<ParkingSpace[]> {
-    return await this.em.find(ParkingSpace, { parking,state: { $ne: 'BAJA' }});
-  }
-
-  async findAvailable(parking: Parking, vehicleType?: string): Promise<ParkingSpace[]> {
-    const query: Record<string, any> = { parking, state: 'LIBRE'};
-
-    if (vehicleType) { query.vehicleType = vehicleType; }
-
-    return await this.em.find(ParkingSpace, query);
+  async createBulk(spaces: Partial<ParkingSpace>[]): Promise<void> {
+    for (const spaceData of spaces) {
+      const space = this.em.create(ParkingSpace, { ...spaceData, isActive: true } as any);
+      this.em.persist(space);
+    }
+    await this.em.flush();
   }
 }

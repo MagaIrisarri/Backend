@@ -2,75 +2,135 @@ import { Request, Response } from 'express';
 import { ParkingSpaceService } from './ParkingSpace.Service.js';
 
 export class ParkingSpaceController {
-  constructor(private service: ParkingSpaceService) {}
+  constructor(private parkingSpaceService: ParkingSpaceService) {}
 
-  public create = async (req: Request, res: Response) => {
+  findByParking = async (req: Request, res: Response) => {
     try {
-      const parkingId = req.params.id as string;
-      const parkingSpace = await this.service.create(parkingId, req.body);
-
-      return res.status(201).json({ message: 'Plaza de estacionamiento creada con éxito', data: parkingSpace });
+      const parkingId = req.params.parkingId as string;
+      const spaces = await this.parkingSpaceService.findByParking(parkingId);
+      
+      return res.status(200).json({
+        message: spaces.length === 0 ? 'No se encontraron plazas' : 'Plazas encontradas',
+        data: spaces,
+      });
     } catch (error: any) {
-      return res.status(500).json({ message: 'Error al crear la plaza de estacionamiento', error: error.message });
+      return res.status(500).json({
+        message: 'Error al obtener plazas',
+        error: error.message,
+      });
     }
   };
 
-  public findByParking = async (req: Request, res: Response) => {
+  findAvailable = async (req: Request, res: Response) => {
     try {
-      const parkingId = req.params.id as string;
-      const spaces = await this.service.findByParking(parkingId);
+      const parkingId = req.params.parkingId as string;
+      const vehicleType = req.query.vehicleType as string | undefined;
+      const spaces = await this.parkingSpaceService.findAvailable(parkingId, vehicleType);
 
-      const message = spaces.length === 0
-        ? 'No se encontraron plazas para este estacionamiento'
-        : 'Plazas encontradas';
-
-      return res.status(200).json({ message, data: spaces });
+      return res.status(200).json({
+        message: 'Plazas disponibles encontradas',
+        data: spaces,
+      });
     } catch (error: any) {
-      return res.status(500).json({ message: 'Error al obtener plazas', error: error.message });
+      return res.status(500).json({
+        message: 'Error al consultar plazas disponibles',
+        error: error.message,
+      });
     }
   };
 
-  public findAvailable = async (req: Request, res: Response) => {
-    try {
-      const parkingId = req.params.id as string;
-      const spaces = await this.service.findAvailable(parkingId);
-
-      const message = spaces.length === 0
-        ? 'No hay plazas disponibles'
-        : 'Plazas disponibles encontradas';
-
-      return res.status(200).json({ message, data: spaces });
-    } catch (error: any) {
-      return res.status(500).json({ message: 'Error al consultar disponibilidad', error: error.message });
-    }
-  };
-
-  public findAvailableByVehicleType = async (req: Request, res: Response) => {
-    try {
-      const parkingId = req.params.id as string;
-      const vehicleType = req.params.vehicleType as string;
-
-      const spaces = await this.service.findAvailableByVehicleType(parkingId, vehicleType);
-
-      const message = spaces.length === 0
-        ? 'No hay plazas disponibles para este tipo de vehículo'
-        : 'Plazas disponibles encontradas';
-
-      return res.status(200).json({ message, data: spaces });
-    } catch (error: any) {
-      return res.status(500).json({ message: 'Error al consultar disponibilidad por tipo de vehículo', error: error.message });
-    }
-  };
-
-  public remove = async (req: Request, res: Response) => {
+  findOne = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const deleted = await this.service.remove(id);
+      const space = await this.parkingSpaceService.findOne(id);
 
-      if (!deleted) return res.status(404).json({ message: 'Plaza de estacionamiento no encontrada' });
-      return res.status(200).json({ message: 'Plaza de estacionamiento dada de baja correctamente' });
+      if (!space) {
+        return res.status(404).json({ message: 'Plaza no encontrada' });
+      }
+
+      return res.status(200).json({
+        message: 'Plaza encontrada',
+        data: space,
+      });
     } catch (error: any) {
-      return res.status(500).json({ message: 'Error al eliminar plaza de estacionamiento', error: error.message });
+      return res.status(500).json({
+        message: 'Error al consultar plaza',
+        error: error.message,
+      });
+    }
+  };
+
+  create = async (req: Request, res: Response) => {
+    try {
+      const parkingId = req.params.parkingId as string;
+      const space = await this.parkingSpaceService.create(parkingId, req.body);
+
+      return res.status(201).json({
+        message: 'Plaza creada con éxito',
+        data: space,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al crear plaza',
+        error: error.message,
+      });
+    }
+  };
+
+  createBulk = async (req: Request, res: Response) => {
+    try {
+      const parkingId = req.params.parkingId as string;
+      await this.parkingSpaceService.createBulkManual(parkingId, req.body);
+
+      return res.status(201).json({
+        message: 'Plazas generadas en lote con éxito',
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al generar plazas en lote',
+        error: error.message,
+      });
+    }
+  };
+
+  update = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const updatedSpace = await this.parkingSpaceService.update(id, req.body);
+
+      if (!updatedSpace) {
+        return res.status(404).json({ message: 'Plaza no encontrada' });
+      }
+
+      return res.status(200).json({
+        message: 'Plaza actualizada con éxito',
+        data: updatedSpace,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al actualizar plaza',
+        error: error.message,
+      });
+    }
+  };
+
+  remove = async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id as string;
+      const isDeleted = await this.parkingSpaceService.remove(id);
+
+      if (!isDeleted) {
+        return res.status(404).json({ message: 'Plaza no encontrada' });
+      }
+
+      return res.status(200).json({
+        message: 'Plaza dada de baja con éxito',
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al eliminar plaza',
+        error: error.message,
+      });
     }
   };
 }

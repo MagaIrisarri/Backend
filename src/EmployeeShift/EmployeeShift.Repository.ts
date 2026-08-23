@@ -16,10 +16,17 @@ export class EmployeeShiftRepository implements Repository<EmployeeShift> {
   }
 
   async add(data: any): Promise<EmployeeShift> {
-    const shift = this.em.create(EmployeeShift, { ...data, isActive: true });
-    await this.em.flush();
-    return shift;
-  }
+  const shift = this.em.create(EmployeeShift, {
+    dayOfWeek: data.dayOfWeek as DayOfWeek,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    employee: data.employee,
+    parking: data.parking,
+    isActive: true,
+  });
+  await this.em.flush();
+  return shift;
+}
 
   async update(id: string, data: any): Promise<EmployeeShift | null> {
     const shift = await this.findOne({ id });
