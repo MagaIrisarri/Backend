@@ -3,25 +3,10 @@ import { ParkingService } from './Parking.Service.js';
 
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
-
-  public add = async (req: Request, res: Response) => {
-    try {
-      const parking = await this.parkingService.createParking(req.body);
-      return res.status(201).json({
-        message: 'Estacionamiento creado con éxito',
-        data: parking,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al crear estacionamiento',
-        error: error.message,
-      });
-    }
-  };
-
+  
   public findAll = async (_req: Request, res: Response) => {
     try {
-      const parkings = await this.parkingService.findAllParking();
+      const parkings = await this.parkingService.findAll();
       return res.status(200).json({
         message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
         data: parkings,
@@ -34,10 +19,10 @@ export class ParkingController {
     }
   };
 
-  public findOneById = async (req: Request, res: Response) => {
+  public findOne = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const parking = await this.parkingService.findParkingById(id);
+      const parking = await this.parkingService.findOne(id);
 
       if (!parking) {
         return res.status(404).json({ message: 'Estacionamiento no encontrado' });
@@ -54,11 +39,26 @@ export class ParkingController {
       });
     }
   };
+  
+  public create = async (req: Request, res: Response) => {
+    try {
+      const parking = await this.parkingService.create(req.body);
+      return res.status(201).json({
+        message: 'Estacionamiento creado con éxito',
+        data: parking,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al crear estacionamiento',
+        error: error.message,
+      });
+    }
+  };
 
   public update = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const updatedParking = await this.parkingService.updateParking(id, req.body);
+      const updatedParking = await this.parkingService.update(id, req.body);
 
       if (!updatedParking) {
         return res.status(404).json({ message: 'Estacionamiento no encontrado' });
@@ -79,7 +79,7 @@ export class ParkingController {
   public remove = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const deleted = await this.parkingService.deleteParking(id);
+      const deleted = await this.parkingService.remove(id);
 
       if (!deleted) {
         return res.status(404).json({ message: 'Estacionamiento no encontrado' });

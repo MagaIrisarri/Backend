@@ -7,25 +7,19 @@ export class InvoiceRepository implements Repository<Invoice> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Invoice[]> {
-    return await this.em.find(
-      Invoice,
-      { status: { $ne: 'ANULADA' } },
+    return await this.em.find( Invoice, { status: { $ne: 'ANULADA' } },
       { populate: ['reservation'] }
     );
   }
 
   async findOne(item: { id: string }): Promise<Invoice | null> {
-    return await this.em.findOne(
-      Invoice,
-      { id: item.id, status: { $ne: 'ANULADA' } },
+    return await this.em.findOne( Invoice, { id: item.id, status: { $ne: 'ANULADA' } },
       { populate: ['reservation'] }
     );
   }
 
   async findByReservationId(reservationId: string): Promise<Invoice | null> {
-    return await this.em.findOne(
-      Invoice,
-      { reservation: { id: reservationId }, status: { $ne: 'ANULADA' } },
+    return await this.em.findOne( Invoice, { reservation: { id: reservationId }, status: { $ne: 'ANULADA' } },
       { populate: ['reservation'] }
     );
   }

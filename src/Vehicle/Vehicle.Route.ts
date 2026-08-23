@@ -14,9 +14,10 @@ const vehicleService = new VehicleService(vehicleRepository);
 const vehicleController = new VehicleController(vehicleService); 
 
 VehicleRouter.get('/', vehicleController.findAll);
-VehicleRouter.get('/:id', validateSchema(VehicleIdSchema), vehicleController.findOneById);
-VehicleRouter.post('/client/:userId', validateSchema(ClientIdSchema), validateSchema(createVehicleSchema), vehicleController.add);
+VehicleRouter.get('/:id', validateSchema(VehicleIdSchema), vehicleController.findOne);
+VehicleRouter.post('/client/:userId', validateSchema(ClientIdSchema), validateSchema(createVehicleSchema), vehicleController.create);
 VehicleRouter.put('/:id', validateSchema(VehicleIdSchema), validateSchema(UpdateVehicleSchema), vehicleController.update);
+VehicleRouter.patch('/:id', validateSchema(VehicleIdSchema), validateSchema(UpdateVehicleSchema), vehicleController.update);
 VehicleRouter.delete('/:id', validateSchema(VehicleIdSchema), vehicleController.remove);
 
 export default VehicleRouter;

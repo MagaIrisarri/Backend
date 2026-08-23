@@ -13,9 +13,10 @@ const parkingRepository = new ParkingRepository(orm.em);
 const parkingService = new ParkingService(parkingRepository);
 const parkingController = new ParkingController(parkingService);
 
+ParkingRouter.post('/', validateSchema(createParkingSchema), parkingController.create);
+
 ParkingRouter.get('/', parkingController.findAll);
-ParkingRouter.get('/:id', validateSchema(parkingIdSchema), parkingController.findOneById);
-ParkingRouter.post('/', validateSchema(createParkingSchema), parkingController.add);
+ParkingRouter.get('/:id', validateSchema(parkingIdSchema), parkingController.findOne);
 ParkingRouter.put('/:id', validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);
 ParkingRouter.patch('/:id', validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);
 ParkingRouter.delete('/:id', validateSchema(parkingIdSchema), parkingController.remove);

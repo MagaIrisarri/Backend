@@ -10,14 +10,14 @@ export class ReservationService {
   }
 
   async findOne(id: string): Promise<Reservation | null> {
-    return await this.repo.findById(id);
+    return await this.repo.findOne({ id });
   }
 
   async create(data: CreateReservationInput): Promise<Reservation> {
     const { parking, vehicle } = await this.repo.getDependencies(data.parkingId, data.vehicleId);
     
-    if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
-    if (!vehicle) throw new Error("Vehículo no encontrado o inactivo");
+    if (!parking) throw new Error("Estacionamiento no encontrado");
+    if (!vehicle) throw new Error("Vehículo no encontrado");
 
     const durationHours = (data.endTime.getTime() - data.startTime.getTime()) / (1000 * 60 * 60);
     
@@ -35,26 +35,14 @@ export class ReservationService {
       throw new Error(`El horario de reserva está fuera del horario de atención (${parking.openingTime} a ${parking.closingTime})`);
     }
 
-    return await this.repo.createReservationAtomically(
-      parking,
-      vehicle,
-      data.startTime,
-      data.endTime
-    );
+    return await this.repo.createReservationAtomically( parking, vehicle, data.startTime, data.endTime );
   }
 
   async update(id: string, data: UpdateReservationInput): Promise<Reservation | null> {
-    const reservation = await this.repo.findById(id);
-    if (!reservation) return null;
-
-    return await this.repo.update(reservation, data);
+    return await this.repo.update(id, data);
   }
 
   async remove(id: string): Promise<boolean> {
-    const reservation = await this.repo.findById(id);
-    if (!reservation) return false;
-
-    await this.repo.deactivate(reservation);
-    return true;
+    return await this.repo.remove({ id });
   }
 }

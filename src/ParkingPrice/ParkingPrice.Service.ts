@@ -4,42 +4,36 @@ import { ParkingPrice } from './ParkingPrice.Entity.js';
 export class ParkingPriceService {
   constructor(private repo: ParkingPriceRepository) {}
 
-  async createParkingPrice(
-    parkingId: string,
-    data: { vehicleType: string; price: number }
-  ): Promise<ParkingPrice> {
+  async create(parkingId: string, data: { vehicleType: string; price: number }): Promise<ParkingPrice> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) {
-      throw new Error('Estacionamiento no encontrado o inactivo');
-    }
+    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
+    // Desactivamos la tarifa vigente si existe
     const currentActivePrice = await this.repo.findActive(parkingId, data.vehicleType);
     if (currentActivePrice) {
-      await this.repo.deactivate(currentActivePrice);
+      await this.repo.remove({ id: currentActivePrice.id });
     }
 
-    return await this.repo.create(parking, data.vehicleType, data.price);
+    return await this.repo.add({ 
+      parking, 
+      vehicleType: data.vehicleType, 
+      price: data.price 
+    });
   }
 
-  async findPricesByParking(parkingId: string): Promise<ParkingPrice[]> {
+  async findOne(id: string): Promise<ParkingPrice | null> {
+    return await this.repo.findOne({ id });
+  }
+
+  async remove(id: string): Promise<boolean> {
+    return await this.repo.remove({ id });
+  }
+
+  async findByParking(parkingId: string): Promise<ParkingPrice[]> {
     return await this.repo.findByParking(parkingId);
   }
 
-  async findActivePrice(parkingId: string, vehicleType: string): Promise<ParkingPrice | null> {
+  async findActive(parkingId: string, vehicleType: string): Promise<ParkingPrice | null> {
     return await this.repo.findActive(parkingId, vehicleType);
-  }
-
-  async findPrice(id: string): Promise<ParkingPrice | null> {
-    return await this.repo.findById(id);
-  }
-
-  async deactivatePrice(id: string): Promise<boolean> {
-    const price = await this.repo.findById(id);
-    if (!price || price.expirationDate !== null) {
-      return false;
-    }
-
-    await this.repo.deactivate(price);
-    return true;
   }
 }

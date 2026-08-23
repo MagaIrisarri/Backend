@@ -4,10 +4,22 @@ import { BrandService } from './Brand.Service.js';
 export class BrandController {
   constructor(private brandService: BrandService) {}
 
-  getAll = async (req: Request, res: Response) => {
+  findAll = async (_req: Request, res: Response) => {
     try {
       const marcas = await this.brandService.findAll();
-      res.status(200).json(marcas);
+      res.status(200).json({ data: marcas });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  findOne = async (req: Request, res: Response) => {
+    try {
+      const marca = await this.brandService.findOne(req.params.id as string);
+      if (!marca) {
+        return res.status(404).json({ message: 'Marca no encontrada' });
+      }
+      res.status(200).json({ data: marca });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
@@ -22,16 +34,28 @@ export class BrandController {
     }
   };
 
-  delete = async (req: Request, res: Response) => {
+  update = async (req: Request, res: Response) => {
+    try {
+      const marca = await this.brandService.update(req.params.id as string, req.body);
+      if (!marca) {
+        return res.status(404).json({ message: 'Marca no encontrada' });
+      }
+      res.status(200).json({ message: 'Marca actualizada exitosamente', data: marca });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  remove = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const isDeleted = await this.brandService.delete(id);
+      const isDeleted = await this.brandService.remove(id);
       
       if (!isDeleted) {
         return res.status(404).json({ message: 'Marca no encontrada' });
       }
       
-      res.status(200).json({ message: 'Marca eliminada correctamente' });
+      return res.status(200).json({ message: 'Marca eliminada correctamente' });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

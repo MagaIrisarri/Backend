@@ -12,7 +12,7 @@ const DaysEnum = z.enum([
   message: 'Día de la semana inválido',
 });
 
-// Formato de hora HH:mm o HH:mm:ss
+// ver si anda
 const TimeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
 
 export const createShiftSchema = z.object({
@@ -23,6 +23,20 @@ export const createShiftSchema = z.object({
     startTime: z.string().regex(TimeRegex, "Formato de hora de inicio inválido (HH:mm)"),
     endTime: z.string().regex(TimeRegex, "Formato de hora de fin inválido (HH:mm)"),
   }).refine(data => data.startTime < data.endTime, {
+    message: "La hora de inicio debe ser anterior a la hora de fin",
+    path: ["endTime"],
+  }),
+});
+
+export const updateShiftSchema = z.object({
+  body: z.object({
+    dayOfWeek: DaysEnum.optional(),
+    startTime: z.string().regex(TimeRegex, "Formato de hora de inicio inválido (HH:mm)").optional(),
+    endTime: z.string().regex(TimeRegex, "Formato de hora de fin inválido (HH:mm)").optional(),
+  }).refine(data => {
+    if (data.startTime && data.endTime) return data.startTime < data.endTime;
+    return true;
+  }, {
     message: "La hora de inicio debe ser anterior a la hora de fin",
     path: ["endTime"],
   }),
@@ -42,3 +56,4 @@ export const parkingDaySchema = z.object({
 });
 
 export type CreateShiftInput = z.infer<typeof createShiftSchema>['body'];
+export type UpdateShiftInput = z.infer<typeof updateShiftSchema>['body'];

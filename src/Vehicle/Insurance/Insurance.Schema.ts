@@ -9,6 +9,8 @@ export const createInsuranceSchema = z.object({
   })
 });
 
+export const updateInsuranceSchema = createInsuranceSchema.partial();
+
 export const insuranceIdSchema = z.object({
   params: z.object({
     id: z.string().uuid('El ID de la aseguradora no es válido')

@@ -17,7 +17,7 @@ export class Reservation {
   endTime!: Date;
 
   @Property({ type: 'string', default: 'PENDIENTE' })
-  status?: string = 'PENDIENTE'; // PENDIENTE, CONFIRMADA, CANCELADA, FINALIZADA
+  status?: string = 'PENDIENTE'; 
 
   @ManyToOne(() => Vehicle, { eager: true })
   vehicle!: Rel<Vehicle>;

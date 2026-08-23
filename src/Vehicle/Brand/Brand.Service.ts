@@ -8,11 +8,19 @@ export class BrandService {
     return await this.brandRepository.findAll();
   }
 
-  async create(data: { name: string }): Promise<Brand> {
-    return await this.brandRepository.create(data);
+  async findOne(id: string): Promise<Brand | null> {
+    return await this.brandRepository.findOne({ id });
   }
 
-  async delete(id: string): Promise<boolean> {
-    return await this.brandRepository.delete(id);
+  async create(data: { name: string }): Promise<Brand> {
+    return await this.brandRepository.add(data);
+  }
+
+  async update(id: string, data: any): Promise<Brand | null> {
+    return await this.brandRepository.update(id, data);
+  }
+
+  async remove(id: string): Promise<boolean> {
+    return await this.brandRepository.remove({ id });
   }
 }

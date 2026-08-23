@@ -5,30 +5,24 @@ import { CreateParkingInput, UpdateParkingInput } from './Parking.Schema.js';
 export class ParkingService {
   constructor(private repo: ParkingRepository) {}
 
-  async createParking(data: CreateParkingInput): Promise<Parking> {
-    return await this.repo.create(data);
+  async create(data: CreateParkingInput): Promise<Parking> {
+    return await this.repo.add(data);
   }
 
-  async findAllParking(): Promise<Parking[]> {
+  async findAll(): Promise<Parking[]> {
     return await this.repo.findAll();
   }
 
-  async findParkingById(id: string): Promise<Parking | null> {
-    return await this.repo.findById(id);
+  async findOne(id: string): Promise<Parking | null> {
+    return await this.repo.findOne({ id }); 
   }
 
-  async updateParking(id: string, data: UpdateParkingInput): Promise<Parking | null> {
-    const parking = await this.repo.findById(id);
-    if (!parking) return null;
-
-    return await this.repo.update(parking, data);
+  async update(id: string, data: UpdateParkingInput): Promise<Parking | null> {
+    return await this.repo.update(id, data);
   }
 
-  async deleteParking(id: string): Promise<boolean> {
-    const parking = await this.repo.findById(id);
-    if (!parking) return false;
-
-    await this.repo.deactivate(parking);
-    return true;
+  async remove(id: string): Promise<boolean> {
+    // Delegamos directo al repo pasando el formato de objeto
+    return await this.repo.remove({ id });
   }
 }

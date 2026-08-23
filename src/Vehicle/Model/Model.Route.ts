@@ -14,7 +14,10 @@ const modelService = new ModelService(modelRepository);
 const modelController = new ModelController(modelService);
 
 modelRouter.get('/', validateSchema(ModelQuerySchema), modelController.findAll);
-modelRouter.get('/:id', validateSchema(ModelIdSchema), modelController.findById);
+modelRouter.get('/:id', validateSchema(ModelIdSchema), modelController.findOne);
 modelRouter.post('/', validateSchema(createModelSchema), modelController.create);
 modelRouter.put('/:id', validateSchema(ModelIdSchema), validateSchema(UpdateModelSchema), modelController.update);
-modelRouter.delete('/:id', validateSchema(ModelIdSchema), modelController.delete);
+modelRouter.patch('/:id', validateSchema(ModelIdSchema), validateSchema(UpdateModelSchema), modelController.update);
+modelRouter.delete('/:id', validateSchema(ModelIdSchema), modelController.remove);
+
+export default modelRouter;

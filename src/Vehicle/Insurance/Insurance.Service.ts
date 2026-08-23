@@ -8,11 +8,19 @@ export class InsuranceService {
     return await this.insuranceRepository.findAll();
   }
 
-  async create(data: { name: string }): Promise<Insurance> {
-    return await this.insuranceRepository.create(data);
+  async findOne(id: string): Promise<Insurance | null> {
+    return await this.insuranceRepository.findOne({ id });
   }
 
-  async delete(id: string): Promise<boolean> {
-    return await this.insuranceRepository.delete(id);
+  async create(data: { name: string }): Promise<Insurance> {
+    return await this.insuranceRepository.add(data);
+  }
+
+  async update(id: string, data: { name?: string }): Promise<Insurance | null> {
+    return await this.insuranceRepository.update(id, data);
+  }
+
+  async remove(id: string): Promise<boolean> {
+    return await this.insuranceRepository.remove({ id });
   }
 }

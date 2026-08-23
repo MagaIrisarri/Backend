@@ -4,28 +4,24 @@ import { Model } from './Model.Entity.js';
 export class ModelService {
   constructor(private modelRepository: ModelRepository) {}
 
-  async createModel(data: any): Promise<Model> {
-    const modelData = {
-      name: data.name,
-      brand: data.brandId,
-      vehicleType: data.vehicleTypeId
-    };
-    return await this.modelRepository.create(modelData);
-  }
-
-  async findAllModels(brandId?: string): Promise<Model[]> {
+  async findAll(brandId?: string): Promise<Model[]> {
     return await this.modelRepository.findAll(brandId);
   }
 
-  async findModelById(params: { id: string }): Promise<Model | null> {
-    return await this.modelRepository.findById(params.id);
+  async findOne(id: string): Promise<Model | null> {
+    return await this.modelRepository.findOne({ id });
   }
 
-  async updateModel(params: { id: string }, data: any): Promise<Model | null> {
-    return await this.modelRepository.update(params.id, data);
+  async create(data: any): Promise<Model> {
+    const modelData = { name: data.name, brand: data.brandId, vehicleType: data.vehicleTypeId };
+    return await this.modelRepository.add(modelData);
   }
 
-  async deleteModel(params: { id: string }): Promise<boolean> {
-    return await this.modelRepository.delete(params.id);
+  async update(id: string, data: any): Promise<Model | null> {
+    return await this.modelRepository.update(id, data);
+  }
+
+  async remove(id: string): Promise<boolean> {
+    return await this.modelRepository.remove({ id });
   }
 }

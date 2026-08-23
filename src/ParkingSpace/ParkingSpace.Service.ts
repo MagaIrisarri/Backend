@@ -4,15 +4,18 @@ import { CreateParkingSpaceInput } from './ParkingSpace.Schema.js';
 
 export class ParkingSpaceService {
   constructor(private repo: ParkingSpaceRepository) {}
+  
+  async findAll(): Promise<ParkingSpace[]> {
+    return await this.repo.findAll();
+  }
 
-  async createParkingSpace(
-    parkingId: string,
-    data: CreateParkingSpaceInput
-  ): Promise<ParkingSpace> {
+  async findOne(id: string): Promise<ParkingSpace | null> {
+    return await this.repo.findOne({ id });
+  }
+
+  async create(parkingId: string, data: CreateParkingSpaceInput): Promise<ParkingSpace> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) {
-      throw new Error('Estacionamiento no encontrado o inactivo');
-    }
+    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
     const spacesCount = await this.repo.countActiveSpacesByType(parking, data.vehicleType);
 
@@ -33,46 +36,31 @@ export class ParkingSpaceService {
       spaceCode = `${prefix}-${String(number).padStart(2, '0')}`;
     }
 
-    return await this.repo.create(parking, data.vehicleType, spaceCode);
+    return await this.repo.add({ parking, vehicleType: data.vehicleType, spaceCode });
   }
 
-  async findSpacesByParking(parkingId: string): Promise<ParkingSpace[]> {
+  async remove(id: string): Promise<boolean> {
+    return await this.repo.remove({ id });
+  }
+
+  async findByParking(parkingId: string): Promise<ParkingSpace[]> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) {
-      throw new Error('Estacionamiento no encontrado o inactivo');
-    }
+    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
     return await this.repo.findByParking(parking);
   }
 
-  async findAvailableSpaces(parkingId: string): Promise<ParkingSpace[]> {
+  async findAvailable(parkingId: string): Promise<ParkingSpace[]> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) {
-      throw new Error('Estacionamiento no encontrado o inactivo');
-    }
+    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
     return await this.repo.findAvailable(parking);
   }
 
-  async findAvailableSpacesByVehicleType(
-    parkingId: string,
-    vehicleType: string
-  ): Promise<ParkingSpace[]> {
+  async findAvailableByVehicleType(parkingId: string, vehicleType: string): Promise<ParkingSpace[]> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) {
-      throw new Error('Estacionamiento no encontrado o inactivo');
-    }
+    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
 
     return await this.repo.findAvailable(parking, vehicleType);
-  }
-
-  async deleteParkingSpace(id: string): Promise<boolean> {
-    const space = await this.repo.findById(id);
-    if (!space) {
-      return false;
-    }
-
-    await this.repo.deactivate(space);
-    return true;
   }
 }

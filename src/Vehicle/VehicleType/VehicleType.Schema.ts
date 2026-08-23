@@ -10,3 +10,9 @@ export const createVehicleTypeSchema = z.object({
 });
 
 export const updateVehicleTypeSchema = createVehicleTypeSchema.partial();
+
+export const vehicleTypeIdSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('ID de tipo de vehículo inválido'),
+  }),
+});
