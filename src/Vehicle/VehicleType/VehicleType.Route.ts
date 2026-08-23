@@ -1,18 +1,18 @@
 import { Router } from 'express';
-import { VehicleTypeController } from './VehicleType.Controller.js';
-import { VehicleTypeService } from './VehicleType.Service.js';
-import { VehicleTypeRepository } from './VehicleType.Repository.js'; // <-- Importamos el repo
-import { orm } from '../../Shared/db/orm.js'; 
-import { createVehicleTypeSchema } from './VehicleType.Schema.js';
 import { validateSchema } from '../../Shared/middlewares/ValidateSchemas.js';
+import { orm } from '../../Shared/db/orm.js'; 
+
+import { VehicleTypeController } from './VehicleType.Controller.js';
+import { VehicleTypeRepository } from './VehicleType.Repository.js'; // <-- Importamos el repo
+import { VehicleTypeService } from './VehicleType.Service.js';
+import { createVehicleTypeSchema } from './VehicleType.Schema.js';
 
 export const vehicleTypeRouter = Router();
 
-const em = orm.em.fork();
-const vehicleTypeRepository = new VehicleTypeRepository(em);
+const vehicleTypeRepository = new VehicleTypeRepository(orm.em);
 const vehicleTypeService = new VehicleTypeService(vehicleTypeRepository);
-const controller = new VehicleTypeController(vehicleTypeService);
+const vehicleTypecontroller = new VehicleTypeController(vehicleTypeService);
 
-vehicleTypeRouter.get('/', controller.getAll);
-vehicleTypeRouter.post('/', validateSchema(createVehicleTypeSchema), controller.create);
-vehicleTypeRouter.delete('/:id', controller.delete);
+vehicleTypeRouter.get('/', vehicleTypecontroller.getAll);
+vehicleTypeRouter.post('/', validateSchema(createVehicleTypeSchema), vehicleTypecontroller.create);
+vehicleTypeRouter.delete('/:id', vehicleTypecontroller.delete);

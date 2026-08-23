@@ -10,7 +10,7 @@ export class InvoiceRepository implements Repository<Invoice> {
     return await this.em.find(
       Invoice,
       { status: { $ne: 'ANULADA' } },
-      { populate: ['reservation'] as any }
+      { populate: ['reservation'] }
     );
   }
 
@@ -18,7 +18,7 @@ export class InvoiceRepository implements Repository<Invoice> {
     return await this.em.findOne(
       Invoice,
       { id: item.id, status: { $ne: 'ANULADA' } },
-      { populate: ['reservation'] as any }
+      { populate: ['reservation'] }
     );
   }
 
@@ -26,7 +26,7 @@ export class InvoiceRepository implements Repository<Invoice> {
     return await this.em.findOne(
       Invoice,
       { reservation: { id: reservationId }, status: { $ne: 'ANULADA' } },
-      { populate: ['reservation'] as any }
+      { populate: ['reservation'] }
     );
   }
 

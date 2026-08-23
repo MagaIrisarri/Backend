@@ -1,15 +1,13 @@
 import { Router } from 'express';
+import { orm } from '../Shared/db/orm.js';
 import { UserController } from './User.Controller.js';
 import { UserService } from './User.Service.js';
 import { UserRepository } from './User.Repository.js';
-import { orm } from '../Shared/db/orm.js';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
 import { createUserSchema, updateUserSchema, userIdSchema, loginSchema, updatePasswordSchema } from './User.Schema.js';
 
 export const userRouter = Router();
-
-const em = orm.em.fork();
-const userRepository = new UserRepository(em);
+const userRepository = new UserRepository(orm.em);
 const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 

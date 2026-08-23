@@ -1,23 +1,23 @@
 import { Router } from "express";
-import { InvoiceController } from "./Invoice.Controller.js";
-import { InvoiceService } from "./Invoice.Service.js";
-import { InvoiceRepository } from "./Invoice.Repository.js";
-import { orm } from "../Shared/db/orm.js";
 import { validateSchema } from "../Shared/middlewares/ValidateSchemas.js";
+import { orm } from "../Shared/db/orm.js";
+
+import { InvoiceController } from "./Invoice.Controller.js";
+import { InvoiceRepository } from "./Invoice.Repository.js";
+import { InvoiceService } from "./Invoice.Service.js";
 import { createInvoiceSchema, updateInvoiceSchema, invoiceIdSchema } from "./Invoice.Schema.js";
 
 export const invoiceRouter = Router();
 
-const em = orm.em.fork();
-const repository = new InvoiceRepository(em);
-const service = new InvoiceService(repository);
-const controller = new InvoiceController(service);
+const invoiceRepository = new InvoiceRepository(orm.em);
+const invoiceService = new InvoiceService(invoiceRepository);
+const invoiceController = new InvoiceController(invoiceService);
 
-invoiceRouter.get("/", controller.findAll);
-invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), controller.findOne);
-invoiceRouter.post("/", validateSchema(createInvoiceSchema), controller.create);
-invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), controller.update);
-invoiceRouter.patch("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), controller.update);
-invoiceRouter.delete("/:id", validateSchema(invoiceIdSchema), controller.remove);
+invoiceRouter.get("/", invoiceController.findAll);
+invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), invoiceController.findOne);
+invoiceRouter.post("/", validateSchema(createInvoiceSchema), invoiceController.create);
+invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
+invoiceRouter.patch("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
+invoiceRouter.delete("/:id", validateSchema(invoiceIdSchema), invoiceController.remove);
 
 export default invoiceRouter;

@@ -15,7 +15,6 @@ export class EmployeeShiftRepository {
     return await this.em.findOne(Parking, { id: parkingId, isActive: true });
   }
 
-  // Previene solapamiento de horarios del mismo empleado
   async findOverlappingShift(
     employee: User, 
     dayOfWeek: DayOfWeek, 
@@ -37,8 +36,7 @@ export class EmployeeShiftRepository {
     return await this.em.find(
       EmployeeShift, 
       { parking: { id: parkingId }, dayOfWeek, isActive: true },
-      // Populamos employee manualmente ya que no tiene eager: true
-      { orderBy: { startTime: 'ASC' }, populate: ['employee'] as any }
+      { orderBy: { startTime: 'ASC' }, populate: ['employee'] }
     );
   }
 
@@ -46,7 +44,7 @@ export class EmployeeShiftRepository {
     return await this.em.findOne(
       EmployeeShift, 
       { id, isActive: true },
-      { populate: ['employee', 'parking'] as any }
+      { populate: ['employee', 'parking'] }
     );
   }
 
@@ -57,7 +55,6 @@ export class EmployeeShiftRepository {
       dayOfWeek: data.dayOfWeek as DayOfWeek,
       startTime: data.startTime,
       endTime: data.endTime,
-      // Pasamos estas flags explícitamente para evitar errores de TS (strict type check de MikroORM)
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),

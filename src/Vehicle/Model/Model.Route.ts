@@ -1,20 +1,15 @@
 import { Router } from 'express';
-import { ModelController } from './Model.Controller.js';
-import { ModelService } from './Model.Service.js';
-import { ModelRepository } from './Model.Repository.js';
-import { orm } from '../../Shared/db/orm.js'; 
 import { validateSchema } from '../../Shared/middlewares/ValidateSchemas.js'; 
-import { 
-  createModelSchema, 
-  UpdateModelSchema, 
-  ModelIdSchema, 
-  ModelQuerySchema 
-} from './Model.Schema.js';
+import { orm } from '../../Shared/db/orm.js'; 
+
+import { ModelController } from './Model.Controller.js';
+import { ModelRepository } from './Model.Repository.js';
+import { ModelService } from './Model.Service.js';
+import { createModelSchema, UpdateModelSchema, ModelIdSchema, ModelQuerySchema } from './Model.Schema.js';
 
 export const modelRouter = Router();
 
-const em = orm.em.fork();
-const modelRepository = new ModelRepository(em);
+const modelRepository = new ModelRepository(orm.em);
 const modelService = new ModelService(modelRepository);
 const modelController = new ModelController(modelService);
 

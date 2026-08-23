@@ -35,24 +35,12 @@ export class ReservationService {
       throw new Error(`El horario de reserva está fuera del horario de atención (${parking.openingTime} a ${parking.closingTime})`);
     }
 
-    const availableSpace = await this.repo.findAvailableSpace(
-      parking, 
-      vehicle.vehicleType.name, 
-      data.startTime, 
+    return await this.repo.createReservationAtomically(
+      parking,
+      vehicle,
+      data.startTime,
       data.endTime
     );
-
-    if (!availableSpace) {
-      throw new Error("No hay plazas disponibles para este tipo de vehículo en el horario seleccionado");
-    }
-
-    return await this.repo.create({
-      startTime: data.startTime,
-      endTime: data.endTime,
-      vehicle,
-      parkingSpace: availableSpace,
-      status: 'PENDIENTE',
-    });
   }
 
   async update(id: string, data: UpdateReservationInput): Promise<Reservation | null> {

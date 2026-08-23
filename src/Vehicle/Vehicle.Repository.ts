@@ -21,7 +21,7 @@ export class VehicleRepository {
   }
 
   getUserReference(userId: string): User {
-    return this.em.getReference(User, userId as any);
+    return this.em.getReference(User, userId);
   }
 
   create(vehicleData: any): Vehicle {

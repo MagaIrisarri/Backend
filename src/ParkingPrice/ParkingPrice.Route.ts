@@ -1,27 +1,22 @@
 import { Router } from "express";
+import { validateSchema } from "../Shared/middlewares/ValidateSchemas.js";
+import { orm } from "../Shared/db/orm.js";
+
+import { ParkingPriceRepository } from "./ParkingPrice.Repository.js";
 import { ParkingPriceController } from "./ParkingPrice.Controller.js";
 import { ParkingPriceService } from "./ParkingPrice.Service.js";
-import { ParkingPriceRepository } from "./ParkingPrice.Repository.js";
-import { orm } from "../Shared/db/orm.js";
-import { validateSchema } from "../Shared/middlewares/ValidateSchemas.js";
-import {
-  createParkingPriceSchema,
-  parkingPriceIdSchema,
-  parkingIdParamSchema,
-  activeParkingPriceSchema,
-} from "./ParkingPrice.Schema.js";
+import { createParkingPriceSchema, parkingPriceIdSchema, parkingIdParamSchema, activeParkingPriceSchema } from "./ParkingPrice.Schema.js";
 
 export const ParkingPriceRouter = Router();
 
-const em = orm.em.fork();
-const repository = new ParkingPriceRepository(em);
-const service = new ParkingPriceService(repository);
-const controller = new ParkingPriceController(service);
+const parkingPriceRepository = new ParkingPriceRepository(orm.em);
+const parkingPriceService = new ParkingPriceService(parkingPriceRepository);
+const parkingPriceController = new ParkingPriceController(parkingPriceService);
 
-ParkingPriceRouter.post('/parkings/:id/prices', validateSchema(createParkingPriceSchema), controller.add);
-ParkingPriceRouter.get('/parkings/:id/prices', validateSchema(parkingIdParamSchema), controller.findPricesByParking);
-ParkingPriceRouter.get('/prices/:id', validateSchema(parkingPriceIdSchema), controller.findPrice);
-ParkingPriceRouter.get('/parkings/:id/prices/active/:vehicleType', validateSchema(activeParkingPriceSchema), controller.findActivePrice);
-ParkingPriceRouter.delete('/prices/:id', validateSchema(parkingPriceIdSchema), controller.remove);
+ParkingPriceRouter.post('/:id/prices', validateSchema(createParkingPriceSchema), parkingPriceController.add);
+ParkingPriceRouter.get('/:id/prices', validateSchema(parkingIdParamSchema), parkingPriceController.findPricesByParking);
+ParkingPriceRouter.get('/:id/prices/active/:vehicleType', validateSchema(activeParkingPriceSchema), parkingPriceController.findActivePrice);
+ParkingPriceRouter.get('/prices/:id', validateSchema(parkingPriceIdSchema), parkingPriceController.findPrice);
+ParkingPriceRouter.delete('/prices/:id', validateSchema(parkingPriceIdSchema), parkingPriceController.remove);
 
 export default ParkingPriceRouter;

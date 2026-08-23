@@ -31,50 +31,62 @@ export class ReservationRepository {
     return { parking, vehicle };
   }
 
-  async findAvailableSpace(
-    parking: Parking, 
-    vehicleTypeName: string, 
-    reqStartTime: Date, 
+  // NUEVO MÉTODO: Ejecuta la búsqueda y la creación en una misma transacción
+  async createReservationAtomically(
+    parking: Parking,
+    vehicle: Vehicle,
+    reqStartTime: Date,
     reqEndTime: Date
-  ): Promise<ParkingSpace | null> {
-    const marginMs = parking.reservationMargin * 60 * 60 * 1000;
-    const startWithMargin = new Date(reqStartTime.getTime() - marginMs);
-    const endWithMargin = new Date(reqEndTime.getTime() + marginMs);
+  ): Promise<Reservation> {
+    // txEm es el EntityManager transaccional aislado para esta operación
+    return await this.em.transactional(async (txEm) => {
+      const marginMs = parking.reservationMargin * 60 * 60 * 1000;
+      const startWithMargin = new Date(reqStartTime.getTime() - marginMs);
+      const endWithMargin = new Date(reqEndTime.getTime() + marginMs);
 
-    const allSpaces = await this.em.find(ParkingSpace, {
-      parking,
-      vehicleType: vehicleTypeName,
-      state: 'LIBRE',
+      // 1. Buscar todos los espacios del tipo requerido
+      const allSpaces = await txEm.find(ParkingSpace, {
+        parking,
+        vehicleType: vehicle.vehicleType.name,
+        state: 'LIBRE',
+      });
+
+      if (allSpaces.length === 0) {
+        throw new Error("No hay plazas para este tipo de vehículo en el estacionamiento");
+      }
+
+      // 2. Buscar reservas conflictivas
+      const conflictingReservations = await txEm.find(Reservation, {
+        parkingSpace: { parking },
+        status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
+        $and: [
+          { startTime: { $lt: endWithMargin } },
+          { endTime: { $gt: startWithMargin } }
+        ]
+      }, { populate: ['parkingSpace'] as any });
+
+      const occupiedSpaceIds = new Set(
+        conflictingReservations.map(res => res.parkingSpace.id)
+      );
+
+      // 3. Seleccionar un espacio libre
+      const availableSpace = allSpaces.find(space => !occupiedSpaceIds.has(space.id));
+
+      if (!availableSpace) {
+        throw new Error("No hay plazas disponibles en el horario seleccionado");
+      }
+
+      // 4. Crear la reserva (El flush se hace automático al terminar la transacción)
+      const reservation = txEm.create(Reservation, {
+        startTime: reqStartTime,
+        endTime: reqEndTime,
+        vehicle,
+        parkingSpace: availableSpace,
+        status: 'PENDIENTE',
+      });
+
+      return reservation;
     });
-
-    if (allSpaces.length === 0) return null;
-
-    const conflictingReservations = await this.em.find(Reservation, {
-      parkingSpace: { parking },
-      status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
-      $and: [
-        { startTime: { $lt: endWithMargin } },
-        { endTime: { $gt: startWithMargin } }
-      ]
-    }, { populate: ['parkingSpace'] as any });
-
-    const occupiedSpaceIds = new Set(
-      conflictingReservations.map(res => res.parkingSpace.id)
-    );
-
-    return allSpaces.find(space => !occupiedSpaceIds.has(space.id)) || null;
-  }
-
-  async create(data: {
-    startTime: Date;
-    endTime: Date;
-    vehicle: Vehicle;
-    parkingSpace: ParkingSpace;
-    status?: string;
-  }): Promise<Reservation> {
-    const reservation = this.em.create(Reservation, data);
-    await this.em.flush();
-    return reservation;
   }
 
   async update(reservation: Reservation, data: UpdateReservationInput): Promise<Reservation> {

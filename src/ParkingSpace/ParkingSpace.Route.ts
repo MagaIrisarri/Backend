@@ -1,27 +1,22 @@
 import { Router } from 'express';
-import { ParkingSpaceController } from './ParkingSpace.Controller.js';
-import { ParkingSpaceService } from './ParkingSpace.Service.js';
-import { ParkingSpaceRepository } from './ParkingSpace.Repository.js';
-import { orm } from '../Shared/db/orm.js';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
-import {
-  createParkingSpaceSchema,
-  parkingSpaceIdSchema,
-  parkingIdParamSchema,
-  availableSpacesByVehicleTypeSchema,
-} from './ParkingSpace.Schema.js';
+import { orm } from '../Shared/db/orm.js';
+
+import { ParkingSpaceController } from './ParkingSpace.Controller.js';
+import { ParkingSpaceRepository } from './ParkingSpace.Repository.js';
+import { ParkingSpaceService } from './ParkingSpace.Service.js';
+import { createParkingSpaceSchema, parkingSpaceIdSchema, parkingIdParamSchema, availableSpacesByVehicleTypeSchema } from './ParkingSpace.Schema.js';
 
 export const parkingSpaceRouter = Router();
 
-const em = orm.em.fork();
-const repository = new ParkingSpaceRepository(em);
-const service = new ParkingSpaceService(repository);
-const controller = new ParkingSpaceController(service);
+const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
+const parkingSpaceService = new ParkingSpaceService(parkingSpaceRepository);
+const parkingSpaceController = new ParkingSpaceController(parkingSpaceService);
 
-parkingSpaceRouter.post('/parkings/:id/spaces', validateSchema(createParkingSpaceSchema), controller.create);
-parkingSpaceRouter.get('/parkings/:id/spaces', validateSchema(parkingIdParamSchema), controller.findByParking);
-parkingSpaceRouter.get('/parkings/:id/spaces/available', validateSchema(parkingIdParamSchema), controller.findAvailable);
-parkingSpaceRouter.get('/parkings/:id/spaces/available/:vehicleType', validateSchema(availableSpacesByVehicleTypeSchema), controller.findAvailableByVehicleType);
-parkingSpaceRouter.delete('/spaces/:id', validateSchema(parkingSpaceIdSchema), controller.remove);
+parkingSpaceRouter.post('/:id/spaces', validateSchema(createParkingSpaceSchema), parkingSpaceController.create);
+parkingSpaceRouter.get('/:id/spaces', validateSchema(parkingIdParamSchema), parkingSpaceController.findByParking);
+parkingSpaceRouter.get('/:id/spaces/available', validateSchema(parkingIdParamSchema), parkingSpaceController.findAvailable);
+parkingSpaceRouter.get('/:id/spaces/available/:vehicleType', validateSchema(availableSpacesByVehicleTypeSchema), parkingSpaceController.findAvailableByVehicleType);
+parkingSpaceRouter.delete('/spaces/:id', validateSchema(parkingSpaceIdSchema), parkingSpaceController.remove);
 
 export default parkingSpaceRouter;
