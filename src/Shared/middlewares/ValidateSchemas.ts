@@ -12,8 +12,14 @@ export const validateSchema = (schema: ZodSchema<any>) =>
 
       if (parsed.body !== undefined) req.body = parsed.body;
       if (parsed.params !== undefined) req.params = parsed.params;
-      if (parsed.query !== undefined) req.query = parsed.query;
-
+      if (parsed.query !== undefined) {
+        Object.defineProperty(req, 'query', {
+          value: parsed.query,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
       next();
     } catch (error) {
       if (error instanceof ZodError) {

@@ -65,4 +65,7 @@ export class ModelController {
       res.status(500).json({ message: 'Error Eliminando modelo', error: error.message });
     }
   };
+
+  
+
 }

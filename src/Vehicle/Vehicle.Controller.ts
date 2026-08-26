@@ -77,4 +77,19 @@ export class VehicleController {
       return res.status(500).json({ error: error.message });
     }
   }
+
+   public findActiveByUserId = async (req: Request, res: Response) => {
+    try {
+      const vehicleList = await this.vehicleService.findActiveByUserId(req.params.id as string);
+
+      const message = vehicleList.length === 0
+          ? "No se encontraron vehículos"
+          : "Vehículos encontrados";
+      
+      return res.status(200).json({ message, data: vehicleList });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
 }

@@ -41,7 +41,7 @@ export class UserService {
     if (!owner || owner.status !== 'ACTIVO' || owner.type !== 'DUEÑO') {
       throw new Error('Dueño no válido o inactivo');
     }
-
+    
     userData.password = await argon2.hash(userData.password!);
     userData.type = 'EMPLEADO';
     userData.status = 'ACTIVO';

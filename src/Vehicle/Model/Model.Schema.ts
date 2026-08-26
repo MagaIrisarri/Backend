@@ -29,3 +29,4 @@ export const ModelQuerySchema = z.object({
     brandId: z.string().uuid("El ID de la marca para filtrar es inválido").optional()
   }).optional() 
 });
+

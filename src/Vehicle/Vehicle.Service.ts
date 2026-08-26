@@ -54,4 +54,9 @@ export class VehicleService {
   async remove(id: string): Promise<boolean> {
     return await this.vehicleRepository.remove({ id });
   }
+
+  async findActiveByUserId(userId: string): Promise<Vehicle[]> {
+    return await this.vehicleRepository.findActiveByUserId(userId);
+  }
+
 }
