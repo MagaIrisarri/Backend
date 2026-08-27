@@ -1,12 +1,14 @@
 import { Router } from 'express'
-import { createVehicleType, getVehicleTypes, getVehicleTypeCode, updateVehicleType, deleteVehicleType} from './vehicleTypeController.js';
+import { sanitizeVehicleTypeInput, validateVehicleTypeSchema } from './vehicleTypeValidations.js';
+import { add, findAll, findOne, remove, update} from './vehicleTypeController.js';
 
-const router = Router();
+const vehicleTypeRouter = Router();
 
-router.post('/', createVehicleType);
-router.get('/', getVehicleTypes);
-router.get('/:code', getVehicleTypeCode);
-router.put('/:code', updateVehicleType);
-router.delete('/:code', deleteVehicleType);
+vehicleTypeRouter.post('/', sanitizeVehicleTypeInput, validateVehicleTypeSchema, add);
+vehicleTypeRouter.get('/', findAll);
+vehicleTypeRouter.get('/:id', findOne);
+vehicleTypeRouter.put('/:id', sanitizeVehicleTypeInput, update);
+vehicleTypeRouter.patch('/:id', sanitizeVehicleTypeInput, update);
+vehicleTypeRouter.delete('/:id', remove);
 
-export default router;
+export default vehicleTypeRouter;

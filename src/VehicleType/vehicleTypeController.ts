@@ -1,51 +1,49 @@
 import { Request, Response } from 'express';
-import {vehicleType} from './vehicleType.js';
+import { VehicleTypeRepository } from './vehicleTypeRepository.js';
+import { VehicleTypeService } from './vehicleTypeService.js';
 
-const vehicleTypes: vehicleType[] = [];
+const service = new VehicleTypeService(new VehicleTypeRepository());
 
-export const createVehicleType = (req: Request, res: Response): void => {
-  const newVehicleType: vehicleType = { ...req.body };
-  vehicleTypes.push(newVehicleType);
-  res.status(201).json(newVehicleType);
-};
-
-export const getVehicleTypes = (req: Request, res: Response): void => {
-  res.status(200).json(vehicleTypes);
-};
-
-export const getVehicleTypeCode = (req: Request, res: Response): void => {
-  const code = parseInt(req.params['code'] as string);
-  const vehicleType = vehicleTypes.find(vt => vt.code === code);
+export const add = (req: Request, res: Response) => {
+  const vehicleType = service.add(req.body.sanitizedVehicleTypeInput);
 
   if (!vehicleType) {
-    res.status(404).json({ mensaje: 'vehicle type not found' });
-    return;
+    return res.status(409).send({ message: "A vehicle type with this code already exists" });
   }
 
-  res.status(200).json(vehicleType);
-};
+  return res.status(201).json(vehicleType);
+}
 
-export const updateVehicleType = (req: Request, res: Response): void => {
-  const code = parseInt(req.params['code'] as string);
-  const vtIndex = vehicleTypes.findIndex(vt => vt.code === code);
+export const findAll = (req: Request, res: Response) => {
+    res.json(service.findAll());
+}
 
-  if (vtIndex === -1) {
-    res.status(404).json({ mensaje: 'vehicle type not found' });
-    return;
-  }
+export const findOne = (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const vehicleType = service.findOne(id);
 
-  vehicleTypes[vtIndex] = { ...vehicleTypes[vtIndex], ...req.body, code };
-  res.status(200).json(vehicleTypes[vtIndex]);
-};
+    if (!vehicleType)
+        return res.status(404).send({ message: "Vehicle type not found" });
 
-export const deleteVehicleType = (req: Request, res: Response): void => {
-  const code = parseInt(req.params['code'] as string);
-  const vtIndex = vehicleTypes.findIndex(vt => vt.code === code);
+    return res.json(vehicleType);
+}
 
-    if (vtIndex === -1) {
-    res.status(404).json({ mensaje: 'vehicle type not found' });
-    return;
-  }
-  vehicleTypes.splice(vtIndex, 1);
-  res.status(204).send();
-};
+export const remove = (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const result = service.remove(id);
+
+    if (!result)
+        return res.status(500).json({ message: "There was an internal error deleting the vehicle type" })
+
+    return res.json({ message: `Vehicle type with id: ${result.id} successfully deleted` })
+}
+
+export const update = (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const vehicleType = service.update(id, req.body.sanitizedVehicleTypeInput);
+
+    if (!vehicleType)
+        return res.status(404).send({ message: "Vehicle type not found" });
+
+    res.json({ message: "Vehicle type updated successfully", data: vehicleType });
+}

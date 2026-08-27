@@ -19,6 +19,7 @@ import parkingpriceRoutes from './ParkingPrice/ParkingPrice.Route.js';
 import parkingspaceRoutes from './ParkingSpace/ParkingSpace.Route.js';
 import VehicleRouter from './Vehicle/VehicleRoute.js'; 
 import  reservationRouter  from './Reservation/ReservationRoutes.js';
+import vehicleTypeRouter from './VehicleType/vehicleTypeRoute.js';
 
 app.use('/api/users', userRoutes);
 app.use('/api/parkings', parkingRoutes);
@@ -26,6 +27,7 @@ app.use('/api', parkingpriceRoutes);
 app.use('/api/parkings', parkingspaceRoutes);
 app.use('/api/vehicles', VehicleRouter);
 app.use('/api/reservations', reservationRouter);
+app.use('/api/vehicle-types', vehicleTypeRouter);
 
 async function startServer() {
   try {
