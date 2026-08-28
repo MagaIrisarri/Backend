@@ -46,6 +46,18 @@ export class Parking {
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;
 
+  @Property({ type: 'string', nullable: false })
+  name!: string;
+
+  @Property({ type: 'double', precision: 10, scale: 7 })
+  latitude!: number;
+
+  @Property({ type: 'double', precision: 10, scale: 7 })
+  longitude!: number;
+
+  @Property({ type: 'string', nullable: true })
+  imageUrl?: string;
+
   @ManyToOne(() => User)
   owner!: Rel<User>;
 
@@ -76,6 +88,10 @@ export class Parking {
       maxReservationHours: this.maxReservationHours,
       reservationMargin: this.reservationMargin,
       isActive: this.isActive,
+      name: this.name,
+      latitude: this.latitude,
+      longitude: this.longitude,
+      imageUrl: this.imageUrl,
       owner: this.owner,
     };
   }

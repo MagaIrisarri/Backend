@@ -11,7 +11,17 @@ export class ParkingService {
   ) {}
 
   async findAll(): Promise<Parking[]> {
-    return await this.parkingRepository.findAll();
+     return await this.parkingRepository.findAll();
+}
+
+    async findActive(): Promise<Parking[]> {
+    const Parkings = await this.parkingRepository.findAll();
+    const ParkingsActive: Parking[] = [];
+    for(let i=0; i < Parkings.length; i++){
+      if (Parkings[i].isActive)
+        ParkingsActive.push(Parkings[i])
+    }
+    return ParkingsActive;
   }
 
   async findOne(id: string): Promise<Parking | null> {
@@ -68,4 +78,7 @@ export class ParkingService {
   async remove(id: string): Promise<boolean> {
     return await this.parkingRepository.remove({ id });
   }
+
+
+
 }

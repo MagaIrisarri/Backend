@@ -7,6 +7,10 @@ export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Parking[]> {
+    return await this.em.find(Parking, { isActive: true || false }, { populate: ['owner'] as any });
+  }
+
+  async findActive(): Promise<Parking[]> {
     return await this.em.find(Parking, { isActive: true }, { populate: ['owner'] as any });
   }
 

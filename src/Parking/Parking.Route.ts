@@ -16,6 +16,7 @@ const parkingService = new ParkingService(parkingRepository, parkingSpaceReposit
 const parkingController = new ParkingController(parkingService);
 
 parkingRouter.get('/', parkingController.findAll);
+parkingRouter.get('/active', parkingController.findActive);
 parkingRouter.get('/:id', validateSchema(parkingIdSchema), parkingController.findOne);
 parkingRouter.post('/', validateSchema(createParkingSchema), parkingController.create);
 parkingRouter.put('/:id', validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);

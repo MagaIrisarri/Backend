@@ -31,6 +31,9 @@ const parkingBodyBaseSchema = z.object({
   minReservationHours: z.number().int().min(1).default(1),
   maxReservationHours: z.number().int().min(1),
   reservationMargin: z.number().int().min(0).default(1),
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres").max(80),
+  latitude: z.number().min(-90).max(90, "Latitud inválida"),
+  longitude: z.number().min(-180).max(180, "Longitud inválida"),
 });
 
 export const createParkingSchema = z.object({
