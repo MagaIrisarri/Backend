@@ -2,6 +2,11 @@ import { MikroORM } from '@mikro-orm/core';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { MySqlDriver } from '@mikro-orm/mysql';
 
+// Todas las fechas/horas de la app (parseo de strings, columnas datetime, validaciones
+// de horario de atención) asumen la hora local de Argentina. Sin esto, el proceso de
+// Node usa la zona horaria del sistema, que puede no coincidir y desfasar los horarios.
+process.env.TZ = 'America/Argentina/Buenos_Aires';
+
 export const orm = await MikroORM.init({
   entities: ['dist/**/*.Entity.js'],
   entitiesTs: ['src/**/*.Entity.ts'],

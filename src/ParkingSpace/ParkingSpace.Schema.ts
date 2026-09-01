@@ -36,3 +36,14 @@ export const parkingSpaceQuerySchema = z.object({
     vehicleType: z.string().optional(),
   }).optional(),
 });
+
+export const parkingSpaceavailability = z.object({
+  params: z.object({
+    parkingId: z.string().uuid("ID de estacionamiento inválido"),
+  }),
+  query: z.object({
+    vehicleType: z.string(),
+    startTime: z.coerce.date(),
+    endTime: z.coerce.date(),
+  }),
+})

@@ -6,25 +6,29 @@ import { ParkingSpaceController } from "./ParkingSpace.Controller.js";
 import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
 import { ParkingSpaceService } from "./ParkingSpace.Service.js";
+import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
 import {
   createSpaceSchema,
   createBulkSpaceSchema,
   updateSpaceSchema,
   spaceIdSchema,
   parkingSpaceQuerySchema,
+  parkingSpaceavailability,
 } from "./ParkingSpace.Schema.js";
 
 export const parkingSpaceRouter = Router();
 
 const spaceRepo = new ParkingSpaceRepository(orm.em);
 const parkingRepo = new ParkingRepository(orm.em);
-const spaceService = new ParkingSpaceService(spaceRepo, parkingRepo);
+const reservationRepo = new ReservationRepository(orm.em);
+const spaceService = new ParkingSpaceService(spaceRepo, parkingRepo, reservationRepo);
 const spaceController = new ParkingSpaceController(spaceService);
 
 parkingSpaceRouter.get("/:parkingId/spaces", validateSchema(parkingSpaceQuerySchema), spaceController.findByParking);
 parkingSpaceRouter.get("/:parkingId/spaces/available", validateSchema(parkingSpaceQuerySchema), spaceController.findAvailable);
 parkingSpaceRouter.post("/:parkingId/spaces", validateSchema(createSpaceSchema), spaceController.create);
-parkingSpaceRouter.post("/:parkingId/spaces/bulk", validateSchema(createBulkSpaceSchema), spaceController.createBulk);
+parkingSpaceRouter.put("/:parkingId/spaces", validateSchema(createBulkSpaceSchema), spaceController.createBulk);
+parkingSpaceRouter.get("/:parkingId/spaces/availability", validateSchema(parkingSpaceavailability), spaceController.checkAvailability);
 
 // Rutas directas por ID de plaza
 parkingSpaceRouter.get("/spaces/:id", validateSchema(spaceIdSchema), spaceController.findOne);

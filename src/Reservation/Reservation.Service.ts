@@ -42,7 +42,8 @@ export class ReservationService {
     parking,
     vehicle,
     startTime,
-    endTime
+    endTime,
+    data.parkingSpaceId
   );
 }
 

@@ -61,38 +61,50 @@ export class ReservationRepository implements Repository<Reservation> {
     return { parking, vehicle };
   }
 
-  async createReservationAtomically( parking: Parking, vehicle: Vehicle, reqStartTime: Date, reqEndTime: Date): Promise<Reservation>{
+  async createReservationAtomically( parking: Parking, vehicle: Vehicle, reqStartTime: Date, reqEndTime: Date, parkingSpaceId: string): Promise<Reservation>{
     
     return await this.em.transactional(async (txEm) => {
       const marginMs = parking.reservationMargin * 60 * 60 * 1000;
       const startWithMargin = new Date(reqStartTime.getTime() - marginMs);
       const endWithMargin = new Date(reqEndTime.getTime() + marginMs);
-      const allSpaces = await txEm.find(ParkingSpace, { parking, vehicleType: vehicle.vehicleType.name, state: SpaceState.LIBRE });
+      const space = await txEm.findOne(ParkingSpace, { id: parkingSpaceId, parking, vehicleType: vehicle.vehicleType.name, state: SpaceState.LIBRE, isActive: true});
 
-      if (allSpaces.length === 0) {
-        throw new Error("No hay plazas para este tipo de vehículo en el estacionamiento");
+      if (!space) {
+        throw new Error("La plaza seleccionada no existe o no corresponde a este vehículo");
       }
 
-      const conflictingReservations = await txEm.find(Reservation, { parkingSpace: { parking }, status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
+      const conflictingReservations = await txEm.find(Reservation, { parkingSpace:  space, status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
         $and: [
           { startTime: { $lt: endWithMargin } },
           { endTime: { $gt: startWithMargin } }
         ]
       }, { populate: ['parkingSpace'] });
 
-      const occupiedSpaceIds = new Set(
-        conflictingReservations.map(res => res.parkingSpace.id)
-      );
-
-      const availableSpace = allSpaces.find(space => !occupiedSpaceIds.has(space.id));
-
-      if (!availableSpace) {
-        throw new Error("No hay plazas disponibles en el horario seleccionado");
+      if(conflictingReservations.length > 0){
+        throw new Error("La plaza seleccionada ya no está disponible para el horario elegido");
       }
 
-      const reservation = txEm.create(Reservation, { startTime: reqStartTime, endTime: reqEndTime, vehicle, parkingSpace: availableSpace, status: 'PENDIENTE'});
+      const reservation = txEm.create(Reservation, { startTime: reqStartTime, endTime: reqEndTime, vehicle, parkingSpace: space, status: 'PENDIENTE'});
 
       return reservation;
     });
   }
-}
+
+    async findConflictingSpaceIds(parking:Parking, startWithMargin: Date, endWithMargin: Date){
+  
+      const conflictingReservations =await this.em.find (Reservation, { parkingSpace: { parking }, status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
+          $and: [
+            { startTime: { $lt: endWithMargin } },
+            { endTime: { $gt: startWithMargin } }
+          ]
+        }, { populate: ['parkingSpace'] });
+  
+        const occupiedSpaceIds = new Set(
+          conflictingReservations.map(res => res.parkingSpace.id)
+        );
+  
+        return occupiedSpaceIds;
+      };
+
+  }
+
