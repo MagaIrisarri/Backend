@@ -61,6 +61,12 @@ export class UserService {
     return this.excludePassword(user);
   }
 
+  async reactivate(params: { id: string }): Promise<Omit<User, 'password'> | null> {
+    const user = await this.userRepository.update(params.id, { status: 'ACTIVO' });
+    if (!user) return null;
+    return this.excludePassword(user);
+  }
+
   async updatePassword(id: string, currentPass: string, newPass: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ id });
     if (!user) return false;

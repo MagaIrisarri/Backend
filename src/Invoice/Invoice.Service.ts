@@ -17,6 +17,10 @@ export class InvoiceService {
     return await this.repo.findByReservationId(reservationId);
   }
 
+  async findByClientId(clientId: string): Promise<Invoice[]> {
+    return await this.repo.findByClientId(clientId);
+  }
+
   async create(input: any): Promise<Invoice> {
     const existing = await this.repo.findByReservationId(input.reservationId);
     if (existing) {

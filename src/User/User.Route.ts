@@ -33,4 +33,5 @@ userRouter.get('/:id', validateSchema(userIdSchema), userController.findById);
 userRouter.put('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
 userRouter.patch('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
 userRouter.patch('/:id/password', validateSchema(updatePasswordSchema), userController.updatePassword);
+userRouter.post('/:id/reactivate', validateSchema(userIdSchema), userController.reactivate);
 userRouter.delete('/:id', validateSchema(userIdSchema), userController.delete);

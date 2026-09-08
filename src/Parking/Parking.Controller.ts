@@ -36,6 +36,31 @@ export class ParkingController {
     });
   });
   
+  public findByOwnerId = catchAsync(async (req: Request, res: Response) => {
+    const parkings = await this.parkingService.findByOwnerId(req.params.ownerId as string);
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
+      data: parkings,
+    });
+  });
+
+  public getMetrics = catchAsync(async (req: Request, res: Response) => {
+    const metrics = await this.parkingService.getMetrics(req.params.id as string);
+    return res.status(200).json({
+      message: 'Métricas calculadas',
+      data: metrics,
+    });
+  });
+
+  public reactivate = catchAsync(async (req: Request, res: Response) => {
+    const reactivated = await this.parkingService.reactivate(req.params.id as string);
+    if (!reactivated) throw new AppError('Estacionamiento no encontrado', 404);
+    return res.status(200).json({
+      message: 'Estacionamiento reactivado con éxito',
+      data: reactivated,
+    });
+  });
+  
   public create = catchAsync(async (req: Request, res: Response) => {
     const parking = await this.parkingService.create(req.body);
     return res.status(201).json({

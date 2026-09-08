@@ -14,6 +14,10 @@ export class EmployeeShiftService {
     return await this.repo.findOne({ id });
   }
 
+  async findByEmployeeId(employeeId: string): Promise<EmployeeShift[]> {
+    return await this.repo.findByEmployeeId(employeeId);
+  }
+
   async create(data: CreateShiftInput): Promise<EmployeeShift> {
     const employee = await this.repo.findUserById(data.employeeId);
     if (!employee) throw new AppError("Empleado no encontrado o inactivo", 400);

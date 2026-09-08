@@ -17,6 +17,14 @@ export class InvoiceController {
     res.status(200).json({ data: invoice });
   });
 
+  public findByClientId = catchAsync(async (req: Request, res: Response) => {
+    const invoices = await this.service.findByClientId(req.params.clientId as string);
+    return res.status(200).json({
+      message: invoices.length === 0 ? 'No se encontraron facturas' : 'Facturas encontradas',
+      data: invoices,
+    });
+  });
+
   public create = catchAsync(async (req: Request, res: Response) => {
     const invoice = await this.service.create(req.body);
     res.status(201).json({ message: 'Factura generada exitosamente', data: invoice });

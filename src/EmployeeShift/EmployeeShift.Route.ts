@@ -15,6 +15,7 @@ const employeeShiftController = new EmployeeShiftController(employeeShiftService
 
 
 employeeShiftRouter.get('/coverage/:parkingId/:dayOfWeek', validateSchema(parkingDaySchema), employeeShiftController.getCoverage);
+employeeShiftRouter.get('/employee/:employeeId', employeeShiftController.findByEmployeeId);
 
 
 employeeShiftRouter.get('/', employeeShiftController.findAll);

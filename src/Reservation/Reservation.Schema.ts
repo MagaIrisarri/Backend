@@ -10,7 +10,8 @@ export const createReservationSchema = z.object({
     parkingId: z.string().uuid("El ID de estacionamiento debe ser un UUID válido"),
     startTime: z.coerce.date(),
     endTime: z.coerce.date(),
-    parkingSpaceId: z.string().uuid("El ID de plaza debe ser un UUID válido")
+    parkingSpaceId: z.string().uuid("El ID de plaza debe ser un UUID válido"),
+    serviceIds: z.array(z.string().uuid()).optional(),
   })
   .refine(data => data.startTime >= new Date(), {
     message: "La fecha y hora de inicio no puede estar en el pasado",

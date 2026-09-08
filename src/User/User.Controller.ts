@@ -38,6 +38,12 @@ export class UserController {
     res.status(200).json({ message: 'Usario actualizado Exitosamente', data: updatedUser });
   });
 
+  public reactivate = catchAsync(async (req: Request, res: Response) => {
+    const reactivatedUser = await this.userService.reactivate({ id: req.params.id as string });
+    if (!reactivatedUser) throw new AppError('User not found', 404);
+    res.status(200).json({ message: 'Usuario reactivado Exitosamente', data: reactivatedUser });
+  });
+
   public updatePassword = catchAsync(async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
     const success = await this.userService.updatePassword(req.params.id as string, currentPassword, newPassword);

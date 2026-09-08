@@ -17,6 +17,11 @@ export class EmployeeShiftController {
     return res.status(200).json({ data: shift });
   });
 
+  public findByEmployeeId = catchAsync(async (req: Request, res: Response) => {
+    const shifts = await this.service.findByEmployeeId(req.params.employeeId as string);
+    return res.status(200).json({ data: shifts });
+  });
+
   public create = catchAsync(async (req: Request, res: Response) => {
     const shift = await this.service.create(req.body);
     return res.status(201).json({ message: 'Turno creado con éxito', data: shift });

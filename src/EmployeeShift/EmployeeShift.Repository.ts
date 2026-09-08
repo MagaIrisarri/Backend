@@ -15,6 +15,14 @@ export class EmployeeShiftRepository implements Repository<EmployeeShift> {
     return await this.em.findOne(EmployeeShift, { id: item.id, isActive: true }, { populate: ['employee', 'parking'] as any });
   }
 
+  async findByEmployeeId(employeeId: string): Promise<EmployeeShift[]> {
+    return await this.em.find(
+      EmployeeShift,
+      { employee: { id: employeeId }, isActive: true },
+      { populate: ['employee', 'parking'] as any }
+    );
+  }
+
   async add(data: any): Promise<EmployeeShift> {
   const shift = this.em.create(EmployeeShift, {
     dayOfWeek: data.dayOfWeek as DayOfWeek,

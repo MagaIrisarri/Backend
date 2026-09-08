@@ -1,9 +1,10 @@
-import { Entity, PrimaryKey, Property, ManyToOne} from '@mikro-orm/decorators/legacy';
-import { Rel } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, ManyToMany} from '@mikro-orm/decorators/legacy';
+import { Rel, Collection } from '@mikro-orm/core';
 import crypto from "node:crypto";
 import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
 import { ParkingSpace } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { User } from '../User/User.Entity.js';
+import { ServicePrice } from '../ServicePrice/ServicePrice.Entity.js';
 
 @Entity()
 export class Reservation {
@@ -27,4 +28,7 @@ export class Reservation {
 
   @ManyToOne(() => User, { nullable: true, eager: true })
   attendedBy?: Rel<User> | null;
+
+  @ManyToMany(() => ServicePrice)
+  services = new Collection<ServicePrice>(this);
 }
