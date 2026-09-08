@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import fs from 'fs';
 import path from 'path';
+import argon2 from 'argon2';
 import { VehicleType } from '../../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Insurance } from '../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../Vehicle/Brand/Brand.Entity.js';
@@ -17,34 +18,34 @@ export const seedDatabase = async (em: EntityManager) => {
   console.log('Iniciando seeding general...');
 
   await em.transactional(async (forkEm) => {
-    // 1. Usuario de prueba
-/*    const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
-    if (!userExists) {
-      forkEm.create(User, {
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        dni: 12345678,
-        name: 'Juan',
-        last_name: 'Pérez',
-        date_of_birth: new Date('1990-01-01'),
-        email: 'juanperez@hotmail.com',
-        phone: '1234567890',
-        password: 'password123',
-        file: 'client',
-      });
-    }
-*/
-    // 2. Tipos de vehículos
+    // Admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@parking.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    forkEm.create(User, {
+      dni: '00000000',
+      name: 'Admin',
+      last_name: 'Sistema',
+      date_of_birth: new Date('2000-01-01'),
+      email: adminEmail,
+      phone: '0000000000',
+      password: await argon2.hash(adminPassword),
+      type: 'ADMIN',
+      status: 'ACTIVO',
+    });
+
+    // Tipos de vehículos
     const tipoAuto = forkEm.create(VehicleType, { name: 'Auto' });
     const tipoMoto = forkEm.create(VehicleType, { name: 'Moto' });
     const tipoUtilitario = forkEm.create(VehicleType, { name: 'Utilitario' });
 
-    // 3. Aseguradoras
+    // Aseguradoras
     const aseguradoras = ['La Caja', 'San Cristóbal', 'Sancor Seguros', 'Federación Patronal'];
     for (const name of aseguradoras) {
       forkEm.create(Insurance, { name });
     }
 
-    // 4. Marcas y Modelos desde JSON
+    // Marcas y Modelos desde JSON
     const jsonPath = path.resolve(process.cwd(), 'vehiculos.json');
     if (fs.existsSync(jsonPath)) {
       const rawData = fs.readFileSync(jsonPath, 'utf-8');

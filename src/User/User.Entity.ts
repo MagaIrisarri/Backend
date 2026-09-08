@@ -29,7 +29,7 @@ export class User {
   password!: string;
 
   @Property({ type: 'string', default: 'CLIENTE' })
-  type!: string; // 'CLIENTE', 'DUEÑO', 'EMPLEADO'
+  type!: string; // 'CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMIN'
    
   @Property({ type: 'string', default: 'ACTIVO' })
   status!: string; // 'ACTIVO', 'BAJA'

@@ -4,19 +4,30 @@ import { UserController } from './User.Controller.js';
 import { UserService } from './User.Service.js';
 import { UserRepository } from './User.Repository.js';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
-import { createUserSchema, updateUserSchema, userIdSchema, loginSchema, updatePasswordSchema } from './User.Schema.js';
+import {
+  createPublicUserSchema,
+  createEmployeeSchema,
+  updateUserSchema,
+  userIdSchema,
+  ownerIdSchema,
+  loginSchema,
+  updatePasswordSchema,
+} from './User.Schema.js';
 
 export const userRouter = Router();
 const userRepository = new UserRepository(orm.em);
 const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
-userRouter.post('/', validateSchema(createUserSchema), userController.createPublic);
+// --- Registro público y Login ---
+userRouter.post('/', validateSchema(createPublicUserSchema), userController.createPublic);
 userRouter.post('/login', validateSchema(loginSchema), userController.login);
 
-userRouter.get('/:ownerId/employee', userController.findEmployeesByOwner);
-userRouter.post('/:ownerId/employee', validateSchema(createUserSchema), userController.createEmployee);
+// --- Empleados (bajo un dueño) ---
+userRouter.get('/:ownerId/employee', validateSchema(ownerIdSchema), userController.findEmployeesByOwner);
+userRouter.post('/:ownerId/employee', validateSchema(ownerIdSchema), validateSchema(createEmployeeSchema), userController.createEmployee);
 
+// --- CRUD general ---
 userRouter.get('/', userController.findAll);
 userRouter.get('/:id', validateSchema(userIdSchema), userController.findById);
 userRouter.put('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
