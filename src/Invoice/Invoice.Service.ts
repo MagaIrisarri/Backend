@@ -1,5 +1,6 @@
 import { InvoiceRepository } from './Invoice.Repository.js';
 import { Invoice } from './Invoice.Entity.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class InvoiceService {
   constructor(private repo: InvoiceRepository) {}
@@ -19,7 +20,7 @@ export class InvoiceService {
   async create(input: any): Promise<Invoice> {
     const existing = await this.repo.findByReservationId(input.reservationId);
     if (existing) {
-      throw new Error('Ya existe una factura activa para esta reserva');
+      throw new AppError('Ya existe una factura activa para esta reserva', 400);
     }
     return await this.repo.add(input);
   }

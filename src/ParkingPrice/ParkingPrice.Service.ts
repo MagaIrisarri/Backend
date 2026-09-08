@@ -1,12 +1,13 @@
 import { ParkingPriceRepository } from './ParkingPrice.Repository.js';
 import { ParkingPrice } from './ParkingPrice.Entity.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class ParkingPriceService {
   constructor(private repo: ParkingPriceRepository) {}
 
   async create(parkingId: string, data: { vehicleType: string; price: number }): Promise<ParkingPrice> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) throw new Error('Estacionamiento no encontrado o inactivo');
+    if (!parking) throw new AppError('Estacionamiento no encontrado o inactivo', 400);
 
     const currentActivePrice = await this.repo.findActive(parkingId, data.vehicleType);
     if (currentActivePrice) {

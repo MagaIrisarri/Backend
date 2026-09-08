@@ -3,6 +3,7 @@ import { ParkingRepository } from './Parking.Repository.js';
 import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 import { CreateParkingInput } from './Parking.Schema.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class ParkingService {
   constructor(
@@ -12,16 +13,10 @@ export class ParkingService {
 
   async findAll(): Promise<Parking[]> {
      return await this.parkingRepository.findAll();
-}
+  }
 
-    async findActive(): Promise<Parking[]> {
-    const Parkings = await this.parkingRepository.findAll();
-    const ParkingsActive: Parking[] = [];
-    for(let i=0; i < Parkings.length; i++){
-      if (Parkings[i].isActive)
-        ParkingsActive.push(Parkings[i])
-    }
-    return ParkingsActive;
+  async findActive(): Promise<Parking[]> {
+    return await this.parkingRepository.findActive();
   }
 
   async findOne(id: string): Promise<Parking | null> {
@@ -31,11 +26,11 @@ export class ParkingService {
   async create(data: CreateParkingInput): Promise<Parking> {
     const owner = await this.parkingRepository.getUserById(data.ownerId);
     if (!owner || owner.status !== 'ACTIVO') {
-      throw new Error("Dueño no encontrado o inactivo");
+      throw new AppError("Dueño no encontrado o inactivo", 404);
     }
 
     if (owner.type !== 'DUEÑO') {
-      throw new Error("Solo los usuarios con rol DUEÑO pueden crear estacionamientos");
+      throw new AppError("Solo los usuarios con rol DUEÑO pueden crear estacionamientos", 403);
     }
 
     const { ownerId, ...parkingData } = data;

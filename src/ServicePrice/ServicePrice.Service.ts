@@ -1,5 +1,6 @@
 import { ServicePriceRepository } from './ServicePrice.Repository.js';
 import { ServicePrice } from './ServicePrice.Entity.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class ServicePriceService {
   constructor(private repo: ServicePriceRepository) {}
@@ -14,10 +15,10 @@ export class ServicePriceService {
 
   async create(parkingId: string, serviceCatalogId: string, price: number): Promise<ServicePrice> {
     const parking = await this.repo.findParking(parkingId);
-    if (!parking) throw new Error("Estacionamiento no encontrado");
+    if (!parking) throw new AppError("Estacionamiento no encontrado", 400);
 
     const serviceCatalog = await this.repo.findServiceCatalog(serviceCatalogId);
-    if (!serviceCatalog) throw new Error("Servicio no encontrado");
+    if (!serviceCatalog) throw new AppError("Servicio no encontrado", 400);
 
     const currentActivePrice = await this.repo.findActive(parkingId, serviceCatalogId);
     if (currentActivePrice) {

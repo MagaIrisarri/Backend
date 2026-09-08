@@ -1,3 +1,4 @@
+import { AppError } from '../Shared/utils/AppError.js';
 import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
@@ -24,7 +25,7 @@ export class ParkingSpaceService {
 
   async create(parkingId: string, data: { spaceCode: string; vehicleType: string }): Promise<ParkingSpace> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
-    if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     return await this.spaceRepo.add({
       ...data,
@@ -38,7 +39,7 @@ export class ParkingSpaceService {
     data: { vehicleType: string; count: number }
   ): Promise<void> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
-    if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
     const spacesOfSameType = existingSpaces.filter(
@@ -78,7 +79,7 @@ export class ParkingSpaceService {
   async checkAvailability(parkingId: string, vehicleType: string, startTime: Date, endTime: Date):Promise<(ParkingSpace & { available: boolean })[]>{
 
     const parking = await this.parkingRepo.findOne({ id: parkingId });
-    if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
     const marginMs = parking.reservationMargin * 60 * 60 * 1000;
     const startWithMargin = new Date(startTime.getTime() - marginMs);
     const endWithMargin = new Date(endTime.getTime() + marginMs);

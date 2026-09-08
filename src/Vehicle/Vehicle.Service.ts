@@ -1,5 +1,6 @@
 import { Vehicle } from './Vehicle.Entity.js';
 import { VehicleRepository } from './Vehicle.Repository.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class VehicleService {
   constructor(private readonly vehicleRepository: VehicleRepository) {}
@@ -19,20 +20,20 @@ export class VehicleService {
   async create(data: any, userId: string): Promise<Vehicle> {
     const user = await this.vehicleRepository.getUserById(userId);
     if (!user || user.status !== 'ACTIVO') {
-      throw new Error("Cliente no encontrado o inactivo");
+      throw new AppError("Cliente no encontrado o inactivo", 404);
     }
 
     if (user.type === 'EMPLEADO') {
-      throw new Error("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO");
+      throw new AppError("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO", 403);
     }
     const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
     
     if (!model) {
-      throw new Error("El modelo seleccionado no existe en la base de datos.");
+      throw new AppError("El modelo seleccionado no existe en la base de datos.", 404);
     }
    
     if (model.brand.id !== data.brandId) {
-      throw new Error("Marca y modelo no coinciden");
+      throw new AppError("Marca y modelo no coinciden", 400);
     }
 
     const vehicleData = {
