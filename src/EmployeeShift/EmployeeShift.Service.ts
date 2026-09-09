@@ -1,6 +1,7 @@
 import { EmployeeShiftRepository } from './EmployeeShift.Repository.js';
 import { EmployeeShift, DayOfWeek } from './EmployeeShift.Entity.js';
 import { CreateShiftInput, UpdateShiftInput } from './EmployeeShift.Schema.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class EmployeeShiftService {
   constructor(private repo: EmployeeShiftRepository) {}
@@ -13,19 +14,23 @@ export class EmployeeShiftService {
     return await this.repo.findOne({ id });
   }
 
+  async findByEmployeeId(employeeId: string): Promise<EmployeeShift[]> {
+    return await this.repo.findByEmployeeId(employeeId);
+  }
+
   async create(data: CreateShiftInput): Promise<EmployeeShift> {
     const employee = await this.repo.findUserById(data.employeeId);
-    if (!employee) throw new Error("Empleado no encontrado o inactivo");
-    if (employee.type !== 'EMPLEADO') throw new Error("El usuario asignado no tiene rol de EMPLEADO");
+    if (!employee) throw new AppError("Empleado no encontrado o inactivo", 400);
+    if (employee.type !== 'EMPLEADO') throw new AppError("El usuario asignado no tiene rol de EMPLEADO", 400);
 
     const parking = await this.repo.findParkingById(data.parkingId);
-    if (!parking) throw new Error("Estacionamiento no encontrado o inactivo");
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     const day = data.dayOfWeek as DayOfWeek;
 
     const overlap = await this.repo.findOverlappingShift(employee, day, data.startTime, data.endTime);
     if (overlap) {
-      throw new Error(`El empleado ya tiene un turno asignado que se cruza (${overlap.startTime} - ${overlap.endTime})`);
+      throw new AppError(`El empleado ya tiene un turno asignado que se cruza (${overlap.startTime} - ${overlap.endTime})`, 400);
     }
 
     return await this.repo.add({
@@ -47,11 +52,11 @@ export class EmployeeShiftService {
       const newEnd = data.endTime || currentShift.endTime;
       const newDay = (data.dayOfWeek || currentShift.dayOfWeek) as DayOfWeek;
 
-      if (newStart >= newEnd) throw new Error("La hora de inicio debe ser anterior a la hora de fin");
+      if (newStart >= newEnd) throw new AppError("La hora de inicio debe ser anterior a la hora de fin", 400);
 
       const overlap = await this.repo.findOverlappingShift(currentShift.employee, newDay, newStart, newEnd, id);
       if (overlap) {
-        throw new Error(`El turno se superpone con otro existente (${overlap.startTime} - ${overlap.endTime})`);
+        throw new AppError(`El turno se superpone con otro existente (${overlap.startTime} - ${overlap.endTime})`, 400);
       }
     }
 

@@ -1,23 +1,18 @@
 import { Request, Response } from 'express';
 import { ParkingService } from './Parking.Service.js';
+import { catchAsync } from '../Shared/utils/catchAsync.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
   
-  public findAll = async (_req: Request, res: Response) => {
-    try {
-      const parkings = await this.parkingService.findAll();
-      return res.status(200).json({
-        message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
-        data: parkings,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al obtener estacionamientos',
-        error: error.message,
-      });
-    }
-  };
+  public findAll = catchAsync(async (_req: Request, res: Response) => {
+    const parkings = await this.parkingService.findAll();
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
+      data: parkings,
+    });
+  });
 
   public findActive = async (_req: Request, res: Response) => {
     try {
@@ -50,80 +45,77 @@ export class ParkingController {
     }
   };
 
-  public findOne = async (req: Request, res: Response) => {
-    try {
-      const id = req.params.id as string;
-      const parking = await this.parkingService.findOne(id);
+  public findOne = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const parking = await this.parkingService.findOne(id);
 
-      if (!parking) {
-        return res.status(404).json({ message: 'Estacionamiento no encontrado' });
-      }
-
-      return res.status(200).json({
-        message: 'Estacionamiento encontrado',
-        data: parking,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al consultar estacionamiento',
-        error: error.message,
-      });
+    if (!parking) {
+      throw new AppError('Estacionamiento no encontrado', 404);
     }
-  };
+
+    return res.status(200).json({
+      message: 'Estacionamiento encontrado',
+      data: parking,
+    });
+  });
   
-  public create = async (req: Request, res: Response) => {
-    try {
-      const parking = await this.parkingService.create(req.body);
-      return res.status(201).json({
-        message: 'Estacionamiento creado con éxito',
-        data: parking,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al crear estacionamiento',
-        error: error.message,
-      });
+  public findByOwnerId = catchAsync(async (req: Request, res: Response) => {
+    const parkings = await this.parkingService.findByOwnerId(req.params.ownerId as string);
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
+      data: parkings,
+    });
+  });
+
+  public getMetrics = catchAsync(async (req: Request, res: Response) => {
+    const metrics = await this.parkingService.getMetrics(req.params.id as string);
+    return res.status(200).json({
+      message: 'Métricas calculadas',
+      data: metrics,
+    });
+  });
+
+  public reactivate = catchAsync(async (req: Request, res: Response) => {
+    const reactivated = await this.parkingService.reactivate(req.params.id as string);
+    if (!reactivated) throw new AppError('Estacionamiento no encontrado', 404);
+    return res.status(200).json({
+      message: 'Estacionamiento reactivado con éxito',
+      data: reactivated,
+    });
+  });
+  
+  public create = catchAsync(async (req: Request, res: Response) => {
+    const parking = await this.parkingService.create(req.body);
+    return res.status(201).json({
+      message: 'Estacionamiento creado con éxito',
+      data: parking,
+    });
+  });
+
+  public update = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const updatedParking = await this.parkingService.update(id, req.body);
+
+    if (!updatedParking) {
+      throw new AppError('Estacionamiento no encontrado', 404);
     }
-  };
 
-  public update = async (req: Request, res: Response) => {
-    try {
-      const id = req.params.id as string;
-      const updatedParking = await this.parkingService.update(id, req.body);
+    return res.status(200).json({
+      message: 'Estacionamiento actualizado con éxito',
+      data: updatedParking,
+    });
+  });
 
-      if (!updatedParking) {
-        return res.status(404).json({ message: 'Estacionamiento no encontrado' });
-      }
+  public remove = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const deleted = await this.parkingService.remove(id);
 
-      return res.status(200).json({
-        message: 'Estacionamiento actualizado con éxito',
-        data: updatedParking,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al actualizar estacionamiento',
-        error: error.message,
-      });
+    if (!deleted) {
+      throw new AppError('Estacionamiento no encontrado', 404);
     }
-  };
 
-  public remove = async (req: Request, res: Response) => {
-    try {
-      const id = req.params.id as string;
-      const deleted = await this.parkingService.remove(id);
-
-      if (!deleted) {
-        return res.status(404).json({ message: 'Estacionamiento no encontrado' });
-      }
-
-      return res.status(200).json({
-        message: 'Estacionamiento dado de baja con éxito',
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al dar de baja el estacionamiento',
-        error: error.message,
-      });
-    }
-  };
+    return res.status(200).json({
+      message: 'Estacionamiento dado de baja con éxito',
+    });
+  });
 }

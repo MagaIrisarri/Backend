@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import fs from 'fs';
 import path from 'path';
+import argon2 from 'argon2';
 import { VehicleType } from '../../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Insurance } from '../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../Vehicle/Brand/Brand.Entity.js';
@@ -63,13 +64,13 @@ export const seedDatabase = async (em: EntityManager) => {
     const tipoMoto = forkEm.create(VehicleType, { name: 'Moto' });
     const tipoUtilitario = forkEm.create(VehicleType, { name: 'Utilitario' });
 
-    // 3. Aseguradoras
+    // Aseguradoras
     const aseguradoras = ['La Caja', 'San Cristóbal', 'Sancor Seguros', 'Federación Patronal'];
     for (const name of aseguradoras) {
       forkEm.create(Insurance, { name });
     }
 
-    // 4. Marcas y Modelos desde JSON
+    // Marcas y Modelos desde JSON
     const jsonPath = path.resolve(process.cwd(), 'vehiculos.json');
     if (fs.existsSync(jsonPath)) {
       const rawData = fs.readFileSync(jsonPath, 'utf-8');

@@ -62,6 +62,9 @@ app.use('/api/reservations', reservationRouter);
 app.use('/api/billing', invoiceRouter);
 
 
+app.use(errorHandler);
+
+
 // ==========================================
 async function startServer() {
   try {

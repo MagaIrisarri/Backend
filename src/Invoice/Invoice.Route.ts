@@ -14,6 +14,7 @@ const invoiceService = new InvoiceService(invoiceRepository);
 const invoiceController = new InvoiceController(invoiceService);
 
 invoiceRouter.get("/", invoiceController.findAll);
+invoiceRouter.get('/client/:clientId', invoiceController.findByClientId);
 invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), invoiceController.findOne);
 invoiceRouter.post("/", validateSchema(createInvoiceSchema), invoiceController.create);
 invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);

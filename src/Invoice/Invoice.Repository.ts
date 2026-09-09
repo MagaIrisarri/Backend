@@ -24,6 +24,14 @@ export class InvoiceRepository implements Repository<Invoice> {
     );
   }
 
+  async findByClientId(clientId: string): Promise<Invoice[]> {
+    return await this.em.find(
+      Invoice,
+      { reservation: { vehicle: { client: { id: clientId } } }, status: { $ne: 'ANULADA' } },
+      { populate: ['reservation', 'reservation.parkingSpace', 'reservation.parkingSpace.parking', 'reservation.vehicle'] as any }
+    );
+  }
+
   async add(item: any): Promise<Invoice> {
     const reservation = this.em.getReference(Reservation, item.reservationId);
 

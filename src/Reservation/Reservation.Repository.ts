@@ -21,6 +21,22 @@ export class ReservationRepository implements Repository<Reservation> {
     );
   }
 
+  async findByClientId(clientId: string): Promise<Reservation[]> {
+    return await this.em.find(
+      Reservation,
+      { vehicle: { client: { id: clientId } } },
+      { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking', 'attendedBy'] }
+    );
+  }
+
+  async findByParkingId(parkingId: string): Promise<Reservation[]> {
+    return await this.em.find(
+      Reservation,
+      { parkingSpace: { parking: { id: parkingId } } },
+      { populate: ['vehicle', 'parkingSpace', 'parkingSpace.parking', 'attendedBy'] }
+    );
+  }
+
   async add(data: any): Promise<Reservation> {
     const reservation = this.em.create(Reservation, data);
     await this.em.flush();
@@ -61,7 +77,7 @@ export class ReservationRepository implements Repository<Reservation> {
     return { parking, vehicle };
   }
 
-  async createReservationAtomically( parking: Parking, vehicle: Vehicle, reqStartTime: Date, reqEndTime: Date, parkingSpaceId: string): Promise<Reservation>{
+  async createReservationAtomically( parking: Parking, vehicle: Vehicle, reqStartTime: Date, reqEndTime: Date, parkingSpaceId: string, serviceIds?: string[]): Promise<Reservation>{
     
     return await this.em.transactional(async (txEm) => {
       const marginMs = parking.reservationMargin * 60 * 60 * 1000;
@@ -73,7 +89,7 @@ export class ReservationRepository implements Repository<Reservation> {
         throw new Error("La plaza seleccionada no existe o no corresponde a este vehículo");
       }
 
-      const conflictingReservations = await txEm.find(Reservation, { parkingSpace:  space, status: { $in: ['PENDIENTE', 'CONFIRMADA'] },
+      const conflictingReservations = await txEm.find(Reservation, { parkingSpace:  space, status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
         $and: [
           { startTime: { $lt: endWithMargin } },
           { endTime: { $gt: startWithMargin } }
@@ -85,6 +101,12 @@ export class ReservationRepository implements Repository<Reservation> {
       }
 
       const reservation = txEm.create(Reservation, { startTime: reqStartTime, endTime: reqEndTime, vehicle, parkingSpace: space, status: 'PENDIENTE'});
+
+      if (serviceIds && serviceIds.length > 0) {
+        const { ServicePrice } = await import('../ServicePrice/ServicePrice.Entity.js');
+        const services = await txEm.find(ServicePrice, { id: { $in: serviceIds }, parking });
+        reservation.services.add(services);
+      }
 
       return reservation;
     });
