@@ -69,5 +69,11 @@ export const parkingIdSchema = z.object({
   }),
 });
 
+export const parkingIdOwnerSchema = z.object({
+  params: z.object({
+    ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
+  }),
+});
+
 export type CreateParkingInput = z.infer<typeof parkingBodyBaseSchema>;
 export type UpdateParkingInput = z.infer<typeof updateParkingSchema>['body'];

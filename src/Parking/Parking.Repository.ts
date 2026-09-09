@@ -18,6 +18,10 @@ export class ParkingRepository implements Repository<Parking> {
     return await this.em.findOne(Parking, { id: item.id, isActive: true }, { populate: ['owner'] as any });
   }
 
+  async findByOwner(ownerId: string): Promise<Parking[]> {
+    return await this.em.find(Parking, { owner: ownerId as any }, { populate: ['owner'] as any, orderBy: { name: 'ASC' } });
+  }
+
   async add(data: any): Promise<Parking> {
     const parking = this.em.create(Parking, { ...data, isActive: true });
     await this.em.flush();

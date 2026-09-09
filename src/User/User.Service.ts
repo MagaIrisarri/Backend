@@ -23,13 +23,16 @@ export class UserService {
   async addPublicUser(userData: Partial<User>): Promise<Omit<User, 'password'>> {
     const existing = await this.userRepository.findOneForEmail(userData.email!);
     if (existing) throw new Error('El email ya está registrado');
-
+    if (userData.type === 'ADMINISTRADOR' || userData.type === 'EMPLEADO') {
+        throw new Error('No podés registrarte con ese tipo de usuario');
+        }
     userData.password = await argon2.hash(userData.password!);
     userData.status = 'ACTIVO';
     userData.type = userData.type || 'CLIENTE';
 
     const user = await this.userRepository.add(userData);
     const { password, ...rest } = user;
+    
     return rest;
   }
 

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
-import { seedDatabase } from './Shared/db/seeder.js'; 
+import { seedDatabase, seedDatabaseAdmi } from './Shared/db/seeder.js'; 
 
 import { userRouter } from './User/User.Route.js';
 import employeeShiftRouter from './EmployeeShift/EmployeeShift.Route.js';
@@ -67,6 +67,7 @@ async function startServer() {
   try {
     await syncSchema(); 
     await seedDatabase(orm.em.fork());
+    await seedDatabaseAdmi(orm.em.fork());
 
     app.listen(3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');

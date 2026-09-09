@@ -28,6 +28,10 @@ export class ParkingService {
     return await this.parkingRepository.findOne({ id });
   }
 
+  async findByOwner(ownerId: string): Promise<Parking[]> {
+    return await this.parkingRepository.findByOwner(ownerId);
+  }
+
   async create(data: CreateParkingInput): Promise<Parking> {
     const owner = await this.parkingRepository.getUserById(data.ownerId);
     if (!owner || owner.status !== 'ACTIVO') {

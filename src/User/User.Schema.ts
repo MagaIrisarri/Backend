@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
-export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO']);
+export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
 
 // Schema para la creación de usuarios (dni y phone como strings limpios)
 export const createUserSchema = z.object({

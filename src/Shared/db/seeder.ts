@@ -6,6 +6,29 @@ import { Insurance } from '../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../Vehicle/Brand/Brand.Entity.js';
 import { Model } from '../../Vehicle/Model/Model.Entity.js';
 import { User } from '../../User/User.Entity.js';
+import argon2 from 'argon2';
+
+
+
+export const seedDatabaseAdmi = async (em: EntityManager) => {
+  await em.transactional(async (forkEm) => {
+  const hashedPassword = await argon2.hash('password123');
+  const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
+    if (!userExists) {
+      forkEm.create(User, {
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        dni: '87654321',
+        name: 'Juan',
+        last_name: 'Pérez',
+        date_of_birth: new Date('1990-01-01'),
+        email: 'juanperez@hotmail.com',
+        phone: '1234567890',
+        password: hashedPassword,
+        type: 'ADMINISTRADOR',
+        status: 'ACTIVO',
+      });
+    }
+  })}
 
 export const seedDatabase = async (em: EntityManager) => {
   const count = await em.count(VehicleType, {});
@@ -17,22 +40,24 @@ export const seedDatabase = async (em: EntityManager) => {
   console.log('Iniciando seeding general...');
 
   await em.transactional(async (forkEm) => {
-    // 1. Usuario de prueba
-/*    const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
+    // 1. Usuario de Administrador
+  const hashedPassword = await argon2.hash('password123');
+  const userExists = await forkEm.findOne(User, { id: '550e8400-e29b-41d4-a716-446655440000' });
     if (!userExists) {
       forkEm.create(User, {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        dni: 12345678,
+        dni: '12345678',
         name: 'Juan',
         last_name: 'Pérez',
         date_of_birth: new Date('1990-01-01'),
         email: 'juanperez@hotmail.com',
         phone: '1234567890',
-        password: 'password123',
-        file: 'client',
+        password: hashedPassword,
+        type: 'ADMINISTRADOR',
+        status: 'ACTIVO',
       });
     }
-*/
+
     // 2. Tipos de vehículos
     const tipoAuto = forkEm.create(VehicleType, { name: 'Auto' });
     const tipoMoto = forkEm.create(VehicleType, { name: 'Moto' });

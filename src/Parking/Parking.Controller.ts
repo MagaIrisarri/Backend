@@ -34,6 +34,22 @@ export class ParkingController {
     }
   };
 
+  public findByOwner = async (req: Request, res: Response) => {
+    try {
+      const ownerId = req.params.ownerId as string;
+      const parkings = await this.parkingService.findByOwner(ownerId);
+      return res.status(200).json({
+        message: parkings.length === 0 ? 'El dueño no tiene estacionamientos' : 'Estacionamientos encontrados',
+        data: parkings,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al obtener los estacionamientos del dueño',
+        error: error.message,
+      });
+    }
+  };
+
   public findOne = async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
