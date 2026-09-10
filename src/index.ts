@@ -3,6 +3,7 @@ import cors from 'cors';
 import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
 import { seedDatabase, seedDatabaseAdmi } from './Shared/db/seeder.js'; 
+import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
 import employeeShiftRouter from './EmployeeShift/EmployeeShift.Route.js';
@@ -60,7 +61,6 @@ app.use('/api/parkings', servicePriceRouter);
 // --- Reserva ---
 app.use('/api/reservations', reservationRouter);
 app.use('/api/billing', invoiceRouter);
-
 
 app.use(errorHandler);
 

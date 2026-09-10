@@ -1,7 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import fs from 'fs';
 import path from 'path';
-import argon2 from 'argon2';
 import { VehicleType } from '../../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Insurance } from '../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../Vehicle/Brand/Brand.Entity.js';
