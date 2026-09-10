@@ -1,45 +1,49 @@
 import { z } from "zod";
 
-export const ParkingPriceSchema = z.object({
+const vehicleTypeEnum = z.enum(['AUTO', 'MOTOCICLETA'], {
+  message: 'Tipo de vehículo no válido',
+});
 
-  vehicleType: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .pipe(
-      z.enum(['AUTO', 'MOTOCICLETA'], {
-        message: 'Invalid vehicle type'
+export const createParkingPriceSchema = z.object({
+  body: z.object({
+    vehicleType: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .pipe(vehicleTypeEnum),
+    price: z
+      .number({
+        message: 'El precio debe ser un número',
       })
-    ),
-
-  price: z
-    .number({
-      message: 'The price must be a number'
-    })
-    .positive('The price must be greater than 0')
-    .finite('The price must be a valid number'),
-
+      .positive('El precio debe ser mayor a 0')
+      .finite('El precio debe ser un número válido'),
+  }),
+  params: z.object({
+    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
+  }),
 });
 
-export const ParkingPriceIdSchema = z.object({
-
-  id: z.string()
-
+export const parkingPriceIdSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('El ID de tarifa debe ser un UUID válido'),
+  }),
 });
 
-export const ActivePriceSchema = z.object({
-
-  id: z.string(),
-
-  vehicleType: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .pipe(
-      z.enum(['AUTO', 'MOTOCICLETA'], {
-        message: 'Invalid vehicle type'
-      })
-    ),
-    
+export const parkingIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
+  }),
 });
 
+export const activeParkingPriceSchema = z.object({
+  params: z.object({
+    id: z.string().uuid('El ID de estacionamiento debe ser un UUID válido'),
+    vehicleType: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .pipe(vehicleTypeEnum),
+  }),
+});
+
+export type CreateParkingPriceInput = z.infer<typeof createParkingPriceSchema>['body'];

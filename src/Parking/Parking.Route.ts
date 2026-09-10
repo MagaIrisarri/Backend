@@ -1,21 +1,29 @@
-import {Router} from "express";
-import{
-  add,
-  findAll,
-  findOneById,
-  update,
-  remove,
-} from "./Parking.Controller.js";
+import { Router } from 'express';
+import { orm } from '../Shared/db/orm.js';
+import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
 
-const ParkingRouter = Router();
+import { ParkingController } from './Parking.Controller.js';
+import { ParkingRepository } from './Parking.Repository.js';
+import { ParkingService } from './Parking.Service.js';
+import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
+import { createParkingSchema, updateParkingSchema, parkingIdSchema, parkingIdOwnerSchema } from './Parking.Schema.js';
 
-ParkingRouter.post('/', add);
+export const parkingRouter = Router();
 
-ParkingRouter.get('/', findAll);
-ParkingRouter.get('/:id', findOneById);
+const parkingRepository = new ParkingRepository(orm.em);
+const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
+const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
+const parkingController = new ParkingController(parkingService);
 
-ParkingRouter.put('/:id', update);
+parkingRouter.get('/', parkingController.findAll);
+parkingRouter.get('/active', parkingController.findActive);
+parkingRouter.get('/:id/metrics', validateSchema(parkingIdSchema), parkingController.getMetrics);
+parkingRouter.post('/:id/reactivate', validateSchema(parkingIdSchema), parkingController.reactivate);
+parkingRouter.get('/owner/:ownerId', validateSchema(parkingIdOwnerSchema), parkingController.findByOwner);
+parkingRouter.get('/:id', validateSchema(parkingIdSchema), parkingController.findOne);
+parkingRouter.post('/', validateSchema(createParkingSchema), parkingController.create);
+parkingRouter.put('/:id', validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);
+parkingRouter.delete('/:id', validateSchema(parkingIdSchema), parkingController.remove);
 
-ParkingRouter.delete('/:id', remove);
 
-export default ParkingRouter;
+export default parkingRouter;

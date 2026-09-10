@@ -1,95 +1,39 @@
-import { EntityManager } from "@mikro-orm/core";
-import { ParkingPrice } from "./ParkingPrice.Entity.js";
-import { Parking } from "../Parking/Parking.Entity.js";
-import { CreateParkingPriceDto, ParkingPriceIdDto } from "./ParkingPrice.Dto.js";
-import { ParkingIdDto } from "../Parking/Parking.Dto.js";
+import { ParkingPriceRepository } from './ParkingPrice.Repository.js';
+import { ParkingPrice } from './ParkingPrice.Entity.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
 export class ParkingPriceService {
-  private readonly em: EntityManager;
+  constructor(private repo: ParkingPriceRepository) {}
 
-  constructor(em: EntityManager) {
-    this.em = em;
-  }
+  async create(parkingId: string, data: { vehicleType: string; price: number }): Promise<ParkingPrice> {
+    const parking = await this.repo.findParking(parkingId);
+    if (!parking) throw new AppError('Estacionamiento no encontrado o inactivo', 400);
 
-  async createParkingPrice(
-    parkingId: ParkingIdDto,
-    data: CreateParkingPriceDto
-  ): Promise<ParkingPrice> {
-
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
-
-    if (!parking) {
-      throw new Error('Parking not found');
+    const currentActivePrice = await this.repo.findActive(parkingId, data.vehicleType);
+    if (currentActivePrice) {
+      await this.repo.remove({ id: currentActivePrice.id });
     }
 
-    const currentPrice = await this.em.findOne(ParkingPrice, {
-      parking,
-      vehicleType: data.vehicleType,
-      expirationDate: null
-    });
-
-    if (currentPrice) {
-      currentPrice.expirationDate = new Date();
-    }
-
-    const newParkingPrice = this.em.create(ParkingPrice, {
-      ...data,
-      parking,
-      expirationDate: null
-    });
-
-    this.em.persist(newParkingPrice);
-    await this.em.flush();
-
-    return newParkingPrice;
-  }
-
-  async findPricesByParking(
-    parkingId: ParkingIdDto
-  ): Promise<ParkingPrice[]> {
-
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
-
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
-
-    return this.em.find(ParkingPrice, {
-      parking
+    return await this.repo.add({ 
+      parking, 
+      vehicleType: data.vehicleType, 
+      price: data.price 
     });
   }
 
-  async findPrice(
-    priceId: ParkingPriceIdDto
-  ): Promise<ParkingPrice | null> {
-
-    return this.em.findOne(ParkingPrice, {
-      id: priceId.id
-    });
+  async findOne(id: string): Promise<ParkingPrice | null> {
+    return await this.repo.findOne({ id });
   }
 
-  async findActivePrice(
-    parkingId: ParkingIdDto,
-    vehicleType: string
-  ): Promise<ParkingPrice | null> {
-
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
-    
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
-
-    return this.em.findOne(ParkingPrice, {
-      parking,
-      vehicleType,
-      expirationDate: null
-    });
+  async remove(id: string): Promise<boolean> {
+    return await this.repo.remove({ id });
   }
-  
+
+  async findByParking(parkingId: string): Promise<ParkingPrice[]> {
+    return await this.repo.findByParking(parkingId);
+  }
+
+  async findActive(parkingId: string, vehicleType: string): Promise<ParkingPrice | null> {
+    return await this.repo.findActive(parkingId, vehicleType);
+  }
 }

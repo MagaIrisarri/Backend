@@ -1,159 +1,121 @@
 import { Request, Response } from 'express';
-import {  orm } from '../Shared/db/orm.js'
 import { ParkingService } from './Parking.Service.js';
-import {
-  ParkingSchema,
-  ParkingIdSchema,
-  UpdateParkingSchema,
-} from './Parking.Schema.js';
+import { catchAsync } from '../Shared/utils/catchAsync.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
-const parkingService = new ParkingService(orm.em);
-
-async function add(req: Request, res: Response) {
-  const parkingInput = await ParkingSchema.safeParseAsync(req.body);
-
-  if (!parkingInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: parkingInput.error, 
-    });
-  }
-
-  try {
-    const parking = await parkingService.createParking(parkingInput.data);
-
-    return res.status(201).json({ 
-      message: "Parking created successfully", 
-      data: parking, 
-    });
-  } catch (error: any) {
-    return res.status(500).json({ 
-      message: "Error creating parking", 
-      error: error.message,
-    });
-  }
-}
-
-async function findAll(req: Request, res: Response) {
-  try {
-    const parkingList = await parkingService.findAllParking();
-
-    const message =
-      parkingList.length === 0
-        ? 'No parkings found'
-        : 'Parkings found';
-    
-    return res.status(200).json({
-      message,
-      data: parkingList,
-    });
-  } catch (error: any) {
-    return res.status(500).json({ 
-      error: error.message,
-    });
-  }
-}
-
-async function findOneById(req: Request, res: Response) {
-  const idInput = await ParkingIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: idInput.error,
-    });
-  }
-
-  try {
-    const parking = await parkingService.findParkingById(idInput.data);
-
-    if(!parking) {
-      return res.status(404).json({
-        message: 'Parking not found'
-      })
-    }
-
-    return res.status(200).json({ 
-      message: 'Parking found', 
-      data: parking, 
-    });
-  } catch (error: any) {
-    return res.status(500).json({ 
-      error: error.message,
-    });
-  }
-}
-
-async function update(req: Request, res: Response) {
-  const idInput = await ParkingIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({
-      message: "ID validation error",
-      error: idInput.error,
-    });
-  }
-
-  const parkingInput = await UpdateParkingSchema.safeParseAsync(req.body);
+export class ParkingController {
+  constructor(private parkingService: ParkingService) {}
   
-  if (!parkingInput.success) {
-    return res.status(400).json({
-      message: "Parking validation error",
-      error: parkingInput.error,
+  public findAll = catchAsync(async (_req: Request, res: Response) => {
+    const parkings = await this.parkingService.findAll();
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
+      data: parkings,
     });
-  }
+  });
 
-  try {
-    const parking = await parkingService.updateParking(
-      idInput.data, 
-      parkingInput.data
-    );
-
-    if(!parking) {
-      return res.status(404).json({
-        message: 'Parking not found',
+  public findActive = async (_req: Request, res: Response) => {
+    try {
+      const parkings = await this.parkingService.findActive();
+      return res.status(200).json({
+        message: parkings.length === 0 ? 'No se encontraron estacionamientos activos' : 'Estacionamientos encontrados',
+        data: parkings,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al obtener estacionamientos activos',
+        error: error.message,
       });
     }
+  };
+
+  public findByOwner = async (req: Request, res: Response) => {
+    try {
+      const ownerId = req.params.ownerId as string;
+      const parkings = await this.parkingService.findByOwner(ownerId);
+      return res.status(200).json({
+        message: parkings.length === 0 ? 'El dueño no tiene estacionamientos' : 'Estacionamientos encontrados',
+        data: parkings,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error al obtener los estacionamientos del dueño',
+        error: error.message,
+      });
+    }
+  };
+
+  public findOne = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const parking = await this.parkingService.findOne(id);
+
+    if (!parking) {
+      throw new AppError('Estacionamiento no encontrado', 404);
+    }
 
     return res.status(200).json({
-      message: 'Parking updated successfully',
+      message: 'Estacionamiento encontrado',
       data: parking,
     });
-  } catch (error: any) {
-    return res.status(500).json({
-      error: error.message, 
-    });
-  }
-}
-
-async function remove(req: Request, res: Response) {
-  const idInput = await ParkingIdSchema.safeParseAsync(req.params);
-
-  if (!idInput.success) {
-    return res.status(400).json({ 
-      message: "Validation error", 
-      error: idInput.error,
-    });
-  }
+  });
   
-  try {
-    const deleted = await parkingService.deleteParking(idInput.data);
+  public findByOwnerId = catchAsync(async (req: Request, res: Response) => {
+    const parkings = await this.parkingService.findByOwnerId(req.params.ownerId as string);
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
+      data: parkings,
+    });
+  });
 
-    if (!deleted) {
-      return res.status(404).json({ 
-        message: 'Parking not found', 
-      });
+  public getMetrics = catchAsync(async (req: Request, res: Response) => {
+    const metrics = await this.parkingService.getMetrics(req.params.id as string);
+    return res.status(200).json({
+      message: 'Métricas calculadas',
+      data: metrics,
+    });
+  });
+
+  public reactivate = catchAsync(async (req: Request, res: Response) => {
+    const reactivated = await this.parkingService.reactivate(req.params.id as string);
+    if (!reactivated) throw new AppError('Estacionamiento no encontrado', 404);
+    return res.status(200).json({
+      message: 'Estacionamiento reactivado con éxito',
+      data: reactivated,
+    });
+  });
+  
+  public create = catchAsync(async (req: Request, res: Response) => {
+    const parking = await this.parkingService.create(req.body);
+    return res.status(201).json({
+      message: 'Estacionamiento creado con éxito',
+      data: parking,
+    });
+  });
+
+  public update = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const updatedParking = await this.parkingService.update(id, req.body);
+
+    if (!updatedParking) {
+      throw new AppError('Estacionamiento no encontrado', 404);
     }
 
-    return res.status(200).json({ 
-      message: "Parking deleted successfully", 
+    return res.status(200).json({
+      message: 'Estacionamiento actualizado con éxito',
+      data: updatedParking,
     });
-  } catch (error: any) {
-    return res.status(500).json({ 
-      error: error.message,
+  });
+
+  public remove = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const deleted = await this.parkingService.remove(id);
+
+    if (!deleted) {
+      throw new AppError('Estacionamiento no encontrado', 404);
+    }
+
+    return res.status(200).json({
+      message: 'Estacionamiento dado de baja con éxito',
     });
-  }
+  });
 }
-
-export { add, findAll, findOneById, update, remove };
-

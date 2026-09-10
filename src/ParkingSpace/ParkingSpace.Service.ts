@@ -1,133 +1,100 @@
-import { EntityManager } from "@mikro-orm/core";
-
-import { CreateParkingSpaceDto } from "./ParkingSpace.Dto.js";
-import { ParkingIdDto } from "../Parking/Parking.Dto.js";
-
-import { ParkingSpace } from "./ParkingSpace.Entity.js";
-import { Parking } from "../Parking/Parking.Entity.js";
+import { AppError } from '../Shared/utils/AppError.js';
+import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
+import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
+import { ParkingRepository } from "../Parking/Parking.Repository.js";
+import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
 
 export class ParkingSpaceService {
+  constructor(
+    private spaceRepo: ParkingSpaceRepository,
+    private parkingRepo: ParkingRepository,
+    private reservationRepo: ReservationRepository
+  ) {}
 
-  private readonly em: EntityManager;
-
-  constructor(em: EntityManager) {
-    this.em = em;
+  async findByParking(parkingId: string): Promise<ParkingSpace[]> {
+    return await this.spaceRepo.findByParking(parkingId);
   }
 
-  async createParkingSpace(
-    parkingId: ParkingIdDto,
-    data: CreateParkingSpaceDto
-  ): Promise <ParkingSpace> {
+  async findAvailable(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
+    return await this.spaceRepo.findAvailableByParking(parkingId, vehicleType);
+  }
 
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
+  async findOne(id: string): Promise<ParkingSpace | null> {
+    return await this.spaceRepo.findOne({ id });
+  }
 
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
+  async create(parkingId: string, data: { spaceCode: string; vehicleType: string }): Promise<ParkingSpace> {
+    const parking = await this.parkingRepo.findOne({ id: parkingId });
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
-    const spacesCount = await this.em.count(ParkingSpace, {
+    return await this.spaceRepo.add({
+      ...data,
+      state: SpaceState.LIBRE,
       parking,
-      vehicleType: data.vehicleType
     });
+  }
 
-    if (
-      data.vehicleType === 'AUTO' &&
-      spacesCount >= parking.carCapacity 
-    ) {
-      throw new Error('Maximun car capacity reached');
-    }
+  async createBulkManual(
+    parkingId: string, 
+    data: { vehicleType: string; count: number }
+  ): Promise<void> {
+    const parking = await this.parkingRepo.findOne({ id: parkingId });
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
-    if (
-      data.vehicleType === 'MOTOCICLETA' &&
-      spacesCount >= parking.motorcycleCapacity
-    ) {
-      throw new Error('Maximun motorcycle capacity reached');
-    }
+    const existingSpaces = await this.spaceRepo.findByParking(parkingId);
+    const spacesOfSameType = existingSpaces.filter(
+      (s) => s.vehicleType.toUpperCase() === data.vehicleType.toUpperCase()
+    );
 
-    const prefix = data.vehicleType === 'AUTO' ? 'A' : 'M';
+    const prefixMap: Record<string, string> = {
+      AUTO: 'A',
+      MOTOCICLETA: 'M',
+      CAMIONETA: 'C',
+    };
+    const prefix = prefixMap[data.vehicleType.toUpperCase()] || data.vehicleType.charAt(0).toUpperCase();
 
-    let number = 1;
-    let spaceCode = `${prefix}-${String(number).padStart(2, '0')}`;
+    const startNumber = spacesOfSameType.length + 1;
 
-    while (
-      await this.em.findOne(ParkingSpace, {
+    const spacesToCreate: Partial<ParkingSpace>[] = [];
+    for (let i = 0; i < data.count; i++) {
+      spacesToCreate.push({
+        spaceCode: `${prefix}-${String(startNumber + i).padStart(2, '0')}`,
+        vehicleType: data.vehicleType,
+        state: SpaceState.LIBRE,
         parking,
-        spaceCode
-      })
-    
-    ) {
-      number++;
-      spaceCode = `${prefix}-${String(number).padStart(2, '0')}`;
+      });
     }
 
-    const newParkingSpace = this.em.create(ParkingSpace, {
-      spaceCode,
-      state: 'LIBRE',
-      vehicleType: data.vehicleType ,
-      parking
-    });
-
-    this.em.persist(newParkingSpace);
-    await this.em.flush();
-
-    return newParkingSpace;
+    await this.spaceRepo.createBulk(spacesToCreate);
   }
 
-  async findSpacesByParking(
-    parkingId: ParkingIdDto
-  ): Promise<ParkingSpace[]> {
-
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
-
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
-
-    return this.em.find(ParkingSpace, {
-      parking
-    });
+  async update(id: string, data: Partial<ParkingSpace>): Promise<ParkingSpace | null> {
+    return await this.spaceRepo.update(id, data);
   }
 
-  async findAvailableSpaces(
-    parkingId: ParkingIdDto
-  ): Promise<ParkingSpace[]> {
-
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
-
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
-
-    return this.em.find(ParkingSpace, {
-      parking,
-      state: 'LIBRE'
-    })
+  async remove(id: string): Promise<boolean> {
+    return await this.spaceRepo.remove({ id });
   }
 
-  async findAvailableSpacesByVehicleType(
-    parkingId: ParkingIdDto,
-    vehicleType: string
-  ): Promise<ParkingSpace[]> {
+  async checkAvailability(parkingId: string, vehicleType: string, startTime: Date, endTime: Date):Promise<(ParkingSpace & { available: boolean })[]>{
 
-    const parking = await this.em.findOne(Parking, {
-      id: parkingId.id
-    });
+    const parking = await this.parkingRepo.findOne({ id: parkingId });
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
+    const marginMs = parking.reservationMargin * 60 * 60 * 1000;
+    const startWithMargin = new Date(startTime.getTime() - marginMs);
+    const endWithMargin = new Date(endTime.getTime() + marginMs);
+    const existingSpaces = await this.spaceRepo.findByParking(parkingId);
+    const spacesOfSameType = existingSpaces.filter(
+      (s) => s.vehicleType.toUpperCase() === vehicleType.toUpperCase()
+    );
 
-    if (!parking) {
-      throw new Error('Parking not found');
-    }
+    const spacesOccupied = await this.reservationRepo.findConflictingSpaceIds(parking, startWithMargin, endWithMargin);
 
-    return this.em.find(ParkingSpace, {
-      parking,
-      state: 'LIBRE',
-      vehicleType
-    });
+    return spacesOfSameType.map((space) => ({
+      ...space,
+      available: space.state === 'LIBRE' && !spacesOccupied.has(space.id),
+    }));
+
   }
 
 }

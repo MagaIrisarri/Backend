@@ -1,159 +1,52 @@
 import { Request, Response } from 'express';
-import { orm } from '../Shared/db/orm.js';
 import { ParkingPriceService } from './ParkingPrice.Service.js';
-import { ParkingPriceSchema, ParkingPriceIdSchema, ActivePriceSchema } from './ParkingPrice.Schema.js'
-import { ParkingIdSchema } from '../Parking/Parking.Schema.js';
+import { catchAsync } from '../Shared/utils/catchAsync.js';
+import { AppError } from '../Shared/utils/AppError.js';
 
-const parkingpriceService = new ParkingPriceService(orm.em);
+export class ParkingPriceController {
+  constructor(private service: ParkingPriceService) {}
 
-async function add(req: Request, res: Response) {
+  public create = catchAsync(async (req: Request, res: Response) => {
+    const parkingId = req.params.id as string;
+    const price = await this.service.create(parkingId, req.body);
 
-  const parkingIdInput = await ParkingIdSchema.safeParseAsync(req.params);
+    return res.status(201).json({ message: 'Tarifa creada con éxito', data: price });
+  });
 
-  if (!parkingIdInput.success) {
-    
-    return res.status(400).json({
-      message: 'Parking ID validation error',
-      error: parkingIdInput.error,
-    }); 
-  }
+  public findByParking = catchAsync(async (req: Request, res: Response) => {
+    const parkingId = req.params.id as string;
+    const prices = await this.service.findByParking(parkingId);
 
-  const priceInput = await ParkingPriceSchema.safeParseAsync(req.body);
+    const message = prices.length === 0
+      ? 'No se encontraron tarifas para este estacionamiento'
+      : 'Tarifas encontradas';
 
-  if (!priceInput.success) {
+    return res.status(200).json({ message, data: prices });
+  });
 
-    return res.status(400).json({
-      message: 'Price validation error',
-      error: priceInput.error,
-    });
-  }
+  public findOne = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const price = await this.service.findOne(id);
 
-  try {
+    if (!price) throw new AppError('Tarifa no encontrada', 404);
+    return res.status(200).json({ message: 'Tarifa encontrada', data: price });
+  });
 
-    const price = await parkingpriceService.createParkingPrice(
-      parkingIdInput.data,
-      priceInput.data
-    );
+  public findActive = catchAsync(async (req: Request, res: Response) => {
+    const parkingId = req.params.id as string;
+    const vehicleType = req.params.vehicleType as string;
 
-    return res.status(201).json({
-      message: 'Parking price created successfully',
-      data: price,
-    });
+    const price = await this.service.findActive(parkingId, vehicleType);
 
-  } catch (error: any) {
+    if (!price) throw new AppError('No hay tarifa activa vigente para este tipo de vehículo', 404);
+    return res.status(200).json({ message: 'Tarifa activa encontrada', data: price });
+  });
 
-    return res.status(500).json({
-      message: 'Error creating parking price',
-      error: error.message,
-    });
-  }
+  public remove = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const deactivated = await this.service.remove(id);
+
+    if (!deactivated) throw new AppError('Tarifa no encontrada o ya inactiva', 404);
+    return res.status(200).json({ message: 'Tarifa dada de baja exitosamente' });
+  });
 }
-
-async function findPricesByParking( req: Request, res: Response) {
-
-  const parkingIdInput = await ParkingIdSchema.safeParseAsync(req.params);
-
-  if (!parkingIdInput.success) {
-    return res.status(400).json({
-      message: 'Parking ID validation error',
-      error: parkingIdInput.error
-    });
-  }
-
-  try {
-
-    const prices = await parkingpriceService.findPricesByParking(parkingIdInput.data);
-    
-    const message =
-      prices.length === 0
-        ? 'No prices found for this parking'
-        : 'Prices found';
-
-    return res.status(200).json({
-      message,
-      data: prices,
-    });
-
-  } catch (error: any) {
-
-    return res.status(500).json({
-      message: 'Error getting parking prices',
-      error: error.message,
-    });
-  }
-}
-
-async function findPrice( req: Request, res: Response) {
-
-  const priceIdInput = await ParkingPriceIdSchema.safeParseAsync(req.params);
-
-  if (!priceIdInput.success) {
-    return res.status(400).json({
-      message: 'Price ID validation error',
-      error: priceIdInput.error,
-    });
-  } 
-
-  try {
-
-    const price = await parkingpriceService.findPrice(priceIdInput.data);
-
-    if(!price) {
-      return res.status(404).json({
-        message: 'Parking price not found',
-      });
-    }
-
-    return res.status(200).json({
-      message: 'Parking price found',
-      data: price,
-    });
-
-  } catch (error: any) {
-
-    return res.status(500).json({
-      message: 'Error getting parking price',
-      error: error.message,
-    });
-  }
-}
-
-async function findActivePrice( req: Request, res: Response) {
-
-  const activePriceInput = await ActivePriceSchema.safeParseAsync(req.params);
-
-  if (!activePriceInput.success) {
-    return res.status(400).json({
-      message: 'Parameters validation error',
-      error: activePriceInput.error,
-    });
-  }
-
-  try {
-
-    const price = await parkingpriceService.findActivePrice(
-      { id: activePriceInput.data.id },
-      activePriceInput.data.vehicleType
-    );
-
-    if (!price) {
-      return res.status(404).json({
-        message: 'No active price found for this vehicle type',
-      });
-    }
-
-    return res.status(200).json({
-      message: 'Active price found',
-      data: price,
-    });
-
-  } catch (error: any) {
-
-    return res.status(500).json({
-      message: 'Error getting active price',
-      error: error.message,
-    });
-  }
-}
-
-export { add, findPricesByParking, findPrice, findActivePrice};

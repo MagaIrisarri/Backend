@@ -1,0 +1,5974 @@
+[
+  {
+    "marca": "ALFA ROMEO",
+    "modelos": [
+      {
+        "nombre": "MITO QV",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "GIULIETTA 170CV DISTINCTIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "ARCFOX",
+    "modelos": [
+      {
+        "nombre": "T5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "AUDI",
+    "modelos": [
+      {
+        "nombre": "A4 2.0 T FSI QUATTRO",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "Q5 2.0 TFSI S TRONIC QUATTRO (252 CV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "Q5 ADVANCED",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "Q3 2.0 TFSI QUATTRO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "Q8 55 TFSI TIPTRONIC QUATTRO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "Q3 SPORTBACK ADVANCED",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "A3 SPORTBACK 1.4 T FSI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "Q2 1.4 TFSI SERIE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "A5 SPORTBACK 2.0T FSI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "A4 1.8 T FSI",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "Q7 3.0 V6T FSI QUATTRO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "A3 1.6",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "A6 2.8 FSI",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "A1 SPORTBACK 30 TFSI STRONIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "A3 SPORTBACK 1.4 TFSI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "Q3 1.4 TFSI",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "A3 SPORTBACK 1.4 T FSI S-TRONIC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "S3 2.0 TFSI QUATTRO",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "A3 SEDAN 1.4 TFSI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "A3 SEDAN 2.0 TFSI S LINE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "A3  SPORTBACK 1.9 TDI",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "A5 S LINE QUATTRO",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "A3 2.0 TFSI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "Q5 SPORTBACK ADVANCED",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "A4 2.0T FSI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "A5 2.0T FSI",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "Q3 ADVANCED",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "A3 SEDAN 1.4 TFSI ADVANCED",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "Q2 35 TFSI ADVANCED",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "BAIC",
+    "modelos": [
+      {
+        "nombre": "BJ30E",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BJ60",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "U5 PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "X55",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "EU5",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "X25",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BJ40",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "X35",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "BMW",
+    "modelos": [
+      {
+        "nombre": "118",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "M135 XDRIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "430I",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "328 I",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "120I",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "X1 SDRIVE 18I",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "M235I",
+        "tipoOriginal": "SEDAN 2 PUERTAS"
+      },
+      {
+        "nombre": "320 I",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "X1 25I",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "220 I",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "X1 1.8I",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "116I",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "118I",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "X1 XDRIVE 20I",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "X3 XDRIVE 30E",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "320 D",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "M240I XDRIVE",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "X3 3.0D",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "X5 3.0D",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "220I",
+        "tipoOriginal": "SEDAN 2 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "BYD",
+    "modelos": [
+      {
+        "nombre": "DOLPHIN MINI EV GS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ATTO 2 DM-I GS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SONG PRO DM-I GS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SHARK DMO GS",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "YUAN PRO EV GS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SONG PRO DM-I GL",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "DOLPHIN MINI EV GL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SEAL U DM-I GS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "CHANGAN",
+    "modelos": [
+      {
+        "nombre": "CS55 PLUS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MD201 BOX REFRIGERADA",
+        "tipoOriginal": "PICK-UP CARROZADA"
+      }
+    ]
+  },
+  {
+    "marca": "CHERY",
+    "modelos": [
+      {
+        "nombre": "TIGGO 2 - 1.5 LUXURY MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2 1.5 COMFORT AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 4 PRO 1.5T CVT LUXURY",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 7 PRO HYBRID 1.5T MHEV PREMIUM",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "QQ LIGHT LS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 3 1.6 LUXURY CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2.0 LUXURY A/T",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ARRIZO 8 HYBRID 1.5T PHEV COMFORT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 5 2.0 COMFORT CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 3 1.6 LUXURY MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2.0 COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 4 HYBRID 1.5L HEV PREMIUM",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FULWIN HATCHBACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 3 1.6 COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 4 PRO 1.5 CVT COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "QQ COMFORT CS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 5 2.0 LUXURY CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 4 2.0 COMFORT MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 5 2.0 MT COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FULWIN SEDAN",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 4 2.0 COMFORT CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2 1.5 COMFORT MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ARRIZO 5 1.5 LUXURY MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "QQ LIGHT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 5 2.0 LUXURY MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 1.6 COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "QQ CONFORT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 7 PRO HYBRID 1.5T PHEV PREMIUM",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2 PRO MAX 1.5L MT COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TIGGO 2 PRO 1.5 5MT LUXURY",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "CHEVROLET",
+    "modelos": [
+      {
+        "nombre": "S10 2.8TD 4X2 LS",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4T LT MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CELTA 1.4 LT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.0T LT MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CAPTIVA PHEV PREMIER",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SONIC 1.0T PREMIER AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 1.8 LT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TRACKER 1.2T LT AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "PRISMA 1.4 N LT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TRACKER 1.2T AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T AT PREMIER",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T LT MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.0T AT LTZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SPIN 1.8N 7P PREMIER M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AGILE 5P 1.4 LT",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ONIX JOY 5P 1.4 N LS MT +",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AGILE 5P 1.4 LTZ",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "S10 2.8TD 4X4 LT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 WT AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "ONIX 1.4 N LT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LS AA+DIR 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.2 MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T AT LTZ",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TRAILBLAZER 2.8 CTDI 4X4 LTZ A/T",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "S10 2.8TDI DLX 4X2 ELECTRONIC CD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 HC AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CLASSIC 4 P LS ABS+AIRBAG 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TRACKER AWD PREMIER +",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "TRACKER 1.2T AT LTZ",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4P SUP/2007",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T RS AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X2 WT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TRAILBLAZER 2.8 4X4 HC AT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "PRISMA JOY 4P 1.4 N LS MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.2 LT MT TECH ONSTAR",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CAPTIVA LS 2.4 M/T",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "AVEO LS 1.6N MT",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CRUZE 1.8 LTZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AGILE LT 5P 1.4N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 AT LTZ",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "S10 2.8TD 4X4 LTZ A/T",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CHEVROLET TRACKER AWD LTZ",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "ONIX 1.4 N LTZ",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CHEVROLET TRACKER FWD LTZ",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX JOY BLACK 1.4 MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.2 LT MT TECH",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TRACKER 1.2T AT PREMIER",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN 1.8 N LTZ M/T",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ONIX 5P 1.4 N ACTIV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.4 N LTZ A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ASTRA GLS 2.0",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO LTZ MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CAPTIVA LT 2.4 M/T",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "SPIN 1.8N 7P PREMIER A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 2.0D LTZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX JOY 5P 1.4 N LS MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MONTANA 1.2T RS AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MONTANA 1.2T LT AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PRISMA 1.4 N LTZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TRACKER FWD PREMIER",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN 1.8 N LT M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LT SPIRIT 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 P LS PACK 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CELTA 1.4N LT SPIRIT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MERIVA GLS 1.8 SOHC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CELTA LT 1.4N PACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SILVERADO Z71 TRAIL BOSS",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO LT MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.0T AT PREMIER",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.4 MT JOY BLACK",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PRISMA JOY 4P 1.4 N LS MT +",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4 TURBO LT MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8TD 4X2 LT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CELTA 1.4 LS",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3 PTAS GLS 1.6N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4 PTAS GL 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CORSA II 4P CD GAS 1.8",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "AVEO G3 LS 1.6N M/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MONTANA 1.2T LTZ AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SONIC 1.0T RS AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4 TURBO PREMIER AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 WT MT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TRACKER 1.2T AT RS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4T RS AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3 PTAS GL 1.4N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4 TURBO LTZ + AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4T PREMIER II AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.4 MT JOY",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "VECTRA CD 2.4",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "SONIC 1.6 LT M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4T LT AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AVEO LT 1.6N MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CHEVROLET TRACKER AWD LTZ+",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "SPARK EUV ACTIV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LT 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4T LTZ AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3 PTAS CARGO 1.4 N",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3P AA+DIR 1.6 N",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "MERIVA GL 1.8",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X2 HC",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MONTANA 1.2T PREMIER AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4P BASE 1.6N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "ASTRA GL 2.0",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CORSA GL 1.6 MPFI 4P C/AA",
+        "tipoOriginal": "SEDAN"
+      },
+      {
+        "nombre": "ONIX 1.4 N EFFECT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8 TDI STD 4X2 ELECTRONIC CD",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "CLASSIC 4 P LT SPIRIT 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "TRACKER 1.2T MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 4P LS A+D SPIRIT 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AVEO G3 LT 1.6N M/T",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "ZAFIRA GL",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CAPTIVA LTZ 2.2 D A/T",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "ONIX 1.2 LT MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX JOY 1.4 MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SILVERADO HIGH COUNTRY",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LS AA + DIR 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "COBALT 1.8 N LTZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CELTA LS 1.4N AA+DIR",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8TDI STD 4X2 ELECTRONIC",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PRISMA 1.4 N LT       /2017",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4T PREMIER II AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8 T.I.(CABINA DOBLE)",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 Z71 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "S10 2.8TD 4X2 LTZ",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4P SUPER 1.6N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "S10 2.8 T.I. ( CABINA DOBLE)",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "CORSA II 5P GL AA/DI GAS 1.8",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CLASSIC 4P LT PACK 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO PREMIER AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SPIN ACTIV 1.8N M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ZAFIRA GLS",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "S10 2.8TDI DLX 4X4 ELECTRONIC CD",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4T LT AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO LTZ + AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AGILE LS 5P 1.4N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SONIC 1.6 LTZ M/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4 TURBO LTZ MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4T MIDNIGHT AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8TDI STD 4X2 ELECTRONIC CS",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "CORSA 3 PTAS CITY 1.6N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "EQUINOX 1.5T PREMIER AWD AT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO LTZ AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4T LTZ AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 1.4 N LS",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "COBALT 1.8 N LT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AVEO LT 1.6N AT",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "ONIX 1.2 LT MT TECH ONSTAR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN 1.8 N 7P LTZ A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CELTA LT 1.4N AA+DIR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 HC MT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "AGILE 5P LS SPIRIT 1.4",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3 PTAS BASE 1.6N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "SPIN 1.8 N 7P LTZ M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA II 1.8L 5P GL AA+DIR GAS",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4 TURBO LTZ AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8TD 4X4 LS",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CLASSIC 4P LT SPIRIT PACK 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.2 MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AGILE 5P LT SPIRIT 1.4",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ONIX PLUS 1.2 LT MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CELTA LS 1.4N AB+ABS",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "S10 2.8TD 4X2 LT / 2017",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "ONIX 1.2 LT MT TECH",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PRISMA 1.4 N LTZ A/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MERIVA GL 1.7 DTI",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3P CITY 1.4 C/AA",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T MT RS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AGILE 5P 1.4 LS",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CORSA 3PTAS CITY 1.6N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "MONTANA 1.2T LT MT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PRISMA 1.4 LT",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "AGILE LTZ EFFECT 1.4N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 3PTAS LS AA+DIR 1.4N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "CLASSIC 3 PTAS LT 1.4N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "CRUZE 5P 1.4T LT MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CELTA 1.4 LS AA",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "VECTRA GLS 2.0",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "COBALT 1.8 N LTZ A/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 1.4 N LT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SPARK LT",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRUZE 1.8 LTZ A/T",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "MERIVA GL PLUS 1.8 SOHC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4 PTAS GLS 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "SONIC 1.6 LTZ A/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "S10 CD 2.8 TD 4X4 LT AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MONTANA  LS",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "CRUZE 4P 1.4 TURBO LS MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3 P CARGO 1.4N",
+        "tipoOriginal": "UTILITARIO"
+      },
+      {
+        "nombre": "CLASSIC AA+DIR 1.4 N LS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "S10 CS 2.8 TD 4X2 WT",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "CLASSIC 3 PTAS. LT 1.4N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "TRAILBLAZER 2.8 4X4 PREMIER AT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "S10 2.8 4X4 LS",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "CELTA LT 1.4N AB+ABS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ONIX 1.0T MT PREMIER",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CELTA ADVANTAGE AA+DIR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN ACTIV 1.8N A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN ACTIV 7P 1.8N A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AGILE 5P LTZ SPIRIT 1.4",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SPIN 1.3 D 7P LTZ M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4 PTAS LT 1.4N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TFR54HSL",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4PTAS BASE 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LT SPIRTIT 1.4N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CLASSIC WAGON LT 1.4N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "S10 2.8TDI STD 4X4 ELECTRONIC CD",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "S10 2.8 4X2 LS",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "CELTA ADVANTAGE PACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CLASSIC 4 PTAS LS AA+DIR 1.4N - AÑO:2011",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 4 PTAS GLS 1.4 N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CAPTIVA 2.0DIESEL LTZ AUTOMATICA",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "CORSA II 4P 1.8L EASYTRONIC GAS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC 3P AA+DIR 1.6N",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "AVEO G3 LT 1.6N A/T",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CORSA CLASSIC WAGON LT 1.4N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ASTRA GL 2.0 DTI",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "AGILE LT + LLANTAS 5P 1.4N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "S10 CS 2.8 TD 4X4 WT MT",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "S10 2.8 TD 4X4 LTZ M/T",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CORSA II 1.8L 4P GL AA+DIR GAS",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "SPIN 1.3 D LTZ M/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CORSA II 5P GL AA+DIR GAS 1.8",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "CHRYSLER",
+    "modelos": [
+      {
+        "nombre": "PT CRUISER TOURING",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "CITROEN",
+    "modelos": [
+      {
+        "nombre": "C4 5P 1.6I 16V X",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI FEEL MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 HYBRID PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 S EDITION",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115  RIP CURL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 TENDANCE PACK S",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 SHINE MY26",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.9D FULL",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C3 VTI 115 LIVE AM18",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT T200 DARK EDITION MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 T200 FEEL PK YOU! MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO VAN L2 HDI 92 MY26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C3 PURETECH 82 FEEL LOOK AM22.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 AT6 SHINE AM19",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 1.6I THP 163 AT6 TENDANCE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 90 TENDANCE PACK SECURE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON HDI 92 BUSINESS AM25",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "AIRCROSS 1.3 FEEL PK MY26.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 143 TENDANCE PACK AM16",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 90 FEEL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 SHINE 7 MY26.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL PACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT T200 SHINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT VTI LIVE PK MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI AT FEEL PK MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON VTI 115 BUSINESS AM22",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 CACTUS PURETECH 110 S&S AT6 SHINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI AT XTR MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 XTR MY26.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK AM19.5",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 2.0I 16V EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON HDI 92 BUSINESS AM22.5",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.6I HDI FULL AM53",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "AIRCROSS T200 SHINE MY26.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "XSARA PICASSO 1.6I 16V EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.6 VTI 115 EXCLUSIVE P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT T200 SHINE MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT VTI FEEL MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "DS3 1.6 TURBO SPORT CHIC",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 S",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI AT FEEL PK MY24",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT 1.3 LIVE PK MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 90 START",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I 16V X PACK CONNECT",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON HDI 92 BUSINESS AM22",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 LOUNGE VTI 115 LIVE AM19",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK AM21.5",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 1.6 HDI EXCLUSIVE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGÓN HDI 92 BUSINESS",
+        "tipoOriginal": "FURGON VIDRIADO C/ASIENTOS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 115 SHINE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO MULTISPACE 1.6I HDI SX",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "BASALT 1.3 FEEL MY26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 90 LIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 FEEL PK MY26",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 2.0I 16V ORIGINE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "JUMPY L3 HDI 150 MY26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C3 VTI 115 AT6 SHINE AM18",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.6 VTI 115 EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 TENDANCE AM16",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 FEEL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 115 FEEL",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C-ELYSEE VTI 115 FEEL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6I 16V EXCLUSIVE P",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK PLUS AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C-ELYSÈE HDI 92 FEEL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 FEEL AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 PICASSO HDI 115 MT6 FEEL PACK",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6VTI 115 EXCLUSIVE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK AM18",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP 165 EAT6 SHINE AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE VTI 115 LIVE AM19.5",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6I 16V SX PACK HIG",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "C-ELYSEE VTI 115 FEEL AM18",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I 16V X PACK PLUS",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 115 SHINE W",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK AM19",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 FEEL PK MY26.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL PACK PLUS AM21.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6I 16V EXCLUSIVE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.6 HDI BUSINESS AM54",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "XSARA PICASSO 1.6 I",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 EAT6 FIRST EDITION",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 AT6 FEEL AM18",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 2.0I 16V TENDANCE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 X-SERIES",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 FEEL AM18",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI AT FEEL MY23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 FEEL AM18",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 1.6I THP 163 AT6 EXCLUSIVE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "XSARA PICASSO 1.6I",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C5 AIRCROSS THP 165 EAT6 FEEL PACK AM22",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI FEEL MY23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 ORIGINE PACK ZE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 SHINE 7 MY26",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "XSARA PICASSO 2.0I 16V EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 1.4 I SX",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 600 KG PLC",
+        "tipoOriginal": "FURGON COURT TYPE 600"
+      },
+      {
+        "nombre": "BERLINGO MULTISPACE 1.9D FULL",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.5I 90 ORIGINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 LIVE AM19",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "JUMPY L3 HDI 150 6P MY26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 CACTUS THP AT SHINE MY23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C5 AIRCROSS MAX",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO MULTISPACE HDI 92 XTR AM18",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS T200 FEEL PK MY24.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON VTI 115 BUSINESS AM22.5",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 AT6 SHINE AM18",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "GRAND C4 PICASSO HDI 115 MT6 SHINE AM18",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I X PACK PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C- ELYSÉE VTI 115 AT6 SHINE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 143 FEEL PACK",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI FEEL MY25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI FEEL PK MY25",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK 10 AÑOS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP 165 EAT6 SHINE AM21.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 1.4 HDI EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C3 1.4 HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 143 TENDANCE PACK",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "DS 3 VTI 120 SO CHIC AM32",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL PACK PLUS AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.6 HDI FULL_",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C3 VTI 115 AT6 INFINIT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 TENDANCE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 EAT6 FEEL PACK AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 AT6 URBAN TRAIL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT VTI FEEL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 FEEL AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6I 16V SX",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115 AT6 FEEL AM18",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 FEEL PACK AM19",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP AT NOIR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I 16V X PACK LOOK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.4I BUSINESS AM54",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 FEEL PACK AM18",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 PICASSO THP 165 AT6 FEEL AM18",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 FEEL AM19",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.6I 16V EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.6 VTI 115 EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE HDI 115 MT6 FEEL PACK",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C5 AIRCROSS THP 165 EAT6 FEEL PACK",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 T200 FEEL PK YOU! MY25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON HDI 92 BUSINESS AM20",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 CACTUS VTI AT FEEL + MY23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 EAT6 SHINE AM19.5",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP 165 EAT6 SHINE AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "AIRCROSS T200 XTR MY26",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE 143 ORIGINE AM16",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI AT FEEL PK MY25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL PACK AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.6I 16V SX",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C4 HYBRID MAX",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 90 SOUNDTRACK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "XSARA PICASSO 2.0 I 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115  FEEL AM18",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.6 HDI FULL AM53",
+        "tipoOriginal": "FURGON VIDRIADO CON ASIENTOS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 AT6 FEEL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS T200 SHINE 7 MY24",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C5 AIRCROSS FEEL PK MY24",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I HDI SX AM73",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 ORIGINE",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "BASALT VTI LIVE PK",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 90 ORIGINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115 FEEL AM20.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 PICASSO THP 165 AT6 FEEL PACK",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 SHINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGÓN VTI 115 BUSINESS",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C3 AIRCROSS T200 SHINE MY24",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 1.6I 16V EXCLUSIVE",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "GRAND C4 PICASSO 165 THP AT6 SHI",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "GRAND C4 SPACETOURER THP 165 EAT6 SHINE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 AIRCROSS TENDANCE 2.0I 150 CV",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115 AT6 SHINE AM18",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BASALT T200 1ST EDITION",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI AT FEEL PK DESIGN",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP 165 EAT6 SHINE AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.6 VTI 115 TEN. AM15",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 1.2 FEEL DESIGN",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "JUMPY L3 HDI 115 MT6 BUSINESS MIXTO AM21",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 FEEL PACK AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS 1.6 VTI 115 TEN.AM15",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO MULTISPACE HDI 92 XTR AM17",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 PICASSO 1.6 VTI 115 TENDANCE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 SEDAN 2.0I 16V SX",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK AM21.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115 AT6 FEEL AM20.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 X-SERIES",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS THP 165 EAT6 SHINE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 VTI 115 FEEL AM19",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 165 MT6 FEEL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON 1.4I FULL AM53",
+        "tipoOriginal": "FURGON VIDRIADO C/ASIENTOS"
+      },
+      {
+        "nombre": "C3 VTI 115 ORIGINS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 5P 1.6I 16V X PACK LOOK/2013",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS VTI 115 AT6 FEEL AM19",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "BERLINGO FURGON VTI 115 BUSINESS MIXTO AM20",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C4 LOUNGE THP 163 AT6 TENDANCE AM15",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C4 SEDAN 2.0I 16V X",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "BERLINGO MULTISPACE 1.6I SX PACK AM53",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 TENDANCE -2013",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 EAT6 FEEL PACK LOOK AM22.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C3 AIRCROSS T200 FEEL PK MY25",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C4 CACTUS VTI 115 ORIGINS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO C3 1.5I 90 ORIGINE PACK ZENITH",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "DAIHATSU",
+    "modelos": [
+      {
+        "nombre": "ROCKY",
+        "tipoOriginal": "TODO TERRENO"
+      }
+    ]
+  },
+  {
+    "marca": "DFSK",
+    "modelos": [
+      {
+        "nombre": "C31",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "GLORY 500",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "E5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C31 BOX",
+        "tipoOriginal": "PICK-UP CARROZADA"
+      },
+      {
+        "nombre": "C35",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "K01H",
+        "tipoOriginal": "PICK-UP CABINA Y MEDIA"
+      },
+      {
+        "nombre": "E5 PLUS PHEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "C32",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "EC35",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C31 BOX REFRIGERADO",
+        "tipoOriginal": "PICK-UP CARROZADA"
+      },
+      {
+        "nombre": "GLORY 580",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "EC31",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      }
+    ]
+  },
+  {
+    "marca": "DODGE",
+    "modelos": [
+      {
+        "nombre": "JOURNEY SXT 2.4",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "JOURNEY R/T 2.7",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "JOURNEY SE 2.4",
+        "tipoOriginal": "RURAL 5 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "DONGFENG",
+    "modelos": [
+      {
+        "nombre": "HUGE AEOLUS HEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MAGE AEOLUS HEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "DS",
+    "modelos": [
+      {
+        "nombre": "DS 7 RIVOLI MY24",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "DS 7 CROSSBACK PURETECH 165 A/T PERFORMANCE LINE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "DS7 PALLAS MY 26",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "DS 3 THP 165 MT6 SPORT CHIC",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "DS 4 ETOILE HYBRID MY25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "FIAT",
+    "modelos": [
+      {
+        "nombre": "STRADA FREEDOM 1.3 CD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "GRAND SIENA ESSENCE 1.6 16V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "MOBI TREKKING 1.0",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO FIORINO 1.4 8V",
+        "tipoOriginal": "FURGONETA VIDRIADA C/ASIEN"
+      },
+      {
+        "nombre": "TORO FREEDOM 1.3T AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PUNTO ATTRACTIVE 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS DRIVE 1.3 GSE BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "WEEKEND ADVENTURE 1.6 16V",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS PRECISION 1.3 GSE CVT BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ARGO DRIVE 1.3",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ARGO 1.3 DRIVE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO FIRE 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PULSE AUDACE 1.0T CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "STRADA ADVENTURE 1.6",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "STRADA VOLCANO 1.3 CVT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TORO VOLCANO 1.3T AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PALIO FIRE 5P 1.4 8V BENZ EOBD",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS 1.3 GSE BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SIENA EL 1.4",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "UNO FIRE 1242 MPI 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRONOS DRIVE 1.3 MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PULSE DRIVE 1.3 MT5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FASTBACK TURBO 270 AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS DRIVE 1.3 GSE CVT BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TITANO FREEDOM MT 4WD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TORO VOLCANO 2.0 16V 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "STRADA ENDURANCE 1.4 CD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "CRONOS PRECISION 1.8 MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS LIKE 1.3 GSE BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PALIO (326) ATTRACTIVE 5P 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FIORINO ENDURANCE 1.3 MT",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "FASTBACK ABARTH TURBO 270 AT6",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIORINO QUBO 1.4 8V DYNAMIC",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "TORO FREEDOM 2.0 CD AT9 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "STRADA RANCH T200 CVT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PULSE IMPETUS 1.0T CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS PRECISION 1.8 AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SIENA (F4) EL 1.4 8V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 2.0 16V 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MOBI 1.0 8V WAY",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ARGO HGT 1.8",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "UNO VAN FIRE MPI 8V",
+        "tipoOriginal": "UTILITARIO"
+      },
+      {
+        "nombre": "UNO 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "STRADA WORKING 1.4",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "TIPO EASY 1.6 AT6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TITANO FREEDOM PLUS AT8 AWD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TITANO ENDURANCE MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "GRAND SIENA ATTRACTIVE 1.4 8V",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "UNO SPORTING 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 1.8 16V 4X2 AT6",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "ARGO PRECISION 1.8",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "IDEA ATTRACTIVE 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PALIO SPORTING 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRONOS STILE 1.3 GSE BZ",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TITANO RANCH AT8 AWD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "STRADA WORKING 1.4 8V",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA EL 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TORO VOLCANO 1.3T CD AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TITANO ENDURANCE MT 4WD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "PALIO WEEKEND ADVENTURE 1.6 16V",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 2.0 16V 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "STRADA FREEDOM 1.4 CD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MOBI 1.0 8V EASY",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO (326) ESSENCE 5P 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PULSE ABARTH T270 AT6",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "600 HYBRID 1.2 EDCT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO FIRE 1.4",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "LINEA 1.9 16V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 1.8 CD AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "IDEA ADVENTURE 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "500 1.4 16V SPORT",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PUNTO HLX 1.8",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 2.0 16V 4X4 AT9",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "FIORINO ENDURANCE 1.4 MT",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "TORO VOLCANO 2.2TD AT9 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TORO FREEDOM 1.3T CD AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "PULSE DRIVE 1.3 CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "LINEA HLX 1.8 16V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PUNTO ESSENCE 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MOBI LIKE 1.0",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "STRADA TREKKING 1.3 16V JTD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA 1.6 EL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FIORINO FIRE 1242 MPI 8V",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "STRADA FREEDOM 1.3 CS",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "PALIO WEEKEND ATTRACTIVE 1.4 8V",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO WEEKEND TREKKING 1.4MPI 8V",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "QUBO 1.4  8V DYNAMIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM SD 1.8 CD AT6 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "FIORINO QUBO 1.4 8V ACTIVE",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "TORO RANCH 2.0 AT9 4WD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA ATTRACTIVE 1.4 BE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "DUNA SCL 1.6",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PALIO S 1.3 MPI (3P)",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PUNTO ELX 1.3 JTD",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PUNTO ELX 1.4",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PALIO FIRE 3P 1.4 8V BE",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PALIO 1.4 FIRE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "IDEA HLX 1.8MPI 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "UNO SCR 5P",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PALIO 1.4",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ARGO PRECISION 1.8 AT6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BRAVO 1.4 16V DYNAMIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SIENA ELX 4P 1.4RSTIII BZ EOBD",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PALIO ADVENTURE 1.6",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "STRADA ULTRA T200 CVT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA EL 1.4 BENZINA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "STRADA ADVENTURE 1.8MPI 8V",
+        "tipoOriginal": "PICK-UP CABINA Y MED"
+      },
+      {
+        "nombre": "LINEA ABSOLUTE 1.8 16V",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRONOS 1.3 MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PALIO ADVENTURE 1.8MPI V8/10",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "GRAND SIENA ESSENCE 1.6 16V-2014",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "STRADA VOLCANO 1.3 CD",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA FIRE 4P 1.4MPI 8V HP BZ",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "TORO ULTRA 2.0 CD AT9 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TORO VOLCANO 2.0 CD AT9 4X4",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SIENA ATTRACTIVE 1.4 BENZINA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "SIENA S",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SPAZIO TR",
+        "tipoOriginal": "SEDAN 2 PTAS"
+      },
+      {
+        "nombre": "SIENA FIRE 4P 1.4MPI 8V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PALIO WEEKEND ELX 1.4",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "IDEA ELX 1.4 MPI 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PUNTO SPORTING 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO WEEKEND TREKKING 1.4 8V",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO HLX 1.8 MPI 8V",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "GRAND SIENA ATTRACTIVE 1.4 8V / 2015",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SIENA EX FIRE 1.3 MPI 16V",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "QUBO 1.4 8V ACTIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "DOBLO CARGO 1.4 16V ACTIVE",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "DUCATO MAXICARGO 2.3 JTD",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "DUNA SX 1.6",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "UNO WAY 1.3",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "BRAVO DYNAMIC 1.6 16V MULTIJET",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO WEEKEND 1.4",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "PALIO ELX 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CRONOS DRIVE PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "UNO SCR-5P",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PUNTO ESSENCE 1.6 16V DUALOGIC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "500 595 TURISMO",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "500 1.4 8V CULT",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PALIO ATTRACTIVE 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "IDEA ESSENCE 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PALIO ESSENCE 1.6 16V DUALOGIC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "TORO FREEDOM 2.0 16V 4X4  /2017",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "UNO WAY 1.4 8V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "500X POP 1.4 16V",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO FIRE 5P 1.4 8V BE",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "DUNA SDL 1.3",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "PALIO ESSENCE 1.6 16V",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PALIO FIRE 1242 MPI 16V",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "FORD",
+    "modelos": [
+      {
+        "nombre": "ECOSPORT 1.6 L 4X2 XL PLUS",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "RANGER DC XL 2.0L T 4X4 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT SE 1.6L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA AMBIENTE PLUS MP3",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT 1.6 L 4X2 XLS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L SE PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TERRITORY TITANIUM 1.8L AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT FREESTYLE 1.6L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MAVERICK XLT 2.0L GTDI 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "ECOSPORT S 1.5L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MONDEO TITANIUM ECOBOOST 2.0L AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N MT TITANIUM",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUSEXE STYLE 1.6L NAFTA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT SE 1.5L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT AT 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 4P 1.6L N MT S",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KA S 1.5L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC XLS 3.0L V6 4X4 10AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KA FLY VIRAL 1.0L",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L SE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT 2.8L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "BRONCO SPORT BADLANDS 2.0L",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "KUGA SEL 1.6T 6AT AWD ECOBOOST",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "TERRITORY TREND 1.5L HIBRIDA AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XLT AT 3.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 5P 1.6L N MT S",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC XL 2.0L T 4X2 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC XLT 2.0L BIT 4X2 10AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 XLT AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC XLT 2.0L BIT 4X4 10AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA 1.6L S",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L S PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER RAPTOR 3.0L V6 BIT GTDI 4X4 10AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XLT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TERRITORY TITANIUM 1.5L GTDI 4X2 AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA KINETIC DESIGN TITANIUM",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER XL CS 2.0L T 4X2 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TERRITORY 1.8L GAS AT TITANIUM EU5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XLS 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA MAX 1.6 AMBIENTE PLUS MP3",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT SE 2.0L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC XL 2.0L T 4X4 AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KUGA TITANIUM 2.5T AT 4X4 L",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "KA SEL 1.5L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MUSTANG MACH 1",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 2.0L AT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N AT SE PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XL SAFETY 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KA SE 1.5L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA 1.6L AMBIENTE PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "EVEREST TITANIUM",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "KA SEL 1.5L AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XLT MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TRANSIT VAN MEDIANA TE MT",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "FOCUS TREND 1.6L NAFTA",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MAVERICK LARIAT 2.0L 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "ECOSPORT FREESTYLE 1.5L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC XLS 2.0L T 4X2 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N MT SE PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS GHIA 2.0L NAFTA AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N MT SE PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XL SAFETY 2.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TERRITORY SEL 1.8L AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC LTD+ 3.0L V6 4X4 10AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS TREND 2.0L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N AT SE PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "F-150 RAPTOR 3.5L V6 ECOBOOST 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MONDEO HIBRIDO",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER XL CS 2.0L T 4X4 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC BLACK 2.0L T 4X4 MT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N MT SE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT 2.5L N",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUSEXE TREND 1.6L NAFTA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L SE POWERSHIFT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KA PULSE 1.6L",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA KINETIC DESIGN TREND PLUS",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XLT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KA",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "RANGER DC XLT 3.0L V6 4WD AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS TREND PLUS 1.8L DIESEL",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L TITANIUM POWERSHIFT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TERRITORY TREND 1.5L GTDI 4X2 AT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X4 LTD AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT 2.0L XLS 4X2",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XLS 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KUGA SEL 2.0L ECOBOOST 6AT FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TRANSIT VAN MEDIANA TN MT",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS STYLE 1.6L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLS 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "BRONCO SPORT BIG BEND 1.5L",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "KUGA TITANIUM 1.6T 6AT AWD ECOBO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 1.6L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "MONDEO SEL ECOBOOST 2.0L AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER RAPTOR 2.0L BIT 4X4 10AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "RANGER DC 4X4 SUPERDUTY 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "MAVERICK TREMOR 2.0L GTDI AWD AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XL 2.5L N",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC BLACK 2.0L T 4X2 AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KA SEDAN SE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS TREND 2,0L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "MAVERICK XLT 2.0L 4X2 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "RANGER DC 4X4 LTD MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N AT TITANIUM",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUSEXE STYLE 1.6L",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "KA FLY PLUS 1.0L",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "KA SE 1.5L AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS GHIA 2.0L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N MT SE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ORION GL",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "RANGER XL CD 2.0L T 4X2 AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X4 XLT AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KA FLY VIRAL 1.6L",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XL SAFETY 2.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 1.5L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L AMBIENTE MP3",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL PLUS 3.0 D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA 1.6L TITANIUM",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X4 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "MAVERICK LARIAT  FHEV 2.5L 4X2 8AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "MONDEO TITANIUM 2.3 NAFTA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT S 1.6L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "F-150 LARIAT LUXURY 5.0L V8 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "KA SEDAN SEL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT 1.4L TDCI 4X2 XLS",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT SE 1.5L AT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "F-150 DSL",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 LTD MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 XLS MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 1.5L AT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "TRANSIT VAN LARGA TE AT",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "TERRITORY 1.8L GAS AT SEL EU5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XLT 3.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA KINETIC DESIGN TREND",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "KA FREESTYLE SE 1.5L MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KUGA TITANIUM 1.6T 6AT AWD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XLT 2.5L N",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N MT TITANIUM",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L SE PLUS POWERSHIFT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "TRANSIT VAN LARGA TE MT",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "KA SEDAN S",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "F-150 TREMOR 5.0L V8 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "FIESTA 1.6L AMBIENTE/2006",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "FOCUS GHIA 2,0L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FOCUSEXE GHIA 2,0L NAFTA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "FOCUS TREND PLUS 2,0L NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT FREESTYLE 2.0L MT N 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 2.0L AT POWER",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL PLUS 2.3L N",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLS AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER2 CS 4X2 XL SAFETY 2.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "BRONCO SPORT WILDTRAK 2.0L",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "FOCUS ONE AMBIENTE 5P 1.6L N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 2.0L MT N",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC LTD 2.0L BIT 4X4 10AT D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N AT SE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XLS AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS 4P 2.0L N AT TITANIUM",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 2.0L AT POWERS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL PLUS 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 LTD AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT 2.0 L 4X2 XLT",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XL SAFETY 2.5L NAF",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XLT 3.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TRANSIT2.2L 350L TE",
+        "tipoOriginal": "FURGON C/ASIENTOS"
+      },
+      {
+        "nombre": "RANGER DC XLT 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT 2.0L XLT PLUS 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XLS 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER CS 4X4 XL 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUSEXE TREND PLUS 2.0L NAFTA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "FOCUS AMBIENTE 5P 1.6L N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT 2.0L 4X2 XLT PLUS",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X4 LTD MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLS 3.0L D/2007",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 XLT MT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLT AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "ECOSPORT FREESTYLE 2.0L AT N 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "MAVERICK LARIAT 2.5L HEV AWD AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 LTD AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FIESTA MAX 1.6L AMBIENTE MP3",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "RANGER2 DS 4X2 XLS 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KUGA TITANIUM 2.0L ECOBOOST AWD 6AT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "E TRANSIT VAN BEV L3H3",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "F-100 XLT (DOBLE CABINA)",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "ECOSPORT SE 1.5L DSL MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "F-100 XLT DIESEL",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "RANGER XL C/C 4X4 2.8L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUSEXE TREND 2.0L NAFTA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "KA TOP PULSE1.6L",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "COURIER",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "TRANSIT2.2L 350M TE",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "FIESTA AMBIENTE 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "MONDEO SE 2.5L AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA 1.6L AMBIENTE",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XL SAFETY 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS ONE EDGE 5P 1.6L N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT S 1.6L MT N / 2017",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS TREND 2.OL NAFTA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FOCUSEXE TREND 2,0L NAFTA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "RANGER CS 4X2 XL PLUS 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS EXE TREND 1.6L NAFTA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XL PLUS 2.8L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS GHIA 2,0L NAFTA AT",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "RANGER2 DC 4X2 XLS 3.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS EDGE 5P 1.8L N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "TRANSIT 2.2L 350L",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "RANGER DC 4X2 XLS 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER2 DC 4X4 XLS 3.2L DSL",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FALCON GL",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FOCUSEXE TREND PLUS 1.8L DIESEL",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "NUEVA RANGER DC 4X2 XLT AT 3.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "RANGER DC 4X4 LTD 3.0L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FOCUS ONE AMBIENTE TX 4P 1.6L N",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "RANGER2 CS 4X2 XL 2.2L D",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KUGA TREND 2.5T MT 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "F-100 XL DIESEL",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "ECOSPORT SE 1.5L TDCI MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIESTA AMBIENTE MP3",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "ECOSPORT 2.0L 4X2 XLT PLUS AUTOM",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "FOCUS GUIA 2.0 4P N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "FOCUS 5P 2.0L N AT SE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUSEXE GHIA 2.0L NAFTA",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "TRANSIT 2.2L 350M",
+        "tipoOriginal": "FURGON VID.C/ASIENTOS"
+      },
+      {
+        "nombre": "FOCUS GHIA 1.8 5P TD",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KA FLY 1.0L",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "ECOSPORT TITANIUM 2.0L AT POWERSHIFT N 5P",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FOCUS EDGE 4P 1.8L TDI",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "MONDEO GHIA 2.3L",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "F-100 4X2",
+        "tipoOriginal": "PICK UP"
+      }
+    ]
+  },
+  {
+    "marca": "FORTHING",
+    "modelos": [
+      {
+        "nombre": "T5-MT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "T5HEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "FOTON",
+    "modelos": [
+      {
+        "nombre": "TM1",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "TUNLAND G7 4X4 AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TUNLAND V9",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "TM2",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "TUNLAND G7 4X2 MT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "WONDER",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      }
+    ]
+  },
+  {
+    "marca": "GAC",
+    "modelos": [
+      {
+        "nombre": "EMPOW GE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "EMKOO HEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "GEELY",
+    "modelos": [
+      {
+        "nombre": "EMGRAND GS - GL",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "EX5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "GREAT WALL",
+    "modelos": [
+      {
+        "nombre": "ORA 03-400",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "HAVAL",
+    "modelos": [
+      {
+        "nombre": "JOLION HEV SUPREME",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H6 HEV SUPREME",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "JOLION 1.5T 7DCT DELUXE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H6 PRO HEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "JOLION PRO HEV SUPREME",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H2 LUXURY 1.5T A/T",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H6 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "JOLION 1.5T 7DCT SUPREME",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H6 GT 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "JOLION PRO HEV DELUXE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "HONDA",
+    "modelos": [
+      {
+        "nombre": "WR-V DG5 39K EXL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "HR-V RV3 3M7 EXL",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "HR-V EXL CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ZR-V RZ1 TRG",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "FIT LX",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "CIVIC EX",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "HR-V EX CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CIVIC EXS",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "HR-V LX",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CIVIC LXS",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "HR-V LX CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CR-V EXL",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "CITY EXL MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "HR-V RV3 3M7 LX",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CRV LX",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CITY LX M/T",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "CR-V HYBRID RS6 HEV",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "CITY EXL AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CIVIC EX-L",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "HR-V EX",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CITY LX MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FIT EX",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CITY EXL A/T",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "HYUNDAI",
+    "modelos": [
+      {
+        "nombre": "TUCSON 2WD 2.0",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "HB20S AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "HB 20 AT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CRETA",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "H-1 SVX",
+        "tipoOriginal": "TRANSP. DE PASAJEROS"
+      },
+      {
+        "nombre": "HB 20 MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SANTA FE 2WD",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "HB20S MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "CRETA 1.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "GENESIS COUPE 3.8",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "TUCSON TURBO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "I 30 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SANTA FE 2.2 4WD CRDI",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "I 10 1.2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "ISUZU",
+    "modelos": [
+      {
+        "nombre": "2.5 DIESEL CABINA SIMPLE",
+        "tipoOriginal": "PICK UP"
+      }
+    ]
+  },
+  {
+    "marca": "JAC",
+    "modelos": [
+      {
+        "nombre": "T9 2.0 4X4 DC 8AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "JS6 PHEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "S2 1.5 MT INTELLIGENT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "JS8 PRO",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X200 2.0 GASOLINE CS EXTENDED",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "JS4 FLAGSHIP 1.5 CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "JAC S2 1.5 MT INTELLIGENT FL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "JS4",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "T8 2.0 4X4 DC 6 MT INTELLIGENT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "T6 2.0 4X4 DC 6MT LUXURY",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "JS2 1.5 CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "JEEP",
+    "modelos": [
+      {
+        "nombre": "COMPASS LIMITED 1.3T AT6 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS SPORT 2.4 MT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE 1.8L SPORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE SERIE-S T270 AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE ALTITUDE 1.3T AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE SAHARA 1.3T AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE WILLYS T270 AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RENEGADE LONGITUDE 1.8L AT6 AUTOMATICO",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE SPORT 1.8 AT6",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS SERIE-S T270 AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS BLACKHAWK 2.0L GME AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RENEGADE LONGITUDE T270 AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMMANDER LIMITED 1.3T AT6 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMMANDER LIMITED 2.0 AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RENEGADE SPORT 1.8L AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "JEEP WRANGLER RUBICON 2.0T AT8 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMPASS SPORT 1.3T AT6 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMMANDER OVERLAND 2.0L GME AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "PATRIOT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE SPORT T270 AT6 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS LONGITUDE 2.4 AT9 AWD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RENEGADE SPORT 1.8L MT5 FWD",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS LIMITED 2.4 AT9 AWD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMMANDER BLACKHAWK 2.0L GME AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMPASS LONGITUDE 1.3T AT6 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMMANDER LIMITED GSE 1.3T AT6 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "COMPASS SPORT 2.4 AT6",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE TRAILHAWK 2.0 AUTOMATICO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMPASS LONGITUDE 2.4 AT6",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "RENEGADE TRAILHAWK T270 AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMPASS TRAILHAWK 2.0 AT9 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMMANDER OVERLAND 2.0 AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "RENEGADE WILLYS 1.3T AT9 4X4",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "CHEROKEE TRAILHAWK AUTOMATICO",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "COMPASS LIMITED",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "GRAND CHEROKEE OVERLAND",
+        "tipoOriginal": "TODO TERRENO"
+      }
+    ]
+  },
+  {
+    "marca": "JETOUR",
+    "modelos": [
+      {
+        "nombre": "T1",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "X50",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "T1 I-DM",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X70 FL",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X70 PLUS",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "T2",
+        "tipoOriginal": "TODO TERRENO"
+      }
+    ]
+  },
+  {
+    "marca": "JMC",
+    "modelos": [
+      {
+        "nombre": "GRAND AVENUE 4X2",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "GRAND AVENUE",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      }
+    ]
+  },
+  {
+    "marca": "JMEV",
+    "modelos": [
+      {
+        "nombre": "EVEASY 3",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "KAIYI",
+    "modelos": [
+      {
+        "nombre": "KYX7 PHEV",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X3",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "KIA",
+    "modelos": [
+      {
+        "nombre": "K2500",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "SPORTAGE EX 2.0 A/T 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SPORTAGE 4X2",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "CARNIVAL SX 2.2 CRDI A/T",
+        "tipoOriginal": "TRANS.DE PASAJEROS"
+      },
+      {
+        "nombre": "RIO EX 1.4 A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CERATO SX 2.0 A/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "K3 CROSS GT-LINE 1.6 A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "RIO SX 1.6 A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SELTOS LX 1.5 A/T",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "SORENTO EX 2.2 A/T 4X4 CRDI",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "SOUL EX 1.6 A/T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "CERATO EX 1.6 A/T",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "KYC",
+    "modelos": [
+      {
+        "nombre": "MAMUT BOX REFRIGERADO",
+        "tipoOriginal": "PICK-UP CARROZADA"
+      },
+      {
+        "nombre": "MAMUT",
+        "tipoOriginal": "PICK-UP CABINA SIMPLE"
+      },
+      {
+        "nombre": "V7",
+        "tipoOriginal": "FURGON"
+      }
+    ]
+  },
+  {
+    "marca": "LEAPMOTOR",
+    "modelos": [
+      {
+        "nombre": "B10 REEV DESIGN",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "LEXUS",
+    "modelos": [
+      {
+        "nombre": "NX 300H LUXURY",
+        "tipoOriginal": "TODO TERRENO"
+      }
+    ]
+  },
+  {
+    "marca": "LIFAN",
+    "modelos": [
+      {
+        "nombre": "MYWAY 1.8 VVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X70 2.0 VVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "X50 1.5 VVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "LYNK&CO",
+    "modelos": [
+      {
+        "nombre": "01",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "MERCEDES BENZ",
+    "modelos": [
+      {
+        "nombre": "CLA 200 COUPE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "GLC 300 4MATIC COUPE (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "MERCEDES-AMG GLE 53 COUPE (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "A200 PROGRESSIVE SEDAN",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MERCEDES AMG GLC 43 4MATIC COUPE (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "C250 BLUE EFFICIENCY",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "C250",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "GLA 250 4MATIC (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "GLA 200 PROGRESSIVE",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "B180",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "A200",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "A 200 PROGRESSIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "GLC 300 4MATIC",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "VITO TOURER 119 CDI",
+        "tipoOriginal": "TRANS.DE PASAJEROS"
+      },
+      {
+        "nombre": "MERCEDES-AMG GLC 43 COUPE",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "C200 EDITION C",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MERCEDES-AMG C43 4MATIC (MHEV)",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "A160 CLASSIC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "GLC 300 4MATIC (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "VITO MIXTO 114 AT CDI",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "C 200 KOMPRESSOR AVANTGARDE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "C 180",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "GLC 200 4MATIC (MHEV)",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "MERCEDES-AMG CLE 53 4MATIC COUPE (MHEV)",
+        "tipoOriginal": "COUPE"
+      },
+      {
+        "nombre": "C250 AMG LINE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MERCEDES-BENZ A250 4MATIC (MHEV)",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "C200 BLUE EFFICIENCY",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "VITO 111 CDI FURGON MIXTO 4 + 1",
+        "tipoOriginal": "FURGON"
+      }
+    ]
+  },
+  {
+    "marca": "MG",
+    "modelos": [
+      {
+        "nombre": "ZS HYBRID+",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "ZS HYBRID + LUXURY",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MG3 HYBRID + COMFORT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "ZS HYBRID + COMFORT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "MG3 HYBRID + LUXURY",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "MINI",
+    "modelos": [
+      {
+        "nombre": "COOPER",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "COOPER S COUNTRYMAN ALL4",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "COOPER S",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  },
+  {
+    "marca": "MITSUBISHI",
+    "modelos": [
+      {
+        "nombre": "L200 SPORTERO DI-D COMMON RAIL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "L200 2.4L GLS 6AT 4WD FULL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "OUTLANDER 4WD",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "L200 4X4 CABINA DOBLE",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "L200 DI-D COMMON RAIL AT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      }
+    ]
+  },
+  {
+    "marca": "NISSAN",
+    "modelos": [
+      {
+        "nombre": "TIIDA 1.8 6MT TEKNA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "FRONTIER XE 4X4 MT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "VERSA V-DRIVE PLUS AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS 1.6 SENSE MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KAIT 1.6 ADVANCE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA ADVANCE MT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KAIT 1.6 SENSE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER 4X2 SE 2.8TD (CAB.DOB.)",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "KICKS ADVANCE DCT 1.0T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS SENSE DCT 1.0T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA 1.6 EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS ADVANCE CVT F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA 2.0 EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER CD LE 2.3 D 4X4 AT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FRONTIER S 4X4 MT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "X-TRAIL 2.5 EXCLUSIVE CVT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "KICKS 1.6 ADVANCE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER S 4X2 MT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FRONTIER X-GEAR 4X4 AT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "TIIDA 1.8 6MT VISIA",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "KICKS EXCLUSIVE DCT 1.0T",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA V-DRIVE DRIVE MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS 1.6 ADVANCE CVT PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA ADVANCE PURE DRIVE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "TIIDA 1.8 6MT ACENTA",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NP300 FRONTIER LE 4X4 DIESEL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "KICKS ADVANCE MT F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA SENSE MT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "NOTE SENSE PURE DRIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS 1.6 EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA 2.0 SR CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ACTIVE MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "X-TRAIL  2.5 ADVANCE CVT",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS X-PLAY",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS ADVANCE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER LE 4WD 6MT",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "VERSA ADVANCE AT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER PRO4X 4X4 AT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KICKS 1.6 EXCLUSIVE CVT BT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ACTIVE PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA 1.6 ADVANCE CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KAIT 1.6 EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER PLATINUM 4X4 AT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FRONTIER CD X-GEAR 2.3 D 4X4 AT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "4X4 (DOBLE CABINA DIESEL)",
+        "tipoOriginal": "PICK UP"
+      },
+      {
+        "nombre": "KICKS EXCLUSIVE CVT F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS SPECIAL EDITION CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA 1.6 SENSE CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA TEKNA XTRONIC CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ADVANCE PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA 1.6 SENSE MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA EXCLUSIVE CVT PURE DRIVE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER NP300",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "NOTE EXCLUSIVE CVT PURE DRIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER CD S 2.3 D 4X4 MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FRONTIER CD X-GEAR PLUS 2.3D 4X4 AT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "VERSA SENSE AT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "NP300 FRONTIER LE 4X2 DIESEL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SENTRA SENSE PURE DRIVE",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA 2.0 ADVANCE CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS EXCLUSIVE CVT BT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ACTIVE PURE DRIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER XE 4X2 AT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "X-TRAIL EXCLUSIVE CVT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "FRONTIER S 4X2 AT 2.3 D CD",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "KICKS SENSE MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER CD LE 2.3 D 4X2 MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "FRONTIER CD X-GEAR 2.3 D 4X2 AT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "SENTRA 2.0 ADVANCE MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "VERSA 1.6 SR CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MURANO EXCLUSIVE CVT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "VERSA ADVANCE MT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ADVANCE MEDIA-TECH PURE DR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER SE PLUS 4X2 DIESEL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "FRONTIER CD S 2.3 D 4X2 MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "X-TRAIL",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "VERSA SENSE AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER CD XE 2.3 D 4X2 MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "VERSA ADVANCE AT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "VERSA EXCLUSIVE AT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS SENSE MT F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "MARCH ADVANCE MEDIA-TECH AT PURE DRIVE F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NP300 FRONTIER SE 4X2 DIESEL",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "X-TRAIL EPOWER EXCLUSIVE CVT",
+        "tipoOriginal": "TODO TERRENO"
+      },
+      {
+        "nombre": "NOTE ADVANCE PURE DRIVE",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS PLAY 1.6 SENSE MT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "VERSA ACENTA",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "KICKS ADVANCE CVT UCL",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS SPECIAL EDITION CVT F2",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS PLAY 1.6 EXCLUSIVE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "SENTRA SR CVT",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER CD SE 2.3 D 4X4 MT",
+        "tipoOriginal": "PICK-UP"
+      },
+      {
+        "nombre": "NOTE SENSE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "KICKS PLAY 1.6 ADVANCE CVT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "FRONTIER 4X2SE 2.8TDI ELECTRONIC",
+        "tipoOriginal": "PICK-UP CABINA DOBLE"
+      },
+      {
+        "nombre": "SENTRA ACENTA 6MT",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      }
+    ]
+  },
+  {
+    "marca": "PEUGEOT",
+    "modelos": [
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "208 ALLURE AT AM26.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "206 GENERATION",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARTNER FURGON D PLC PRESENCE",
+        "tipoOriginal": "FURGON 600"
+      },
+      {
+        "nombre": "308 FELINE 2.0 N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER VAN L2 HDI 92 AM26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.6N VTC PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.6L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE MT AM26.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.4 N 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 GT T200 AM26.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PK T200 AM26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE T200 AM26",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6 HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE AT AM24",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE HDI NAV",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XT 1.6 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6N NAV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE AT AM26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE 2.0N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "307 XS 1.6 5P 110CV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6 AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "EXPERT 1.6 HDI CONFORT",
+        "tipoOriginal": "FURGONETA"
+      },
+      {
+        "nombre": "208 ACTIVE PK AT AM24",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ACTIVE T200 AM26.5",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "2008 SPORT 1.6 THP TIPTRONIC 165 AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "301 ALLURE PLUS 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "308 ACTIVE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "3008 ALLURE THP TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE T200 AM26.5",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "408 ACTIVE 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 TIPTRONIC 6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA HDI 1.6 VTC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE 1.6 N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.4 N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "2008 FELINE TIPTRONIC 1.6 AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "NUEVO 3008 GT AM25",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "208 LIKE 1.2L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE 1.6L TIPTRONIC AM23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE PACK 1.6L AM23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 STYLE TIPTRONIC 1.6L AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "206 XT PREMIUM 1.6 5P TIPTRONIC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6 N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 STYLE AT23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 GT 1.6 THP",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 FELINE 1.6 HDI AM22",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "408 FELINE 1.6 HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ACTIVE HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE TIPTRONIC 1.6L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE PACK THP TIPTRONIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.5 N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE+ HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 GT T200 AM26.5",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.4",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "208 ALLURE PK T200 AM26.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE 1.6 N PACK CUIR",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ACTIVE T200 AM26",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "307 XS 2.0 HDI 5P 110 CV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 GT T200 AM26",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ACTIVE T200 AM25",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.5 N TOUCHSCREEN",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PACK 1.6L AM23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS 1.9D 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "206 XS PREMIUM 1.6 3P",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "207 COMPACT XT PREMIUM 1.6 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308S ALLURE PLUS TIPTRONIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE AT AM25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ACTIVE 1.4 N 3P /12",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "208 STYLE MT23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PK AM24.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XR 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 ACTIVE 1.6L AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS 1.6 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "EXPERT L3 HDI 150 AM26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "3008 ALLURE TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.4 HDI 5P/2012",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 GT T200 AM26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.4 HDI 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "EXPERT PREMIUM 1.6 HDI 6P",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "308 ALLURE PLUS 2.0",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "3008 GT-LINE THP TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS HDI 1.4",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "2008 ALLURE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 SPORT 1.6 THP",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS 1.4",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6N NAV.",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA HDI 1.6 VTC PLUS",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ACTIVE T200 AM24",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI 92 AM25",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "207 COMPACT ACTIVE 1.4 N 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PK T200 AM25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE PLUS THP",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "308 ACTIVE 1.6N",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER FURGON D PLC CONFORT",
+        "tipoOriginal": "FURGON 600"
+      },
+      {
+        "nombre": "208 LIKE PACK 1.6L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "307 XT PREMIUM HDI 5P 110CV",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "NUEVO 408 GT AM25",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.5 N",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 115 5 PLAZAS",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "301 ALLURE 1.6 HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "206XRD3",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PK T200 AM25.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ROLAND GARROS THP",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE 1.6 HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "3008 FELINE TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "207 GTI 156 CV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE PACK 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6N TOUCHSCREEN",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "301 ALLURE PLUS 1.6 TIPTRONIC",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "3008 PREMIUM PLUS 156CV TIPTRONI",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARPAD2PLN2",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 GT T200 AM25",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.5 NAV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE 1.6 TIPTRONIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE 1.6 TIPTRONIC 6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE PK AM25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE PACK THP TIPTRONIC",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE TIPTRONIC 1.6L",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 FELINE THP TIPTRONIC AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 FELINE HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "206 XT 1.9D 5P/08",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "408 SPORT 163 CV",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA VTC PLUS 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "206 X-LINE 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "208 ALLURE AM25",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 SPORT 1.6 THP TIPTRONIC 165 AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.4",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "307 XS 1.6 4P 110 CV",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "408 ALLURE+ 2.0N",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "208 ALLURE MT AM26",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "3008 GT PACK AM23.5",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 IN CONCERT 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT HDI 1.6",
+        "tipoOriginal": "FAMILIAR 5 ASIENTOS"
+      },
+      {
+        "nombre": "208 FELINE TIPTRONIC 1.6L AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.6 HDI VTC",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "EXPERT L3 HDI 150 6P AM26",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "308 ALLURE PACK 1.6 HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 AM22.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6 TIPTRONIC NAV",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 GT T200 AM24",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "408 FELINE HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 115 AM22.5",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "206 XT 1.9D 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI 92 AM22.5",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "2008 ACTIVE 1.6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "5008 ALLURE THP TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.4 HDI",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.6 HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE 1.6 HDI AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI 92",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "207 COMPACT XT HDI",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "301 ALLURE 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "206 COUPE CABRIOLET 2.0",
+        "tipoOriginal": "DESCAPOTABLE"
+      },
+      {
+        "nombre": "208 ACTIVE PACK 1.6L TIPTRONIC AM23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 STYLE 1.6L AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XR 1.4",
+        "tipoOriginal": "SEDAN 4 PTAS"
+      },
+      {
+        "nombre": "207 COMPACT XT 1.6",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 ACTIVE 1.6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE 1.6 AM20",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE TIPTRONIC 1.6L AM23",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT ALLURE 1.6 N 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "307 XS HDI 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PRESENCE AA 1.4",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA VTC PLUS 1.6 HDI 92 AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 ALLURE T200 AM24",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "208 GT TIPTRONIC 130 CV AM22",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE 1.6 HDI AM20",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 TIPTRONIC 6 115",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 CC 1.6 TURBO THP 156 CV",
+        "tipoOriginal": "DESCAPOTABLE"
+      },
+      {
+        "nombre": "408 FELINE THP TIPTRONIC",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT QUIKSILVER 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "308 FELINE THP TIPTRONIC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 CC 150CV",
+        "tipoOriginal": "DESCAPOTABLE"
+      },
+      {
+        "nombre": "206 XS 1.6 3P ABS",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.6N VTC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS 1.4 5",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI 92 5 PLAZAS",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "206 PREMIUM 1.6 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "307 XS 2.0 HDI",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "2008 ALLURE T200 AM25",
+        "tipoOriginal": "RURAL 4/5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 AM21",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 FELINE 1.6 HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "206 PREMIUM 1.9D 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "207 COMPACT XS HDI 1.4 5P",
+        "tipoOriginal": "SEDAN 5 PTAS"
+      },
+      {
+        "nombre": "207 COMPACT XR 1.4 3P",
+        "tipoOriginal": "SEDAN 3 PTAS"
+      },
+      {
+        "nombre": "PARTNER CONFORT 1.6 HDI 92 AM22",
+        "tipoOriginal": "FURGON"
+      },
+      {
+        "nombre": "206 XRD CONFORT 5P",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "208 NEW LIKE 1.2L AM23.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "206 SW PREMIUM 1.6",
+        "tipoOriginal": "RURAL 5 PTAS"
+      },
+      {
+        "nombre": "208 ACTIVE PK AT AM24.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "508 FELINE HDI TIP",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "208 ALLURE 1.6 TIPTRONIC 6",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "3008 GT-LINE HDI TIPTRONIC",
+        "tipoOriginal": "RURAL 5 PUERTAS"
+      },
+      {
+        "nombre": "208 XY",
+        "tipoOriginal": "SEDAN 3 PUERTAS"
+      },
+      {
+        "nombre": "208 FELINE AT AM24.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "PARTNER PATAGONICA 1.6 N VTC",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "2008 FELINE 1.6 TIPTRONIC AM22.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 ALLURE HDI",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "408 ALLURE 1.6 HDI AM22",
+        "tipoOriginal": "SEDAN 4 PUERTAS"
+      },
+      {
+        "nombre": "208 ACTIVE MT AM26.5",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      },
+      {
+        "nombre": "308 SPORT",
+        "tipoOriginal": "SEDAN 5 PUERTAS"
+      }
+    ]
+  }]
