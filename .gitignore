@@ -29,8 +29,15 @@ pnpm-debug.log*
 *.swo
 .DS_Store
 
+# Claude
+.claude/
+.claude/*
 
-/.postman/
-/postman/
+# Postman
+.postman/
+postman/
+postmanfolder/
+*postman*
 *.postman_environment.json
 *.postman_collection.json
+
