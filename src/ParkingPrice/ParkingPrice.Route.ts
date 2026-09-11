@@ -5,7 +5,7 @@ import { orm } from "../Shared/db/orm.js";
 import { ParkingPriceRepository } from "./ParkingPrice.Repository.js";
 import { ParkingPriceController } from "./ParkingPrice.Controller.js";
 import { ParkingPriceService } from "./ParkingPrice.Service.js";
-import { createParkingPriceSchema, parkingPriceIdSchema, parkingIdParamSchema, activeParkingPriceSchema } from "./ParkingPrice.Schema.js";
+import { createParkingPriceSchema, updateParkingPriceSchema, parkingPriceIdSchema, parkingIdParamSchema, activeParkingPriceSchema } from "./ParkingPrice.Schema.js";
 
 export const ParkingPriceRouter = Router();
 
@@ -20,6 +20,7 @@ ParkingPriceRouter.get('/:id/prices/active/:vehicleType', validateSchema(activeP
 
 // TARIFA
 ParkingPriceRouter.get('/prices/:id', validateSchema(parkingPriceIdSchema), parkingPriceController.findOne);
+ParkingPriceRouter.put('/prices/:id', validateSchema(updateParkingPriceSchema), parkingPriceController.update);
 ParkingPriceRouter.delete('/prices/:id', validateSchema(parkingPriceIdSchema), parkingPriceController.remove);
 
 export default ParkingPriceRouter;

@@ -47,7 +47,7 @@ export class ServicePriceRepository implements Repository<ServicePrice> {
   }
 
   async findParking(parkingId: string): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: parkingId, isActive: true });
+    return await this.em.findOne(Parking, { id: parkingId });
   }
 
   async findServiceCatalog(serviceCatalogId: string): Promise<ServiceCatalog | null> {
@@ -64,8 +64,10 @@ export class ServicePriceRepository implements Repository<ServicePrice> {
   }
 
   async findByParking(parkingId: string): Promise<ServicePrice[]> {
-    return await this.em.find( ServicePrice, { parking: { id: parkingId } },
-      { populate: ['serviceCatalog', 'parking']}
+    return await this.em.find(
+      ServicePrice,
+      { parking: { id: parkingId }, expirationDate: null },
+      { populate: ['serviceCatalog', 'parking'] }
     );
   }
 }

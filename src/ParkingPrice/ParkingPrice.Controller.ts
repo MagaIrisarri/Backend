@@ -42,6 +42,13 @@ export class ParkingPriceController {
     return res.status(200).json({ message: 'Tarifa activa encontrada', data: price });
   });
 
+  public update = catchAsync(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const price = await this.service.update(id, req.body);
+
+    return res.status(200).json({ message: 'Tarifa actualizada con éxito', data: price });
+  });
+
   public remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const deactivated = await this.service.remove(id);

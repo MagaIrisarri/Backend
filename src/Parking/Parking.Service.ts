@@ -11,16 +11,101 @@ export class ParkingService {
     private readonly parkingSpaceRepository: ParkingSpaceRepository
   ) {}
 
-  async findAll(): Promise<Parking[]> {
-     return await this.parkingRepository.findAll();
+  private async enrichWithLiveAvailability(parking: Parking): Promise<any> {
+    const json = parking.toJSON();
+    const em = (this.parkingRepository as any).em;
+    const { Reservation } = await import('../Reservation/Reservation.Entity.js');
+    const now = new Date();
+    const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    // Considerar reservas activas: en curso o programadas en la jornada/próximas 24 horas
+    const activeReservations = await em.find(Reservation, {
+      parkingSpace: { parking: { id: parking.id } },
+      status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+      $and: [
+        { startTime: { $lte: next24Hours } },
+        { endTime: { $gte: now } },
+      ]
+    }, { populate: ['parkingSpace', 'vehicle', 'vehicle.vehicleType'] as any });
+
+    const isMoto = (t: string) => ['MOTOCICLETA', 'MOTO'].includes(t);
+    const isTruck = (t: string) => ['CAMIONETA', 'VAN', 'UTILITARIO', 'PICKUP', 'PICK-UP'].includes(t);
+
+    const reservedMotoSpaceIds = new Set<string>();
+    const reservedCarSpaceIds = new Set<string>();
+    const reservedTruckSpaceIds = new Set<string>();
+
+    let motoResCount = 0;
+    let carResCount = 0;
+    let truckResCount = 0;
+
+    for (const r of activeReservations) {
+      const spaceType = (r.parkingSpace?.vehicleType || '').trim().toUpperCase();
+      const vehicleType = (r.vehicle?.vehicleType?.name || '').trim().toUpperCase();
+      const type = spaceType || vehicleType;
+      const spaceId = r.parkingSpace?.id;
+
+      if (isMoto(type) || isMoto(spaceType) || isMoto(vehicleType)) {
+        if (spaceId) reservedMotoSpaceIds.add(spaceId);
+        motoResCount++;
+      } else if (isTruck(type) || isTruck(spaceType) || isTruck(vehicleType)) {
+        if (spaceId) reservedTruckSpaceIds.add(spaceId);
+        truckResCount++;
+      } else {
+        if (spaceId) reservedCarSpaceIds.add(spaceId);
+        carResCount++;
+      }
+    }
+
+    const spaces = parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems() : [];
+    const autoSpaces = spaces.filter((s) => s.vehicleType?.toUpperCase() === 'AUTO' && s.isActive);
+    const motoSpaces = spaces.filter((s) => ['MOTOCICLETA', 'MOTO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
+    const truckSpaces = spaces.filter((s) => ['CAMIONETA', 'VAN', 'UTILITARIO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
+
+    const carCap = json.carCapacity ?? (autoSpaces.length > 0 ? autoSpaces.length : 0);
+    const motoCap = json.motorcycleCapacity ?? (motoSpaces.length > 0 ? motoSpaces.length : 0);
+    const truckCap = json.truckCapacity ?? (truckSpaces.length > 0 ? truckSpaces.length : 0);
+
+    const occupiedSpacesByStateCar = autoSpaces.filter(s => s.state === 'OCUPADO').length;
+    const occupiedSpacesByStateMoto = motoSpaces.filter(s => s.state === 'OCUPADO').length;
+    const occupiedSpacesByStateTruck = truckSpaces.filter(s => s.state === 'OCUPADO').length;
+
+    const totalOccupiedCar = Math.max(occupiedSpacesByStateCar, reservedCarSpaceIds.size, carResCount);
+    const totalOccupiedMoto = Math.max(occupiedSpacesByStateMoto, reservedMotoSpaceIds.size, motoResCount);
+    const totalOccupiedTruck = Math.max(occupiedSpacesByStateTruck, reservedTruckSpaceIds.size, truckResCount);
+
+    return {
+      ...json,
+      carCapacity: carCap,
+      motorcycleCapacity: motoCap,
+      truckCapacity: truckCap,
+      availableCarSpaces: Math.max(0, carCap - totalOccupiedCar),
+      availableMotorcycleSpaces: Math.max(0, motoCap - totalOccupiedMoto),
+      availableTruckSpaces: Math.max(0, truckCap - totalOccupiedTruck),
+    };
   }
 
-  async findActive(): Promise<Parking[]> {
-    return await this.parkingRepository.findActive();
+  async findAll(): Promise<any[]> {
+    const parkings = await this.parkingRepository.findAll();
+    return await Promise.all(parkings.map((p) => this.enrichWithLiveAvailability(p)));
   }
 
-  async findOne(id: string): Promise<Parking | null> {
-    return await this.parkingRepository.findOne({ id });
+  async findActive(): Promise<any[]> {
+    const parkings = await this.parkingRepository.findActive();
+    // Exigir que la cochera posea al menos una tarifa activa para figurar como activa
+    const parkingsWithTariff = parkings.filter((p) => {
+      const activePrices = p.parkingpriceHistory?.isInitialized()
+        ? p.parkingpriceHistory.getItems().filter((price) => price.expirationDate === null)
+        : [];
+      return activePrices.length > 0;
+    });
+    return await Promise.all(parkingsWithTariff.map((p) => this.enrichWithLiveAvailability(p)));
+  }
+
+  async findOne(id: string): Promise<any | null> {
+    const parking = await this.parkingRepository.findOne({ id });
+    if (!parking) return null;
+    return await this.enrichWithLiveAvailability(parking);
   }
 
   async findByOwner(ownerId: string): Promise<Parking[]> {
@@ -71,6 +156,57 @@ export class ParkingService {
   }
 
   async update(id: string, data: any): Promise<Parking | null> {
+    if (data.carCapacity !== undefined || data.motorcycleCapacity !== undefined) {
+      const em = (this.parkingRepository as any).em;
+      const { Reservation } = await import('../Reservation/Reservation.Entity.js');
+
+      if (data.carCapacity !== undefined) {
+        const activeCarReservations = await em.find(Reservation, {
+          parkingSpace: { parking: { id }, vehicleType: 'AUTO' },
+          status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+          endTime: { $gte: new Date() },
+        });
+        const distinctReservedSpaces = new Set(activeCarReservations.map((r: any) => r.parkingSpace.id)).size;
+        if (Number(data.carCapacity) < distinctReservedSpaces) {
+          throw new AppError(
+            `La nueva capacidad de autos (${data.carCapacity}) no puede ser menor a las plazas con reservas activas o futuras (${distinctReservedSpaces})`,
+            400
+          );
+        }
+      }
+
+      if (data.motorcycleCapacity !== undefined) {
+        const activeMotoReservations = await em.find(Reservation, {
+          parkingSpace: { parking: { id }, vehicleType: 'MOTOCICLETA' },
+          status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+          endTime: { $gte: new Date() },
+        });
+        const distinctReservedSpaces = new Set(activeMotoReservations.map((r: any) => r.parkingSpace.id)).size;
+        if (Number(data.motorcycleCapacity) < distinctReservedSpaces) {
+          throw new AppError(
+            `La nueva capacidad de motos (${data.motorcycleCapacity}) no puede ser menor a las plazas con reservas activas o futuras (${distinctReservedSpaces})`,
+            400
+          );
+        }
+      }
+    }
+
+    if (data.isActive === true) {
+      const em = (this.parkingRepository as any).em;
+      const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
+      const activePrices = await em.find(ParkingPrice, {
+        parking: { id },
+        expirationDate: null,
+      });
+
+      if (activePrices.length === 0) {
+        throw new AppError(
+          'La cochera debe tener al menos una tarifa activa configurada para poder activarse',
+          400
+        );
+      }
+    }
+
     return await this.parkingRepository.update(id, data);
   }
 
@@ -83,6 +219,23 @@ export class ParkingService {
   }
 
   async reactivate(id: string): Promise<Parking | null> {
+    const parking = await this.parkingRepository.findOne({ id });
+    if (!parking) throw new AppError('Estacionamiento no encontrado', 404);
+
+    const em = (this.parkingRepository as any).em;
+    const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
+    const activePrices = await em.find(ParkingPrice, {
+      parking: { id },
+      expirationDate: null,
+    });
+
+    if (activePrices.length === 0) {
+      throw new AppError(
+        'La cochera debe tener al menos una tarifa activa configurada para poder activarse',
+        400
+      );
+    }
+
     return await this.parkingRepository.update(id, { isActive: true });
   }
 

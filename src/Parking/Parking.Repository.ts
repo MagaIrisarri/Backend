@@ -7,27 +7,27 @@ export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Parking[]> {
-    return await this.em.find(Parking, {}, { populate: ['owner'] as any });
+    return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
   }
 
   async findActive(): Promise<Parking[]> {
-    return await this.em.find(Parking, { isActive: true }, { populate: ['owner'] as any });
+    return await this.em.find(Parking, { isActive: true }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
   }
 
   async findOne(item: { id: string }): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner'] as any });
+    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
   }
 
   async findByOwnerId(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner'] as any });
+    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
   }
 
   async findByOwner(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: ownerId as any }, { populate: ['owner'] as any, orderBy: { name: 'ASC' } });
+    return await this.em.find(Parking, { owner: ownerId as any }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' } });
   }
 
   async add(data: any): Promise<Parking> {
-    const parking = this.em.create(Parking, { ...data, isActive: true });
+    const parking = this.em.create(Parking, { ...data, isActive: false });
     await this.em.flush();
     return parking;
   }

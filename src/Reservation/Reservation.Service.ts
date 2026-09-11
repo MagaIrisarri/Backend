@@ -37,11 +37,37 @@ export class ReservationService {
     throw new AppError(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`, 400);
   }
 
-  const requestedStartTimeString = startTime.toTimeString().split(' ')[0];
-  const requestedEndTimeString = endTime.toTimeString().split(' ')[0];
+  const getHHMM = (d: Date) => {
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
 
-  if (requestedStartTimeString < parking.openingTime || requestedEndTimeString > parking.closingTime) {
-    throw new AppError(`El horario de reserva está fuera del horario de atención (${parking.openingTime} a ${parking.closingTime})`, 400);
+  const requestedStartTimeString = getHHMM(startTime);
+  const requestedEndTimeString = getHHMM(endTime);
+  const openTime = parking.openingTime.slice(0, 5);
+  const closeTime = parking.closingTime.slice(0, 5);
+
+  if (requestedStartTimeString < openTime || requestedEndTimeString > closeTime) {
+    throw new AppError(`El horario de reserva está fuera del horario de atención (${openTime} a ${closeTime})`, 400);
+  }
+
+  const conflictingVehicleReservation = await this.repo.findConflictingVehicleReservation(
+    data.vehicleId,
+    startTime,
+    endTime
+  );
+
+  if (conflictingVehicleReservation) {
+    const parkingName = conflictingVehicleReservation.parkingSpace?.parking?.name
+      ? ` en "${conflictingVehicleReservation.parkingSpace.parking.name}"`
+      : '';
+    const startStr = getHHMM(conflictingVehicleReservation.startTime);
+    const endStr = getHHMM(conflictingVehicleReservation.endTime);
+    throw new AppError(
+      `Este vehículo ya posee una reserva activa${parkingName} en ese horario (${startStr} a ${endStr} hs)`,
+      400
+    );
   }
 
   return await this.repo.createReservationAtomically(
@@ -66,20 +92,40 @@ export class ReservationService {
     return await this.repo.findByParkingId(parkingId);
   }
 
+  async findByOwnerId(ownerId: string): Promise<Reservation[]> {
+    return await this.repo.findByOwnerId(ownerId);
+  }
+
   async remove(id: string, userId: string): Promise<boolean> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) return false;
 
-    if (reservation.vehicle.client.id !== userId) {
-      throw new AppError("No tienes permiso para cancelar esta reserva", 403);
+    const em = (this.repo as any).em;
+    const { User } = await import('../User/User.Entity.js');
+    const user = await em.findOne(User, { id: userId, status: 'ACTIVO' });
+
+    const isClient = reservation.vehicle?.client?.id === userId;
+    const isOwner = reservation.parkingSpace?.parking?.owner?.id === userId;
+    const isAdminOrStaff = user?.type === 'ADMINISTRADOR' || user?.type === 'ADMIN' || user?.type === 'EMPLEADO';
+
+    if (!isClient && !isOwner && !isAdminOrStaff) {
+      throw new AppError("No tienes permiso para dar de baja esta reserva", 403);
     }
 
     if (reservation.status === 'CANCELADA' || reservation.status === 'FINALIZADA') {
-      throw new AppError("No puedes cancelar una reserva que ya está cancelada o finalizada", 400);
+      throw new AppError("No puedes dar de baja una reserva que ya está cancelada o finalizada", 400);
     }
 
-    if (reservation.startTime < new Date()) {
-      throw new AppError("No puedes cancelar una reserva pasada o en curso", 400);
+    if (isClient && !isOwner && !isAdminOrStaff) {
+      if (reservation.status === 'EN CURSO') {
+        throw new AppError("No puedes dar de baja una reserva que ya está en curso", 400);
+      }
+    }
+
+    // Anular factura si estuviera pendiente
+    const invoice = await this.invoiceRepo.findByReservationId(id);
+    if (invoice && invoice.status === 'PENDIENTE') {
+      await this.invoiceRepo.remove({ id: invoice.id });
     }
 
     return await this.repo.remove({ id });
@@ -114,9 +160,19 @@ export class ReservationService {
     const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
     // Acceso al EM a través del repositorio (forma rápida)
     const em = (this.repo as any).em;
+    const getVehicleVariants = (typeName?: string): string[] => {
+      const v = (typeName || '').trim().toUpperCase();
+      if (v.includes('MOTO')) return ['MOTOCICLETA', 'Motocicleta', 'MOTO', 'Moto', 'moto', 'motocicleta'];
+      if (v.includes('CAMION') || v.includes('UTIL') || v.includes('VAN') || v.includes('PICK')) {
+        return ['CAMIONETA', 'Camioneta', 'UTILITARIO', 'Utilitario', 'utilitario', 'camioneta', 'VAN', 'Van'];
+      }
+      return ['AUTO', 'Auto', 'auto', 'AUTOMOVIL', 'Automovil'];
+    };
+
+    const typeVariants = getVehicleVariants(reservation.vehicle?.vehicleType?.name);
     const priceRecord = await em.findOne(ParkingPrice, { 
       parking: { id: reservation.parkingSpace.parking.id }, 
-      vehicleType: reservation.vehicle.vehicleType.name,
+      vehicleType: { $in: typeVariants },
       expirationDate: null 
     });
 
