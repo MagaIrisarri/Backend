@@ -62,7 +62,7 @@ export class UserController {
     const user = await this.userService.login(email, password);
     
     if ('error' in user) {
-      if (user.error === 'not found') throw new AppError('User no encontraod', 404);
+      if (user.error === 'not found') throw new AppError('Usuario no encontrado', 404);
       if (user.error === 'user not ACTIVO') throw new AppError('El usuario no esta activo', 401);
       if (user.error === 'password incorrect') throw new AppError('Contraseña incorrecta', 401);
     }

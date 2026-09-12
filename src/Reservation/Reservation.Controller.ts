@@ -49,6 +49,14 @@ export class ReservationController {
     });
   });
 
+  public findByOwnerId = catchAsync(async (req: Request, res: Response) => {
+    const reservations = await this.service.findByOwnerId(req.params.ownerId as string);
+    return res.status(200).json({
+      message: reservations.length === 0 ? 'No se encontraron reservas' : 'Reservas encontradas',
+      data: reservations,
+    });
+  });
+
   public checkIn = catchAsync(async (req: Request, res: Response) => {
     const employeeId = (req.headers['x-user-id'] || req.body.employeeId || req.query.employeeId) as string;
     if (!employeeId) throw new AppError('employeeId es requerido', 400);

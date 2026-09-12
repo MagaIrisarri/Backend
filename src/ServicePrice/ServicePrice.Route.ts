@@ -19,6 +19,15 @@ servicePriceRouter.get("/:parkingId/service-prices", servicePriceController.find
 servicePriceRouter.get("/:parkingId/service-prices/active/:serviceCatalogId", validateSchema(activeServicePriceSchema), servicePriceController.findActive);
 
 // TARIFA
+servicePriceRouter.get("/services/catalog", async (_req, res, next) => {
+  try {
+    const scRepository = new (await import("../ServiceCatalog/ServiceCatalog.Repository.js")).ServiceCatalogRepository(orm.em);
+    const services = await scRepository.findAll();
+    res.status(200).json({ data: services });
+  } catch (err) {
+    next(err);
+  }
+});
 servicePriceRouter.get("/", servicePriceController.findAll);
 servicePriceRouter.get("/service-prices/:id", validateSchema(servicePriceIdSchema), servicePriceController.findOne);
 servicePriceRouter.delete("/service-prices/:id", validateSchema(servicePriceIdSchema), servicePriceController.remove);

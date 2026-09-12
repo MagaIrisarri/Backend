@@ -72,27 +72,4 @@ export class Parking {
     cascade: [Cascade.REMOVE],
   })
   parkingSpaces = new Collection<ParkingSpace>(this);
-
-  toJSON() {
-    return {
-      id: this.id,
-      locality: this.locality,
-      postalCode: this.postalCode,
-      address: this.address,
-      carCapacity: this.carCapacity,
-      motorcycleCapacity: this.motorcycleCapacity,
-      truckCapacity: this.truckCapacity,
-      openingTime: this.openingTime,
-      closingTime: this.closingTime,
-      minReservationHours: this.minReservationHours,
-      maxReservationHours: this.maxReservationHours,
-      reservationMargin: this.reservationMargin,
-      isActive: this.isActive,
-      name: this.name,
-      latitude: this.latitude,
-      longitude: this.longitude,
-      imageUrl: this.imageUrl,
-      owner: this.owner,
-    };
-  }
 }

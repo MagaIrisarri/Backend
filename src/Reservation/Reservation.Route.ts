@@ -19,6 +19,7 @@ const reservationController = new ReservationController(reservationService);
 reservationRouter.get('/', reservationController.findAll);
 reservationRouter.get('/client/:clientId', reservationController.findByClientId);
 reservationRouter.get('/parking/:parkingId', reservationController.findByParkingId);
+reservationRouter.get('/owner/:ownerId', reservationController.findByOwnerId);
 reservationRouter.get('/:id', validateSchema(reservationIdSchema), reservationController.findOne);
 reservationRouter.post('/', validateSchema(createReservationSchema), reservationController.create);
 reservationRouter.post('/:id/check-in', validateSchema(reservationIdSchema), reservationController.checkIn);
