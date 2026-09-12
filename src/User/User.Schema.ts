@@ -3,6 +3,18 @@ import { z } from 'zod';
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
 export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
 
+const dateOfBirthSchema = z.coerce
+  .date({ message: 'Fecha de nacimiento inválida' })
+  .refine((date) => {
+    const today = new Date();
+    let age = today.getFullYear() - date.getFullYear();
+    const monthDiff = today.getMonth() - date.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+      age--;
+    }
+    return age >= 18;
+  }, { message: 'Debés ser mayor de 18 años para registrarte' });
+
 const baseUserFields = {
   dni: z
     .string()
@@ -10,7 +22,7 @@ const baseUserFields = {
     .regex(/^\d{7,8}$/, 'El DNI debe contener solo números (7 u 8 dígitos)'),
   name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres'),
   last_name: z.string().trim().min(2, 'El apellido debe tener al menos 2 caracteres'),
-  date_of_birth: z.coerce.date({ message: 'Fecha de nacimiento inválida' }),
+  date_of_birth: dateOfBirthSchema,
   email: z.string().trim().email('Formato de email inválido'),
   phone: z
     .string()
@@ -37,7 +49,7 @@ export const updateUserSchema = z.object({
     dni: baseUserFields.dni.optional(),
     name: baseUserFields.name.optional(),
     last_name: baseUserFields.last_name.optional(),
-    date_of_birth: z.coerce.date({ message: 'Fecha de nacimiento inválida' }).optional(),
+    date_of_birth: dateOfBirthSchema,
     email: baseUserFields.email.optional(),
     phone: baseUserFields.phone.optional(),
   }),
@@ -69,6 +81,9 @@ export const updatePasswordSchema = z.object({
     newPassword: z.string().min(6, 'La nueva contraseña debe tener al menos 6 caracteres'),
   }),
 });
+
+
+
 
 export type PublicUserCreateInput = z.infer<typeof createPublicUserSchema>['body'];
 export type EmployeeCreateInput = z.infer<typeof createEmployeeSchema>['body'];
