@@ -58,13 +58,9 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     if (!trimmed) return null;
 
     // 1. Buscar coincidencia exacta en el catálogo oficial cargado por el admin
-    const exact = await this.em.findOne(VehicleType, { name: trimmed, isActive: true });
+    const all = await this.em.find(VehicleType, {});
+    const exact = all.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
     if (exact) return exact;
-
-    // 2. Si difiere por mayúsculas/minúsculas, retornar la entidad oficial para estandarizar el nombre
-    const all = await this.em.find(VehicleType, { isActive: true });
-    const ciMatch = all.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
-    if (ciMatch) return ciMatch;
 
     // 3. Coincidencia semántica con tipos comunes
     const trimmedUpper = trimmed.toUpperCase();

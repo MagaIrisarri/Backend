@@ -42,20 +42,27 @@ export class ParkingSpaceService {
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
-    const spacesOfSameType = existingSpaces.filter(
-      (s) => s.vehicleType.toUpperCase() === data.vehicleType.toUpperCase()
-    );
-
     const prefixMap: Record<string, string> = {
       AUTO: 'A',
+      AUTOMOVIL: 'A',
       MOTOCICLETA: 'M',
       MOTO: 'M',
       CAMIONETA: 'C',
-      UTILITARIO: 'U',
+      UTILITARIO: 'C',
     };
-    const prefix = prefixMap[data.vehicleType.toUpperCase()] || data.vehicleType.charAt(0).toUpperCase();
+    const upperType = data.vehicleType.trim().toUpperCase();
+    const prefix = prefixMap[upperType] || upperType.charAt(0);
 
-    const startNumber = spacesOfSameType.length + 1;
+    let maxNumber = 0;
+    for (const s of existingSpaces) {
+      if (s.spaceCode && s.spaceCode.startsWith(`${prefix}-`)) {
+        const num = parseInt(s.spaceCode.slice(prefix.length + 1), 10);
+        if (!isNaN(num) && num > maxNumber) {
+          maxNumber = num;
+        }
+      }
+    }
+    const startNumber = maxNumber + 1;
 
     const spacesToCreate: Partial<ParkingSpace>[] = [];
     for (let i = 0; i < data.count; i++) {

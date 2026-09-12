@@ -39,11 +39,15 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
 
 
   async findByParking(parkingId: string): Promise<ParkingSpace[]> {
-    return await this.em.find(ParkingSpace, { parking: parkingId as any, isActive: true }, { orderBy: { spaceCode: 'ASC' } });
+    return await this.em.find(
+      ParkingSpace,
+      { parking: { id: parkingId }, isActive: true },
+      { orderBy: { spaceCode: 'ASC' } }
+    );
   }
 
   async findAvailableByParking(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
-    const filter: any = { parking: parkingId, state: SpaceState.LIBRE, isActive: true };
+    const filter: any = { parking: { id: parkingId }, state: SpaceState.LIBRE, isActive: true };
     if (vehicleType) filter.vehicleType = vehicleType;
     return await this.em.find(ParkingSpace, filter);
   }

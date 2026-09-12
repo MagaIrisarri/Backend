@@ -10,19 +10,14 @@ export class ParkingPriceService {
     if (!parking) throw new AppError('Estacionamiento no encontrado', 404);
 
     const officialType = await this.repo.findOfficialVehicleType(data.vehicleType);
-    if (!officialType) {
-      throw new AppError(
-        `El tipo de vehículo "${data.vehicleType}" no es válido. Debe ser uno de los tipos oficiales registrados por el administrador.`,
-        400
-      );
-    }
+    const vehicleTypeName = officialType ? officialType.name : data.vehicleType.trim();
 
     // Expirar cualquier tarifa activa previa de este tipo oficial
-    await this.repo.expireActiveByVehicleType(parkingId, officialType.name);
+    await this.repo.expireActiveByVehicleType(parkingId, vehicleTypeName);
 
     return await this.repo.add({ 
       parking, 
-      vehicleType: officialType.name, 
+      vehicleType: vehicleTypeName, 
       price: data.price 
     });
   }
@@ -36,13 +31,7 @@ export class ParkingPriceService {
     let officialName: string | undefined;
     if (data.vehicleType) {
       const officialType = await this.repo.findOfficialVehicleType(data.vehicleType);
-      if (!officialType) {
-        throw new AppError(
-          `El tipo de vehículo "${data.vehicleType}" no es válido. Debe ser uno de los tipos oficiales registrados por el administrador.`,
-          400
-        );
-      }
-      officialName = officialType.name;
+      officialName = officialType ? officialType.name : data.vehicleType.trim();
     }
 
     const updated = await this.repo.update(id, {
