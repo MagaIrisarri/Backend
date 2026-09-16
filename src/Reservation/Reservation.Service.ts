@@ -2,7 +2,7 @@ import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation } from './Reservation.Entity.js';
 import { CreateReservationInput, UpdateReservationInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
+import { ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
