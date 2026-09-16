@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { ParkingPrice } from './ParkingPrice.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { VehicleType } from '../Vehicle/VehicleType/VehicleType.Entity.js';
+import { categorizeVehicleType, matchesVehicleType } from '../Shared/utils/vehicleTypes.js';
 import { Repository } from '../Shared/base.Repository.js';
 
 export class ParkingPriceRepository implements Repository<ParkingPrice> {
@@ -62,38 +63,12 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     const exact = all.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
     if (exact) return exact;
 
-    // 3. Coincidencia semántica con tipos comunes
-    const trimmedUpper = trimmed.toUpperCase();
-    if (trimmedUpper.includes('CAMION') || trimmedUpper.includes('UTIL') || trimmedUpper.includes('PICK')) {
-      const truckMatch = all.find((t) => {
-        const u = t.name.toUpperCase();
-        return u.includes('UTIL') || u.includes('CAMION') || u.includes('PICK');
-      });
-      if (truckMatch) return truckMatch;
-    }
-    if (trimmedUpper.includes('MOTO')) {
-      const motoMatch = all.find((t) => t.name.toUpperCase().includes('MOTO'));
-      if (motoMatch) return motoMatch;
-    }
-    if (trimmedUpper.includes('AUTO') || trimmedUpper.includes('CAR')) {
-      const autoMatch = all.find((t) => t.name.toUpperCase().includes('AUTO') || t.name.toUpperCase().includes('CAR'));
-      if (autoMatch) return autoMatch;
-    }
+    // 2. Coincidencia semántica con tipos comunes
+    const cat = categorizeVehicleType(trimmed);
+    const semMatch = all.find((t) => categorizeVehicleType(t.name) === cat);
+    if (semMatch) return semMatch;
 
     return null;
-  }
-
-  private matchesType(typeA: string, typeB: string): boolean {
-    const a = (typeA || '').trim().toLowerCase();
-    const b = (typeB || '').trim().toLowerCase();
-    if (a === b) return true;
-    if ((a.includes('moto') || a.includes('bici')) && (b.includes('moto') || b.includes('bici'))) return true;
-    if (
-      (a.includes('camion') || a.includes('util') || a.includes('van') || a.includes('pick') || a.includes('suv')) &&
-      (b.includes('camion') || b.includes('util') || b.includes('van') || b.includes('pick') || b.includes('suv'))
-    ) return true;
-    if ((a.includes('auto') || a.includes('car')) && (b.includes('auto') || b.includes('car'))) return true;
-    return false;
   }
 
   async expireActiveByVehicleType(parkingId: string, vehicleTypeName: string): Promise<void> {
@@ -108,7 +83,7 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     const now = new Date();
     let updated = false;
     for (const p of activePrices) {
-      if (this.matchesType(p.vehicleType, vehicleTypeName)) {
+      if (matchesVehicleType(p.vehicleType, vehicleTypeName)) {
         p.expirationDate = now;
         updated = true;
       }
@@ -128,7 +103,7 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
       { populate: ['parking'] as any, orderBy: { startDate: 'DESC' } }
     );
 
-    return activePrices.find((p) => this.matchesType(p.vehicleType, vehicleTypeName)) || null;
+    return activePrices.find((p) => matchesVehicleType(p.vehicleType, vehicleTypeName)) || null;
   }
 
   async findByParking(parkingId: string): Promise<ParkingPrice[]> {
@@ -141,12 +116,7 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     // Deduplicar respetando la tarifa más reciente de cada categoría
     const byType = new Map<string, ParkingPrice>();
     for (const p of prices) {
-      // Determinar clave canónica para deduplicar histórico (ej: 'auto', 'moto', 'camioneta')
-      const lower = p.vehicleType.toLowerCase();
-      let key = lower;
-      if (lower.includes('moto') || lower.includes('bici')) key = 'moto';
-      else if (lower.includes('camion') || lower.includes('util') || lower.includes('van') || lower.includes('pick')) key = 'camioneta';
-      else if (lower.includes('auto') || lower.includes('car')) key = 'auto';
+      const key = categorizeVehicleType(p.vehicleType);
 
       if (!byType.has(key)) {
         byType.set(key, p);

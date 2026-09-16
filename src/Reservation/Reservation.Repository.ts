@@ -6,18 +6,21 @@ import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
+import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
 export class ReservationRepository implements Repository<Reservation> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Reservation[]> {
-    return await this.em.find( Reservation, { status: { $ne: 'CANCELADA' } },
+    return await this.em.find( Reservation, { status: { $ne: ReservationStatus.CANCELADA } },
       { populate: ['vehicle', 'parkingSpace', 'parkingSpace.parking', 'attendedBy'] }
     );
   }
 
   async findOne(item: { id: string }): Promise<Reservation | null> {
-    return await this.em.findOne( Reservation, { id: item.id, status: { $ne: 'CANCELADA' } },
+    return await this.em.findOne( Reservation, { id: item.id, status: { $ne: ReservationStatus.CANCELADA } },
       { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking', 'parkingSpace.parking.owner', 'attendedBy'] as any}
     );
   }
@@ -79,7 +82,7 @@ export class ReservationRepository implements Repository<Reservation> {
     const reservation = await this.findOne({ id: item.id });
     if (!reservation) return false;
 
-    reservation.status = 'CANCELADA';
+    reservation.status = ReservationStatus.CANCELADA;
     await this.em.flush();
     return true;
   }
@@ -102,7 +105,7 @@ export class ReservationRepository implements Repository<Reservation> {
       // 0. Validar que el mismo vehículo no tenga ya una reserva superpuesta en ese período
       const conflictingVehicleReservations = await txEm.find(Reservation, {
         vehicle,
-        status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+        status: { $in: ACTIVE_RESERVATION_STATUSES },
         $and: [
           { startTime: { $lt: reqEndTime } },
           { endTime: { $gt: reqStartTime } }
@@ -111,16 +114,11 @@ export class ReservationRepository implements Repository<Reservation> {
 
       if (conflictingVehicleReservations.length > 0) {
         const existing = conflictingVehicleReservations[0];
-        const formatTime = (d: Date) => {
-          const h = String(d.getHours()).padStart(2, '0');
-          const m = String(d.getMinutes()).padStart(2, '0');
-          return `${h}:${m}`;
-        };
         const parkingName = existing.parkingSpace?.parking?.name
           ? ` en "${existing.parkingSpace.parking.name}"`
           : '';
         throw new AppError(
-          `Este vehículo ya posee una reserva activa${parkingName} en ese horario (${formatTime(existing.startTime)} a ${formatTime(existing.endTime)} hs)`,
+          `Este vehículo ya posee una reserva activa${parkingName} en ese horario (${formatTimeHHMM(existing.startTime)} a ${formatTimeHHMM(existing.endTime)} hs)`,
           400
         );
       }
@@ -131,14 +129,6 @@ export class ReservationRepository implements Repository<Reservation> {
 
       let targetSpace: ParkingSpace | null = null;
 
-      const getVehicleVariants = (typeName?: string): string[] => {
-        const v = (typeName || '').trim().toUpperCase();
-        if (v.includes('MOTO')) return ['MOTOCICLETA', 'Motocicleta', 'MOTO', 'Moto', 'moto', 'motocicleta'];
-        if (v.includes('CAMION') || v.includes('UTIL') || v.includes('VAN') || v.includes('PICK')) {
-          return ['CAMIONETA', 'Camioneta', 'UTILITARIO', 'Utilitario', 'utilitario', 'camioneta', 'VAN', 'Van'];
-        }
-        return ['AUTO', 'Auto', 'auto', 'AUTOMOVIL', 'Automovil'];
-      };
 
       const allowedVariants = getVehicleVariants(vehicle.vehicleType?.name);
 
@@ -157,7 +147,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
         const conflictingReservations = await txEm.find(Reservation, {
           parkingSpace: space,
-          status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+          status: { $in: ACTIVE_RESERVATION_STATUSES },
           $and: [
             { startTime: { $lt: endWithMargin } },
             { endTime: { $gt: startWithMargin } }
@@ -184,7 +174,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
         const conflictingReservations = await txEm.find(Reservation, {
           parkingSpace: { $in: candidateSpaces },
-          status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+          status: { $in: ACTIVE_RESERVATION_STATUSES },
           $and: [
             { startTime: { $lt: endWithMargin } },
             { endTime: { $gt: startWithMargin } }
@@ -205,7 +195,7 @@ export class ReservationRepository implements Repository<Reservation> {
         endTime: reqEndTime,
         vehicle,
         parkingSpace: targetSpace,
-        status: 'PENDIENTE'
+        status: ReservationStatus.PENDIENTE
       });
 
       if (serviceIds && serviceIds.length > 0) {
@@ -221,7 +211,7 @@ export class ReservationRepository implements Repository<Reservation> {
   async findConflictingSpaceIds(parking: Parking, startWithMargin: Date, endWithMargin: Date) {
     const conflictingReservations = await this.em.find(Reservation, {
       parkingSpace: { parking },
-      status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+      status: { $in: ACTIVE_RESERVATION_STATUSES },
       $and: [
         { startTime: { $lt: endWithMargin } },
         { endTime: { $gt: startWithMargin } }
@@ -238,7 +228,7 @@ export class ReservationRepository implements Repository<Reservation> {
   async findConflictingVehicleReservation(vehicleId: string, startTime: Date, endTime: Date): Promise<Reservation | null> {
     return await this.em.findOne(Reservation, {
       vehicle: { id: vehicleId },
-      status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+      status: { $in: ACTIVE_RESERVATION_STATUSES },
       $and: [
         { startTime: { $lt: endTime } },
         { endTime: { $gt: startTime } }
@@ -246,4 +236,3 @@ export class ReservationRepository implements Repository<Reservation> {
     }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
   }
 }
-

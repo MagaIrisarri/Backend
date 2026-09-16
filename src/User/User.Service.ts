@@ -1,6 +1,7 @@
 import { UserRepository } from './User.Repository.js';
 import { User } from './User.Entity.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { UserStatus, UserType } from '../Shared/constants/status.js';
 import argon2 from 'argon2';
 
 export class UserService {
@@ -11,7 +12,7 @@ export class UserService {
     if (existing) throw new AppError('El email ya está registrado', 409);
 
     userData.password = await argon2.hash(userData.password!);
-    userData.status = 'ACTIVO';
+    userData.status = UserStatus.ACTIVO;
 
     const user = await this.userRepository.add({ ...userData, ...overrides });
     const { password, ...rest } = user;
@@ -40,28 +41,19 @@ export class UserService {
   }
 
   async addPublicUser(userData: Partial<User>): Promise<Omit<User, 'password'>> {
-    const existing = await this.userRepository.findOneForEmail(userData.email!);
-    if (existing) throw new Error('El email ya está registrado');
-    if (userData.type === 'ADMINISTRADOR' || userData.type === 'EMPLEADO') {
-        throw new Error('No podés registrarte con ese tipo de usuario');
-        }
-    userData.password = await argon2.hash(userData.password!);
-    userData.status = 'ACTIVO';
-    userData.type = userData.type || 'CLIENTE';
-
-    const user = await this.userRepository.add(userData);
-    const { password, ...rest } = user;
-    
-    return rest;
+    if (userData.type === UserType.ADMINISTRADOR || userData.type === UserType.EMPLEADO) {
+      throw new AppError('No podés registrarte con ese tipo de usuario', 400);
+    }
+    return this.createUser(userData, { type: userData.type || UserType.CLIENTE });
   }
 
   async addEmployee(userData: Partial<User>, ownerId: string): Promise<Omit<User, 'password'>> {
     const owner = await this.userRepository.findOne({ id: ownerId });
-    if (!owner || owner.status !== 'ACTIVO' || owner.type !== 'DUEÑO') {
+    if (!owner || owner.status !== UserStatus.ACTIVO || owner.type !== UserType.DUENO) {
       throw new AppError('Dueño no válido o inactivo', 400);
     }
 
-    return this.createUser(userData, { type: 'EMPLEADO', ownerId });
+    return this.createUser(userData, { type: UserType.EMPLEADO, ownerId });
   }
 
   async update(params: { id: string }, userData: Partial<User>): Promise<Omit<User, 'password'> | null> {

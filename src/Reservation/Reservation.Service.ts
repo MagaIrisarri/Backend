@@ -2,6 +2,9 @@ import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation } from './Reservation.Entity.js';
 import { CreateReservationInput, UpdateReservationInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
+import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
@@ -37,14 +40,8 @@ export class ReservationService {
     throw new AppError(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`, 400);
   }
 
-  const getHHMM = (d: Date) => {
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  const requestedStartTimeString = getHHMM(startTime);
-  const requestedEndTimeString = getHHMM(endTime);
+  const requestedStartTimeString = formatTimeHHMM(startTime);
+  const requestedEndTimeString = formatTimeHHMM(endTime);
   const openTime = parking.openingTime.slice(0, 5);
   const closeTime = parking.closingTime.slice(0, 5);
 
@@ -62,8 +59,8 @@ export class ReservationService {
     const parkingName = conflictingVehicleReservation.parkingSpace?.parking?.name
       ? ` en "${conflictingVehicleReservation.parkingSpace.parking.name}"`
       : '';
-    const startStr = getHHMM(conflictingVehicleReservation.startTime);
-    const endStr = getHHMM(conflictingVehicleReservation.endTime);
+    const startStr = formatTimeHHMM(conflictingVehicleReservation.startTime);
+    const endStr = formatTimeHHMM(conflictingVehicleReservation.endTime);
     throw new AppError(
       `Este vehículo ya posee una reserva activa${parkingName} en ese horario (${startStr} a ${endStr} hs)`,
       400
@@ -112,12 +109,12 @@ export class ReservationService {
       throw new AppError("No tienes permiso para dar de baja esta reserva", 403);
     }
 
-    if (reservation.status === 'CANCELADA' || reservation.status === 'FINALIZADA') {
+    if (reservation.status === ReservationStatus.CANCELADA || reservation.status === ReservationStatus.FINALIZADA) {
       throw new AppError("No puedes dar de baja una reserva que ya está cancelada o finalizada", 400);
     }
 
     if (isClient && !isOwner && !isAdminOrStaff) {
-      if (reservation.status === 'EN CURSO') {
+      if (reservation.status === ReservationStatus.EN_CURSO) {
         throw new AppError("No puedes dar de baja una reserva que ya está en curso", 400);
       }
     }
@@ -135,11 +132,11 @@ export class ReservationService {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
 
-    if (reservation.status !== 'PENDIENTE' && reservation.status !== 'CONFIRMADA') {
+    if (reservation.status !== ReservationStatus.PENDIENTE && reservation.status !== ReservationStatus.CONFIRMADA) {
       throw new AppError("La reserva no se encuentra en estado válido para Check-in", 400);
     }
 
-    const updated = await this.repo.update(id, { status: 'EN CURSO', attendedById: employeeId });
+    const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId });
     return updated!;
   }
 
@@ -147,7 +144,7 @@ export class ReservationService {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
 
-    if (reservation.status !== 'EN CURSO') {
+    if (reservation.status !== ReservationStatus.EN_CURSO) {
       throw new AppError("La reserva debe estar EN CURSO para realizar el Check-out", 400);
     }
 
@@ -160,15 +157,6 @@ export class ReservationService {
     const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
     // Acceso al EM a través del repositorio (forma rápida)
     const em = (this.repo as any).em;
-    const getVehicleVariants = (typeName?: string): string[] => {
-      const v = (typeName || '').trim().toUpperCase();
-      if (v.includes('MOTO')) return ['MOTOCICLETA', 'Motocicleta', 'MOTO', 'Moto', 'moto', 'motocicleta'];
-      if (v.includes('CAMION') || v.includes('UTIL') || v.includes('VAN') || v.includes('PICK')) {
-        return ['CAMIONETA', 'Camioneta', 'UTILITARIO', 'Utilitario', 'utilitario', 'camioneta', 'VAN', 'Van'];
-      }
-      return ['AUTO', 'Auto', 'auto', 'AUTOMOVIL', 'Automovil'];
-    };
-
     const typeVariants = getVehicleVariants(reservation.vehicle?.vehicleType?.name);
     const priceRecord = await em.findOne(ParkingPrice, { 
       parking: { id: reservation.parkingSpace.parking.id }, 
@@ -182,7 +170,7 @@ export class ReservationService {
 
     const parkingCost = durationHours * priceRecord.price;
     
-    // Sumar servicios adicionales (requiere popular collections)
+    // Sumar servicios adicionales 
     await em.populate(reservation, ['services']);
     let servicesCost = 0;
     for (const service of reservation.services) {
@@ -192,9 +180,9 @@ export class ReservationService {
     const totalAmount = parkingCost + servicesCost;
 
     const updated = await this.repo.update(id, { 
-      status: 'FINALIZADA', 
+      status: ReservationStatus.FINALIZADA, 
       attendedById: employeeId,
-      endTime // actualizamos el endTime a la fecha real de checkout
+      endTime 
     });
 
     // Generamos la factura

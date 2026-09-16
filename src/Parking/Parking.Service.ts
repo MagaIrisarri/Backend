@@ -4,6 +4,7 @@ import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 import { CreateParkingInput } from './Parking.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { categorizeVehicleType, groupSpacesByVehicleType } from '../Shared/utils/vehicleTypes.js';
 
 export class ParkingService {
   constructor(
@@ -23,9 +24,10 @@ export class ParkingService {
     }
   ) {
     const spaces = parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems() : [];
-    const autoSpaces = spaces.filter((s) => s.vehicleType?.toUpperCase() === 'AUTO' && s.isActive);
-    const motoSpaces = spaces.filter((s) => ['MOTOCICLETA', 'MOTO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
-    const truckSpaces = spaces.filter((s) => ['CAMIONETA', 'VAN', 'UTILITARIO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
+    const grouped = groupSpacesByVehicleType(spaces);
+    const autoSpaces = grouped.auto;
+    const motoSpaces = grouped.moto;
+    const truckSpaces = grouped.camioneta;
 
     const carCap = liveAvailability?.carCapacity ?? (parking.carCapacity ?? (autoSpaces.length > 0 ? autoSpaces.length : 0));
     const motoCap = liveAvailability?.motorcycleCapacity ?? (parking.motorcycleCapacity ?? (motoSpaces.length > 0 ? motoSpaces.length : 0));
@@ -71,17 +73,7 @@ export class ParkingService {
         .filter((p) => !p.expirationDate || p.expirationDate === null);
       const byCategory = new Map<string, { id: string; vehicleType: string; price: number }>();
       for (const p of activePrices) {
-        const raw = (p.vehicleType || '').trim().toUpperCase();
-        let category = 'AUTO';
-        if (raw.includes('MOTO')) category = 'MOTO';
-        else if (
-          raw.includes('CAMION') ||
-          raw.includes('UTIL') ||
-          raw.includes('VAN') ||
-          raw.includes('PICK')
-        ) {
-          category = 'CAMIONETA';
-        }
+        const category = categorizeVehicleType(p.vehicleType);
         byCategory.set(category, {
           id: p.id,
           vehicleType: category,
@@ -124,9 +116,6 @@ export class ParkingService {
       const spaces = parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems() : [];
       const spaceIds = spaces.map((s) => s.id).filter(Boolean);
 
-      const isMoto = (t: string) => ['MOTOCICLETA', 'MOTO'].includes(t);
-      const isTruck = (t: string) => ['CAMIONETA', 'VAN', 'UTILITARIO', 'PICKUP', 'PICK-UP'].includes(t);
-
       const reservedMotoSpaceIds = new Set<string>();
       const reservedCarSpaceIds = new Set<string>();
       const reservedTruckSpaceIds = new Set<string>();
@@ -147,15 +136,16 @@ export class ParkingService {
           );
 
           for (const r of activeReservations) {
-            const spaceType = (r.parkingSpace?.vehicleType || '').trim().toUpperCase();
-            const vehicleType = (r.vehicle?.vehicleType?.name || '').trim().toUpperCase();
+            const spaceType = (r.parkingSpace?.vehicleType || '').trim();
+            const vehicleType = (r.vehicle?.vehicleType?.name || '').trim();
             const type = spaceType || vehicleType;
             const spaceId = r.parkingSpace?.id;
+            const cat = categorizeVehicleType(type);
 
-            if (isMoto(type) || isMoto(spaceType) || isMoto(vehicleType)) {
+            if (cat === 'MOTO') {
               if (spaceId) reservedMotoSpaceIds.add(spaceId);
               motoResCount++;
-            } else if (isTruck(type) || isTruck(spaceType) || isTruck(vehicleType)) {
+            } else if (cat === 'CAMIONETA') {
               if (spaceId) reservedTruckSpaceIds.add(spaceId);
               truckResCount++;
             } else {
@@ -168,9 +158,10 @@ export class ParkingService {
         }
       }
 
-      const autoSpaces = spaces.filter((s) => s.vehicleType?.toUpperCase() === 'AUTO' && s.isActive);
-      const motoSpaces = spaces.filter((s) => ['MOTOCICLETA', 'MOTO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
-      const truckSpaces = spaces.filter((s) => ['CAMIONETA', 'VAN', 'UTILITARIO'].includes(s.vehicleType?.toUpperCase()) && s.isActive);
+      const grouped = groupSpacesByVehicleType(spaces);
+      const autoSpaces = grouped.auto;
+      const motoSpaces = grouped.moto;
+      const truckSpaces = grouped.camioneta;
 
       const carCap = parking.carCapacity ?? (autoSpaces.length > 0 ? autoSpaces.length : 0);
       const motoCap = parking.motorcycleCapacity ?? (motoSpaces.length > 0 ? motoSpaces.length : 0);
@@ -221,10 +212,7 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(parking);
   }
 
-  async findByOwner(ownerId: string): Promise<any[]> {
-    const parkings = await this.parkingRepository.findByOwner(ownerId);
-    return await Promise.all(parkings.map((p) => this.enrichWithLiveAvailability(p)));
-  }
+
 
   async create(data: CreateParkingInput): Promise<any> {
     const owner = await this.parkingRepository.getUserById(data.ownerId);

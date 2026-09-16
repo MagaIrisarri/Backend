@@ -5,6 +5,7 @@ import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ParkingPrice } from '../ParkingPrice/ParkingPrice.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 
 export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
@@ -22,12 +23,9 @@ export class ParkingRepository implements Repository<Parking> {
   }
 
   async findByOwnerId(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
-  }
-
-  async findByOwner(ownerId: string): Promise<Parking[]> {
     return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' } });
   }
+
 
   async add(data: any): Promise<Parking> {
     const parking = this.em.create(Parking, { ...data, isActive: false });
@@ -75,7 +73,7 @@ export class ParkingRepository implements Repository<Parking> {
       .where({
         'ps.parking': parkingId,
         'ps.vehicleType': vehicleType,
-        'r.status': { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+        'r.status': { $in: ACTIVE_RESERVATION_STATUSES },
         'r.endTime': { $gte: new Date() },
       });
     const result = await qb.execute<any>();
@@ -132,7 +130,7 @@ export class ParkingRepository implements Repository<Parking> {
       Reservation,
       {
         parkingSpace: { id: { $in: spaceIds } },
-        status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
+        status: { $in: ACTIVE_RESERVATION_STATUSES },
         $and: [
           { startTime: { $lte: to } },
           { endTime: { $gte: from } },

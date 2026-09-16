@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const TimeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
+import { TIME_REGEX } from "../Shared/utils/validation.js";
 
 const parkingBodyBaseSchema = z.object({
   ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
@@ -26,8 +25,8 @@ const parkingBodyBaseSchema = z.object({
     z.number().int().min(0),
     z.string().regex(/^\d+$/).transform(Number),
   ]).optional(),
-  openingTime: z.string().regex(TimeRegex, "Formato de hora de apertura inválido (HH:mm)"),
-  closingTime: z.string().regex(TimeRegex, "Formato de hora de cierre inválido (HH:mm)"),
+  openingTime: z.string().regex(TIME_REGEX, "Formato de hora de apertura inválido (HH:mm)"),
+  closingTime: z.string().regex(TIME_REGEX, "Formato de hora de cierre inválido (HH:mm)"),
   minReservationHours: z.number().int().min(1).default(1),
   maxReservationHours: z.number().int().min(1),
   reservationMargin: z.number().int().min(0).default(1),

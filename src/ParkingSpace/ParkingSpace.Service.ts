@@ -1,8 +1,10 @@
 import { AppError } from '../Shared/utils/AppError.js';
+import { categorizeVehicleType, matchesVehicleType } from '../Shared/utils/vehicleTypes.js';
 import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
 import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
+import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 
 export class ParkingSpaceService {
   constructor(
@@ -42,16 +44,8 @@ export class ParkingSpaceService {
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
-    const prefixMap: Record<string, string> = {
-      AUTO: 'A',
-      AUTOMOVIL: 'A',
-      MOTOCICLETA: 'M',
-      MOTO: 'M',
-      CAMIONETA: 'C',
-      UTILITARIO: 'C',
-    };
-    const upperType = data.vehicleType.trim().toUpperCase();
-    const prefix = prefixMap[upperType] || upperType.charAt(0);
+    const category = categorizeVehicleType(data.vehicleType);
+    const prefix = category.charAt(0);
 
     let maxNumber = 0;
     for (const s of existingSpaces) {
@@ -77,19 +71,23 @@ export class ParkingSpaceService {
     await this.spaceRepo.createBulk(spacesToCreate);
   }
 
+  private async findActiveReservationsForSpace(spaceId: string): Promise<any[]> {
+    const em = (this.reservationRepo as any).em;
+    const { Reservation } = await import('../Reservation/Reservation.Entity.js');
+    return em.find(Reservation, {
+      parkingSpace: { id: spaceId },
+      status: { $in: ACTIVE_RESERVATION_STATUSES },
+      endTime: { $gte: new Date() },
+    });
+  }
+
   async update(id: string, data: Partial<ParkingSpace>): Promise<ParkingSpace | null> {
     if (data.state === SpaceState.MANTENIMIENTO) {
       const space = await this.spaceRepo.findOne({ id });
       if (!space) throw new AppError("Plaza no encontrada", 404);
 
       // Verificar si la plaza tiene reservas activas o futuras
-      const em = (this.reservationRepo as any).em;
-      const { Reservation } = await import('../Reservation/Reservation.Entity.js');
-      const activeReservations = await em.find(Reservation, {
-        parkingSpace: { id },
-        status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-        endTime: { $gte: new Date() },
-      });
+      const activeReservations = await this.findActiveReservationsForSpace(id);
 
       if (activeReservations.length > 0) {
         throw new AppError(
@@ -106,13 +104,7 @@ export class ParkingSpaceService {
     const space = await this.spaceRepo.findOne({ id });
     if (!space) throw new AppError("Plaza no encontrada", 404);
 
-    const em = (this.reservationRepo as any).em;
-    const { Reservation } = await import('../Reservation/Reservation.Entity.js');
-    const activeReservations = await em.find(Reservation, {
-      parkingSpace: { id },
-      status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-      endTime: { $gte: new Date() },
-    });
+    const activeReservations = await this.findActiveReservationsForSpace(id);
 
     if (activeReservations.length > 0) {
       throw new AppError(
@@ -132,18 +124,6 @@ export class ParkingSpaceService {
     const endWithMargin = new Date(endTime.getTime() + marginMs);
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
 
-    const matchesVehicleType = (spaceType: string, queryType: string): boolean => {
-      const s = (spaceType || '').trim().toUpperCase();
-      const q = (queryType || '').trim().toUpperCase();
-      if (s === q) return true;
-      if (['MOTO', 'MOTOCICLETA'].includes(s) && ['MOTO', 'MOTOCICLETA'].includes(q)) return true;
-      if (
-        ['CAMIONETA', 'UTILITARIO', 'VAN', 'PICKUP', 'PICK-UP'].includes(s) &&
-        ['CAMIONETA', 'UTILITARIO', 'VAN', 'PICKUP', 'PICK-UP'].includes(q)
-      ) return true;
-      if (['AUTO', 'AUTOMOVIL'].includes(s) && ['AUTO', 'AUTOMOVIL'].includes(q)) return true;
-      return false;
-    };
 
     const spacesOfSameType = existingSpaces.filter((s) =>
       matchesVehicleType(s.vehicleType, vehicleType)
