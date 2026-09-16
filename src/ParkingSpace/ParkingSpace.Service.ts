@@ -71,14 +71,8 @@ export class ParkingSpaceService {
     await this.spaceRepo.createBulk(spacesToCreate);
   }
 
-  private async findActiveReservationsForSpace(spaceId: string): Promise<any[]> {
-    const em = (this.reservationRepo as any).em;
-    const { Reservation } = await import('../Reservation/Reservation.Entity.js');
-    return em.find(Reservation, {
-      parkingSpace: { id: spaceId },
-      status: { $in: ACTIVE_RESERVATION_STATUSES },
-      endTime: { $gte: new Date() },
-    });
+  private async findActiveReservationsForSpace(spaceId: string) {
+    return await this.reservationRepo.findActiveBySpaceId(spaceId);
   }
 
   async update(id: string, data: Partial<ParkingSpace>): Promise<ParkingSpace | null> {

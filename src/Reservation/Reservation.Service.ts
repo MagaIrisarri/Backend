@@ -8,10 +8,13 @@ import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
+import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
+
 export class ReservationService {
   constructor(
     private repo: ReservationRepository,
-    private invoiceRepo: InvoiceRepository
+    private invoiceRepo: InvoiceRepository,
+    private parkingPriceRepo: ParkingPriceRepository
   ) {}
 
   async findAll(): Promise<Reservation[]> {
@@ -155,16 +158,11 @@ export class ReservationService {
     const MS_PER_HOUR = 1000 * 60 * 60;
     const durationHours = Math.max(1, Math.ceil(durationMs / MS_PER_HOUR));
 
-    // Obtener tarifa activa
-    const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
-    // Acceso al EM a través del repositorio (forma rápida)
-    const entityManager = (this.repo as any).entityManager;
-    const typeVariants = getVehicleVariants(reservation.vehicle?.vehicleType?.name);
-    const priceRecord = await entityManager.findOne(ParkingPrice, { 
-      parking: { id: reservation.parkingSpace.parking.id }, 
-      vehicleType: { $in: typeVariants },
-      expirationDate: null 
-    });
+    // Obtener tarifa activa a través de su repositorio inyectado
+    const priceRecord = await this.parkingPriceRepo.findActive(
+      reservation.parkingSpace.parking.id,
+      reservation.vehicle.vehicleType.name
+    );
 
     if (!priceRecord) {
       throw new AppError("No se encontró tarifa activa para este tipo de vehículo en la cochera", 500);
@@ -172,8 +170,8 @@ export class ReservationService {
 
     const parkingCost = durationHours * priceRecord.price;
     
-    // Sumar servicios adicionales 
-    await entityManager.populate(reservation, ['services']);
+    // Sumar servicios adicionales usando el repo
+    await this.repo.populateServices(reservation);
     let servicesCost = 0;
     for (const service of reservation.services) {
       servicesCost += Number(service.price);
