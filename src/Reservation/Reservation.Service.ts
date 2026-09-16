@@ -2,7 +2,7 @@ import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation } from './Reservation.Entity.js';
 import { CreateReservationInput, UpdateReservationInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
@@ -67,14 +67,14 @@ export class ReservationService {
     );
   }
 
-  return await this.repo.createReservationAtomically(
+  return await this.repo.createReservationAtomically({
     parking,
     vehicle,
-    startTime,
-    endTime,
-    data.parkingSpaceId,
-    data.serviceIds
-  );
+    reqStartTime: startTime,
+    reqEndTime: endTime,
+    parkingSpaceId: data.parkingSpaceId,
+    serviceIds: data.serviceIds
+  });
 }
 
   async update(id: string, data: UpdateReservationInput): Promise<Reservation | null> {
@@ -97,15 +97,16 @@ export class ReservationService {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) return false;
 
-    const em = (this.repo as any).em;
+    const entityManager = (this.repo as any).entityManager;
     const { User } = await import('../User/User.Entity.js');
-    const user = await em.findOne(User, { id: userId, status: 'ACTIVO' });
+    const user = await entityManager.findOne(User, { id: userId, status: UserStatus.ACTIVO });
 
     const isClient = reservation.vehicle?.client?.id === userId;
     const isOwner = reservation.parkingSpace?.parking?.owner?.id === userId;
-    const isAdminOrStaff = user?.type === 'ADMINISTRADOR' || user?.type === 'ADMIN' || user?.type === 'EMPLEADO';
+    const isAdminOrStaff = user?.type === UserType.ADMINISTRADOR || user?.type === UserType.EMPLEADO;
 
-    if (!isClient && !isOwner && !isAdminOrStaff) {
+    const canCancelReservation = isClient || isOwner || isAdminOrStaff;
+    if (!canCancelReservation) {
       throw new AppError("No tienes permiso para dar de baja esta reserva", 403);
     }
 
@@ -151,14 +152,15 @@ export class ReservationService {
     // Calcular horas (mínimo 1 hora, redondeo hacia arriba)
     const endTime = new Date();
     const durationMs = endTime.getTime() - reservation.startTime.getTime();
-    const durationHours = Math.max(1, Math.ceil(durationMs / (1000 * 60 * 60)));
+    const MS_PER_HOUR = 1000 * 60 * 60;
+    const durationHours = Math.max(1, Math.ceil(durationMs / MS_PER_HOUR));
 
     // Obtener tarifa activa
     const { ParkingPrice } = await import('../ParkingPrice/ParkingPrice.Entity.js');
     // Acceso al EM a través del repositorio (forma rápida)
-    const em = (this.repo as any).em;
+    const entityManager = (this.repo as any).entityManager;
     const typeVariants = getVehicleVariants(reservation.vehicle?.vehicleType?.name);
-    const priceRecord = await em.findOne(ParkingPrice, { 
+    const priceRecord = await entityManager.findOne(ParkingPrice, { 
       parking: { id: reservation.parkingSpace.parking.id }, 
       vehicleType: { $in: typeVariants },
       expirationDate: null 
@@ -171,7 +173,7 @@ export class ReservationService {
     const parkingCost = durationHours * priceRecord.price;
     
     // Sumar servicios adicionales 
-    await em.populate(reservation, ['services']);
+    await entityManager.populate(reservation, ['services']);
     let servicesCost = 0;
     for (const service of reservation.services) {
       servicesCost += Number(service.price);

@@ -24,18 +24,18 @@ export class UserController {
 
   public createPublic = catchAsync(async (req: Request, res: Response) => {
     const user = await this.userService.addPublicUser(req.body);
-    res.status(201).json({ message: 'Usario crado Exitosamente', data: user });
+    res.status(201).json({ message: 'Usuario creado exitosamente', data: user });
   });
 
   public createEmployee = catchAsync(async (req: Request, res: Response) => {
     const user = await this.userService.addEmployee(req.body, req.params.ownerId as string);
-    res.status(201).json({ message: 'Empleado creado Exitosamente', data: user });
+    res.status(201).json({ message: 'Empleado creado exitosamente', data: user });
   });
 
   public update = catchAsync(async (req: Request, res: Response) => {
     const updatedUser = await this.userService.update({ id: req.params.id as string }, req.body);
-    if (!updatedUser) throw new AppError('User not found', 404);
-    res.status(200).json({ message: 'Usario actualizado Exitosamente', data: updatedUser });
+    if (!updatedUser) throw new AppError('Usuario no encontrado', 404);
+    res.status(200).json({ message: 'Usuario actualizado exitosamente', data: updatedUser });
   });
 
   public reactivate = catchAsync(async (req: Request, res: Response) => {

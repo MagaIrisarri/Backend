@@ -10,23 +10,32 @@ import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/consta
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
+export interface CreateReservationParams {
+  parking: Parking;
+  vehicle: Vehicle;
+  reqStartTime: Date;
+  reqEndTime: Date;
+  parkingSpaceId?: string;
+  serviceIds?: string[];
+}
+
 export class ReservationRepository implements Repository<Reservation> {
-  constructor(private em: EntityManager) {}
+  constructor(private entityManager: EntityManager) {}
 
   async findAll(): Promise<Reservation[]> {
-    return await this.em.find( Reservation, { status: { $ne: ReservationStatus.CANCELADA } },
+    return await this.entityManager.find( Reservation, { status: { $ne: ReservationStatus.CANCELADA } },
       { populate: ['vehicle', 'parkingSpace', 'parkingSpace.parking', 'attendedBy'] }
     );
   }
 
   async findOne(item: { id: string }): Promise<Reservation | null> {
-    return await this.em.findOne( Reservation, { id: item.id, status: { $ne: ReservationStatus.CANCELADA } },
+    return await this.entityManager.findOne( Reservation, { id: item.id, status: { $ne: ReservationStatus.CANCELADA } },
       { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking', 'parkingSpace.parking.owner', 'attendedBy'] as any}
     );
   }
 
   async findByClientId(clientId: string): Promise<Reservation[]> {
-    return await this.em.find(
+    return await this.entityManager.find(
       Reservation,
       { vehicle: { client: { id: clientId } } },
       { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking', 'attendedBy'] }
@@ -34,7 +43,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async findByParkingId(parkingId: string): Promise<Reservation[]> {
-    return await this.em.find(
+    return await this.entityManager.find(
       Reservation,
       { parkingSpace: { parking: { id: parkingId } } },
       { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any,
@@ -44,7 +53,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async findByOwnerId(ownerId: string): Promise<Reservation[]> {
-    return await this.em.find(
+    return await this.entityManager.find(
       Reservation,
       { parkingSpace: { parking: { owner: { id: ownerId } } } },
       { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any,
@@ -54,8 +63,8 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async add(data: any): Promise<Reservation> {
-    const reservation = this.em.create(Reservation, data);
-    await this.em.flush();
+    const reservation = this.entityManager.create(Reservation, data);
+    await this.entityManager.flush();
     return reservation;
   }
 
@@ -64,17 +73,17 @@ export class ReservationRepository implements Repository<Reservation> {
     if (!reservation) return null;
 
     if (data.attendedById) {
-      const employee = await this.em.findOne(User, { id: data.attendedById, status: 'ACTIVO' });
+      const employee = await this.entityManager.findOne(User, { id: data.attendedById, status: 'ACTIVO' });
       if (employee) reservation.attendedBy = employee;
     }
     
-    this.em.assign(reservation, {
+    this.entityManager.assign(reservation, {
       startTime: data.startTime ?? reservation.startTime,
       endTime: data.endTime ?? reservation.endTime,
       status: data.status ?? reservation.status
     });
     
-    await this.em.flush();
+    await this.entityManager.flush();
     return reservation;
   }
 
@@ -83,27 +92,21 @@ export class ReservationRepository implements Repository<Reservation> {
     if (!reservation) return false;
 
     reservation.status = ReservationStatus.CANCELADA;
-    await this.em.flush();
+    await this.entityManager.flush();
     return true;
   }
 
   async getDependencies(parkingId: string, vehicleId: string) {
-    const parking = await this.em.findOne(Parking, { id: parkingId, isActive: true });
-    const vehicle = await this.em.findOne(Vehicle, { id: vehicleId, isActive: true }, { populate: ['vehicleType'] as any });
+    const parking = await this.entityManager.findOne(Parking, { id: parkingId, isActive: true });
+    const vehicle = await this.entityManager.findOne(Vehicle, { id: vehicleId, isActive: true }, { populate: ['vehicleType'] as any });
     return { parking, vehicle };
   }
 
-  async createReservationAtomically(
-    parking: Parking,
-    vehicle: Vehicle,
-    reqStartTime: Date,
-    reqEndTime: Date,
-    parkingSpaceId?: string,
-    serviceIds?: string[]
-  ): Promise<Reservation> {
-    return await this.em.transactional(async (txEm) => {
+  async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
+    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds } = params;
+    return await this.entityManager.transactional(async (transactionalEntityManager) => {
       // 0. Validar que el mismo vehículo no tenga ya una reserva superpuesta en ese período
-      const conflictingVehicleReservations = await txEm.find(Reservation, {
+      const conflictingVehicleReservations = await transactionalEntityManager.find(Reservation, {
         vehicle,
         status: { $in: ACTIVE_RESERVATION_STATUSES },
         $and: [
@@ -133,7 +136,7 @@ export class ReservationRepository implements Repository<Reservation> {
       const allowedVariants = getVehicleVariants(vehicle.vehicleType?.name);
 
       if (parkingSpaceId) {
-        const space = await txEm.findOne(ParkingSpace, {
+        const space = await transactionalEntityManager.findOne(ParkingSpace, {
           id: parkingSpaceId,
           parking,
           vehicleType: { $in: allowedVariants },
@@ -145,7 +148,7 @@ export class ReservationRepository implements Repository<Reservation> {
           throw new Error("La plaza seleccionada no existe o no corresponde a este vehículo");
         }
 
-        const conflictingReservations = await txEm.find(Reservation, {
+        const conflictingReservations = await transactionalEntityManager.find(Reservation, {
           parkingSpace: space,
           status: { $in: ACTIVE_RESERVATION_STATUSES },
           $and: [
@@ -161,7 +164,7 @@ export class ReservationRepository implements Repository<Reservation> {
         targetSpace = space;
       } else {
         // ASIGNACIÓN AUTOMÁTICA DE PLAZA
-        const candidateSpaces = await txEm.find(ParkingSpace, {
+        const candidateSpaces = await transactionalEntityManager.find(ParkingSpace, {
           parking,
           vehicleType: { $in: allowedVariants },
           state: SpaceState.LIBRE,
@@ -172,7 +175,7 @@ export class ReservationRepository implements Repository<Reservation> {
           throw new Error("No hay plazas habilitadas para este tipo de vehículo en la cochera");
         }
 
-        const conflictingReservations = await txEm.find(Reservation, {
+        const conflictingReservations = await transactionalEntityManager.find(Reservation, {
           parkingSpace: { $in: candidateSpaces },
           status: { $in: ACTIVE_RESERVATION_STATUSES },
           $and: [
@@ -190,7 +193,7 @@ export class ReservationRepository implements Repository<Reservation> {
         }
       }
 
-      const reservation = txEm.create(Reservation, {
+      const reservation = transactionalEntityManager.create(Reservation, {
         startTime: reqStartTime,
         endTime: reqEndTime,
         vehicle,
@@ -200,7 +203,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
       if (serviceIds && serviceIds.length > 0) {
         const { ServicePrice } = await import('../ServicePrice/ServicePrice.Entity.js');
-        const services = await txEm.find(ServicePrice, { id: { $in: serviceIds }, parking });
+        const services = await transactionalEntityManager.find(ServicePrice, { id: { $in: serviceIds }, parking });
         reservation.services.add(services);
       }
 
@@ -209,7 +212,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async findConflictingSpaceIds(parking: Parking, startWithMargin: Date, endWithMargin: Date) {
-    const conflictingReservations = await this.em.find(Reservation, {
+    const conflictingReservations = await this.entityManager.find(Reservation, {
       parkingSpace: { parking },
       status: { $in: ACTIVE_RESERVATION_STATUSES },
       $and: [
@@ -226,7 +229,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async findConflictingVehicleReservation(vehicleId: string, startTime: Date, endTime: Date): Promise<Reservation | null> {
-    return await this.em.findOne(Reservation, {
+    return await this.entityManager.findOne(Reservation, {
       vehicle: { id: vehicleId },
       status: { $in: ACTIVE_RESERVATION_STATUSES },
       $and: [

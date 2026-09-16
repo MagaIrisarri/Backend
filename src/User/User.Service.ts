@@ -87,13 +87,13 @@ export class UserService {
     return await this.userRepository.remove(params);
   }
 
-  async login(email: string, pass: string): Promise<Omit<User, 'password'> | { error: string }> {
+  async login(email: string, password: string): Promise<Omit<User, 'password'> | { error: string }> {
     const user = await this.userRepository.findOneForEmail(email);
-    if (!user) return { error: 'not found' };
-    if (user.status !== 'ACTIVO') return { error: 'user not ACTIVO' };
+    if (!user) return { error: 'Usuario no encontrado' };
+    if (user.status !== UserStatus.ACTIVO) return { error: 'El usuario no está activo' };
 
-    const isValid = await argon2.verify(user.password, pass);
-    if (!isValid) return { error: 'password incorrect' };
+    const isValid = await argon2.verify(user.password, password);
+    if (!isValid) return { error: 'Contraseña incorrecta' };
 
     return this.excludePassword(user);
   }
