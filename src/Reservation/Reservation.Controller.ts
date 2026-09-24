@@ -57,6 +57,11 @@ export class ReservationController {
     });
   });
 
+  public confirm = catchAsync(async (req: Request, res: Response) => {
+    const reservation = await this.service.confirm(req.params.id as string);
+    return res.status(200).json({ message: 'Reserva confirmada con éxito', data: reservation });
+  });
+
   public checkIn = catchAsync(async (req: Request, res: Response) => {
     const employeeId = (req.headers['x-user-id'] || req.body.employeeId || req.query.employeeId) as string;
     if (!employeeId) throw new AppError('employeeId es requerido', 400);

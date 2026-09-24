@@ -36,6 +36,13 @@ export class InvoiceController {
     res.status(200).json({ message: 'Factura actualizada exitosamente', data: invoice });
   });
 
+  public pay = catchAsync(async (req: Request, res: Response) => {
+    const { paymentMethod } = req.body;
+    if (!paymentMethod) throw new AppError('El método de pago es requerido', 400);
+    const invoice = await this.service.pay(req.params.id as string, paymentMethod);
+    res.status(200).json({ message: 'Factura pagada exitosamente', data: invoice });
+  });
+
   public remove = catchAsync(async (req: Request, res: Response) => {
     const deleted = await this.service.remove(req.params.id as string);
     if (!deleted) throw new AppError('Factura no encontrada', 404);

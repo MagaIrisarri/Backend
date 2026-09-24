@@ -17,6 +17,7 @@ invoiceRouter.get("/", invoiceController.findAll);
 invoiceRouter.get('/client/:clientId', invoiceController.findByClientId);
 invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), invoiceController.findOne);
 invoiceRouter.post("/", validateSchema(createInvoiceSchema), invoiceController.create);
+invoiceRouter.post("/:id/pay", validateSchema(invoiceIdSchema), invoiceController.pay);
 invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
 invoiceRouter.patch("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
 invoiceRouter.delete("/:id", validateSchema(invoiceIdSchema), invoiceController.remove);

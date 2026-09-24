@@ -9,12 +9,15 @@ import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
+import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
+import { SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 
 export class ReservationService {
   constructor(
     private repo: ReservationRepository,
     private invoiceRepo: InvoiceRepository,
-    private parkingPriceRepo: ParkingPriceRepository
+    private parkingPriceRepo: ParkingPriceRepository,
+    private parkingSpaceRepo: ParkingSpaceRepository
   ) {}
 
   async findAll(): Promise<Reservation[]> {
@@ -132,6 +135,18 @@ export class ReservationService {
     return await this.repo.remove({ id });
   }
 
+  async confirm(id: string): Promise<Reservation> {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+
+    if (reservation.status !== ReservationStatus.PENDIENTE) {
+      throw new AppError("La reserva no se encuentra en estado PENDIENTE", 400);
+    }
+
+    const updated = await this.repo.update(id, { status: ReservationStatus.CONFIRMADA });
+    return updated!;
+  }
+
   async checkIn(id: string, employeeId: string): Promise<Reservation> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
@@ -141,6 +156,9 @@ export class ReservationService {
     }
 
     const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId });
+    if (updated?.parkingSpace) {
+      await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.OCUPADO });
+    }
     return updated!;
   }
 
@@ -184,6 +202,10 @@ export class ReservationService {
       attendedById: employeeId,
       endTime 
     });
+
+    if (updated?.parkingSpace) {
+      await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.LIBRE });
+    }
 
     // Generamos la factura
     const invoice = await this.invoiceRepo.add({

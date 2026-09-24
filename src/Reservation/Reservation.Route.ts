@@ -9,13 +9,15 @@ import { createReservationSchema, updateReservationSchema, reservationIdSchema} 
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
+import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 
 export const reservationRouter = Router();
 
 const reservationRepository = new ReservationRepository(orm.em);
 const invoiceRepository = new InvoiceRepository(orm.em);
 const parkingPriceRepository = new ParkingPriceRepository(orm.em);
-const reservationService = new ReservationService(reservationRepository, invoiceRepository, parkingPriceRepository);
+const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
+const reservationService = new ReservationService(reservationRepository, invoiceRepository, parkingPriceRepository, parkingSpaceRepository);
 const reservationController = new ReservationController(reservationService);
 
 reservationRouter.get('/', reservationController.findAll);
@@ -24,6 +26,7 @@ reservationRouter.get('/parking/:parkingId', reservationController.findByParking
 reservationRouter.get('/owner/:ownerId', reservationController.findByOwnerId);
 reservationRouter.get('/:id', validateSchema(reservationIdSchema), reservationController.findOne);
 reservationRouter.post('/', validateSchema(createReservationSchema), reservationController.create);
+reservationRouter.patch('/:id/confirm', validateSchema(reservationIdSchema), reservationController.confirm);
 reservationRouter.post('/:id/check-in', validateSchema(reservationIdSchema), reservationController.checkIn);
 reservationRouter.post('/:id/check-out', validateSchema(reservationIdSchema), reservationController.checkOut);
 reservationRouter.put('/:id', validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.update);

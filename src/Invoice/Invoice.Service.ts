@@ -33,6 +33,18 @@ export class InvoiceService {
     return await this.repo.update(id, input);
   }
 
+  async pay(id: string, paymentMethod: string): Promise<Invoice | null> {
+    const invoice = await this.repo.findOne({ id });
+    if (!invoice) throw new AppError('Factura no encontrada', 404);
+    if (invoice.status === 'PAGADA') throw new AppError('La factura ya está pagada', 400);
+
+    return await this.repo.update(id, {
+      status: 'PAGADA',
+      paymentMethod,
+      paymentDate: new Date()
+    });
+  }
+
   async remove(id: string): Promise<boolean> {
     return await this.repo.remove({ id });
   }
