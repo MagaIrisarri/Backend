@@ -41,6 +41,7 @@ export const createPublicUserSchema = z.object({
 export const createEmployeeSchema = z.object({
   body: z.object({
     ...baseUserFields,
+    parkingId: z.string().uuid('Estacionamiento inválido'),
   }),
 });
 
@@ -53,6 +54,21 @@ export const updateUserSchema = z.object({
     email: baseUserFields.email.optional(),
     phone: baseUserFields.phone.optional(),
   }),
+});
+
+export const updateEmployeeSchema = z.object({
+  params: z.object({
+    ownerId: z.string().uuid('ID de dueño inválido'),
+    id: z.string().uuid('ID de empleado inválido'),
+  }),
+  body: updateUserSchema.shape.body.extend({
+    date_of_birth: dateOfBirthSchema.optional(),
+    parkingId: z.string().uuid('Estacionamiento inválido').optional(),
+  }),
+});
+
+export const employeeIdSchema = z.object({
+  params: updateEmployeeSchema.shape.params,
 });
 
 export const userIdSchema = z.object({

@@ -4,20 +4,22 @@ import { CreateReservationInput, UpdateReservationInput } from './Reservation.Sc
 import { AppError } from '../Shared/utils/AppError.js';
 import { ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
-import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 import { SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
+import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
+import { wrap } from '@mikro-orm/core';
 
 export class ReservationService {
   constructor(
     private repo: ReservationRepository,
     private invoiceRepo: InvoiceRepository,
     private parkingPriceRepo: ParkingPriceRepository,
-    private parkingSpaceRepo: ParkingSpaceRepository
+    private parkingSpaceRepo: ParkingSpaceRepository,
+    private scheduleService: ScheduleService
   ) {}
 
   async findAll(): Promise<Reservation[]> {
@@ -54,6 +56,8 @@ export class ReservationService {
   if (requestedStartTimeString < openTime || requestedEndTimeString > closeTime) {
     throw new AppError(`El horario de reserva está fuera del horario de atención (${openTime} a ${closeTime})`, 400);
   }
+
+  await this.scheduleService.assertCovered(parking, startTime, endTime); // R-01
 
   const conflictingVehicleReservation = await this.repo.findConflictingVehicleReservation(
     data.vehicleId,
@@ -95,8 +99,11 @@ export class ReservationService {
     return await this.repo.findByParkingId(parkingId);
   }
 
-  async findByOwnerId(ownerId: string): Promise<Reservation[]> {
-    return await this.repo.findByOwnerId(ownerId);
+  // Incluye `amount` (total de la factura, null si todavía no se cobró) para el panel del dueño.
+  async findByOwnerId(ownerId: string): Promise<(Reservation & { amount: number | null })[]> {
+    const reservations = await this.repo.findByOwnerId(ownerId);
+    const amounts = await this.invoiceRepo.totalsByReservation(reservations.map(r => r.id));
+    return reservations.map(r => Object.assign(wrap(r).toObject(), { amount: amounts.get(r.id) ?? null }) as any);
   }
 
   async remove(id: string, userId: string): Promise<boolean> {

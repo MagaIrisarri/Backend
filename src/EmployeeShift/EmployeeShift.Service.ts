@@ -33,6 +33,11 @@ export class EmployeeShiftService {
       throw new AppError(`El empleado ya tiene un turno asignado que se cruza (${overlap.startTime} - ${overlap.endTime})`, 400);
     }
 
+    const parkingOverlap = await this.repo.findOverlappingInParking(parking.id, day, data.startTime, data.endTime);
+    if (parkingOverlap) {
+      throw new AppError(`Ya hay un turno en la sucursal en ese horario (${parkingOverlap.startTime} - ${parkingOverlap.endTime})`, 400);
+    }
+
     return await this.repo.add({
       employee,
       parking,
@@ -58,6 +63,12 @@ export class EmployeeShiftService {
       if (overlap) {
         throw new AppError(`El turno se superpone con otro existente (${overlap.startTime} - ${overlap.endTime})`, 400);
       }
+      const parkingOverlap = await this.repo.findOverlappingInParking(currentShift.parking.id, newDay, newStart, newEnd, id);
+      if (parkingOverlap) {
+        throw new AppError(`Ya hay un turno en la sucursal en ese horario (${parkingOverlap.startTime} - ${parkingOverlap.endTime})`, 400);
+      }
+      // shortcut: R-06, editar o quitar turnos de la semana tipo no revisa reservas futuras, usar el calendario por fecha hasta que se agregue
+
     }
 
     return await this.repo.update(id, data);

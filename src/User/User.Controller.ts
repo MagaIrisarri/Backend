@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from './User.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { UserStatus } from '../Shared/constants/status.js';
 
 export class UserController {
   constructor(private userService: UserService) {}
@@ -18,7 +19,8 @@ export class UserController {
   });
 
   public findEmployeesByOwner = catchAsync(async (req: Request, res: Response) => {
-    const users = await this.userService.findEmployeesByOwner(req.params.ownerId as string);
+    const status = req.query.status === UserStatus.BAJA ? UserStatus.BAJA : UserStatus.ACTIVO;
+    const users = await this.userService.findEmployeesByOwner(req.params.ownerId as string, status);
     res.status(200).json({ data: users });
   });
 
@@ -30,6 +32,21 @@ export class UserController {
   public createEmployee = catchAsync(async (req: Request, res: Response) => {
     const user = await this.userService.addEmployee(req.body, req.params.ownerId as string);
     res.status(201).json({ message: 'Empleado creado exitosamente', data: user });
+  });
+
+  public updateEmployee = catchAsync(async (req: Request, res: Response) => {
+    const user = await this.userService.updateEmployee(req.params.ownerId as string, req.params.id as string, req.body);
+    res.status(200).json({ message: 'Empleado actualizado exitosamente', data: user });
+  });
+
+  public reactivateEmployee = catchAsync(async (req: Request, res: Response) => {
+    const user = await this.userService.reactivateEmployee(req.params.ownerId as string, req.params.id as string);
+    res.status(200).json({ message: 'Empleado reactivado exitosamente', data: user });
+  });
+
+  public deleteEmployee = catchAsync(async (req: Request, res: Response) => {
+    await this.userService.removeEmployee(req.params.ownerId as string, req.params.id as string);
+    res.status(200).json({ message: 'Empleado dado de baja exitosamente' });
   });
 
   public update = catchAsync(async (req: Request, res: Response) => {
@@ -61,11 +78,8 @@ export class UserController {
     const { email, password } = req.body;
     const user = await this.userService.login(email, password);
     
-    if ('error' in user) {
-      if (user.error === 'not found') throw new AppError('Usuario no encontrado', 404);
-      if (user.error === 'user not ACTIVO') throw new AppError('El usuario no esta activo', 401);
-      if (user.error === 'password incorrect') throw new AppError('Contraseña incorrecta', 401);
-    }
+    // El servicio ya devuelve el mensaje en español
+    if ('error' in user) throw new AppError(user.error, user.error === 'Usuario no encontrado' ? 404 : 401);
     res.status(200).json({ data: user });
   });
 }

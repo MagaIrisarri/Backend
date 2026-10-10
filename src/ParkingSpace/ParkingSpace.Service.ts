@@ -4,7 +4,6 @@ import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
 import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
-import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 
 export class ParkingSpaceService {
   constructor(

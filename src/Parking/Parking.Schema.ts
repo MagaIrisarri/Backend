@@ -4,11 +4,12 @@ import { TIME_REGEX } from "../Shared/utils/validation.js";
 const parkingBodyBaseSchema = z.object({
   ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
   locality: z.string().min(3, "La localidad debe tener al menos 3 caracteres"),
+  // 4 dígitos (2000) o formato CPA (S2000ABC); se guarda en mayúsculas.
   postalCode: z
     .string()
-    .min(4, "El código postal debe tener al menos 4 caracteres")
-    .max(10, "El código postal no puede superar los 10 caracteres")
-    .regex(/^\d+$/, "El código postal debe ser numérico"),
+    .trim()
+    .toUpperCase()
+    .regex(/^(\d{4}|[A-Z]\d{4}[A-Z]{3})$/, "Código postal inválido: usá 4 dígitos (2000) o formato CPA (S2000ABC)"),
   address: z
     .string()
     .min(5, "La dirección debe tener al menos 5 caracteres")

@@ -7,6 +7,8 @@ import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
 import {
   createPublicUserSchema,
   createEmployeeSchema,
+  updateEmployeeSchema,
+  employeeIdSchema,
   updateUserSchema,
   userIdSchema,
   ownerIdSchema,
@@ -26,6 +28,9 @@ userRouter.post('/login', validateSchema(loginSchema), userController.login);
 // --- Empleados (bajo un dueño) ---
 userRouter.get('/:ownerId/employee', validateSchema(ownerIdSchema), userController.findEmployeesByOwner);
 userRouter.post('/:ownerId/employee', validateSchema(ownerIdSchema), validateSchema(createEmployeeSchema), userController.createEmployee);
+userRouter.put('/:ownerId/employee/:id', validateSchema(updateEmployeeSchema), userController.updateEmployee);
+userRouter.post('/:ownerId/employee/:id/reactivate', validateSchema(employeeIdSchema), userController.reactivateEmployee);
+userRouter.delete('/:ownerId/employee/:id', validateSchema(employeeIdSchema), userController.deleteEmployee);
 
 // --- CRUD general ---
 userRouter.get('/', userController.findAll);

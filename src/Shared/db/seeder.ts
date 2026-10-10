@@ -3,10 +3,13 @@ import { User } from '../../User/User.Entity.js';
 import { seedUsers } from './seeders/userSeeder.js';
 import { seedVehicles } from './seeders/vehicleSeeder.js';
 import { seedParkings } from './seeders/parkingSeeder.js';
+import { seedHolidays } from './seeders/holidaySeeder.js';
 
 export const seedDatabaseAdmi = async (_em: EntityManager) => {};
 
 export const seedDatabase = async (em: EntityManager) => {
+  await seedHolidays(em);
+
   const usersCount = await em.count(User, {});
   if (usersCount > 0) {
     console.log('Omitiendo seeding: ya existen datos en la base de datos.');

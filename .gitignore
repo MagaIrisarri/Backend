@@ -29,9 +29,8 @@ pnpm-debug.log*
 *.swo
 .DS_Store
 
-# Claude
-.claude/
-.claude/*
+# Claude: las skills 
+.claude/settings.local.json
 
 # Postman
 .postman/
@@ -41,3 +40,8 @@ postmanfolder/
 *.postman_environment.json
 *.postman_collection.json
 
+# Ralph
+scripts/ralph/prd.json
+scripts/ralph/progress.txt
+scripts/ralph/archive/
+scripts/ralph/.last-branch

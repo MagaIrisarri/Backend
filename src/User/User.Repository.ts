@@ -1,6 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Repository } from '../Shared/base.Repository.js';
 import { User } from './User.Entity.js';
+import { Parking } from '../Parking/Parking.Entity.js';
 
 export class UserRepository implements Repository<User> {
   constructor(private em: EntityManager) {}
@@ -23,7 +24,10 @@ export class UserRepository implements Repository<User> {
     const user = await this.em.findOne(User, { id });
     if (!user) return null;
 
-    this.em.assign(user, item);
+    // La columna `date` se lee como 'YYYY-MM-DD' (string) y MikroORM rechaza asignarle un Date: el esquema entrega Date.
+    const { date_of_birth, ...rest } = item;
+    this.em.assign(user, rest);
+    if (date_of_birth) (user as any).date_of_birth = date_of_birth instanceof Date ? date_of_birth.toISOString().slice(0, 10) : date_of_birth;
     await this.em.flush();
     return user;
   }
@@ -42,7 +46,11 @@ export class UserRepository implements Repository<User> {
     return await this.em.findOne(User, { email });
   }
 
-  async findByOwner(ownerId: string): Promise<User[]> {
-      return await this.em.find(User, { type: 'EMPLEADO', ownerId, status: 'ACTIVO' });
+  async ownsParking(ownerId: string, parkingId: string): Promise<boolean> {
+    return (await this.em.count(Parking, { id: parkingId, owner: { id: ownerId } })) > 0;
+  }
+
+  async findByOwner(ownerId: string, status = 'ACTIVO'): Promise<User[]> {
+      return await this.em.find(User, { type: 'EMPLEADO', ownerId, status });
     }
   }

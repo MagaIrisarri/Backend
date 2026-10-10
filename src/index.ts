@@ -7,6 +7,7 @@ import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
 import employeeShiftRouter from './EmployeeShift/EmployeeShift.Route.js';
+import holidayRouter from './Holiday/Holiday.Route.js';
 
 import { VehicleRouter } from './Vehicle/Vehicle.Route.js';
 import { vehicleTypeRouter } from './Vehicle/VehicleType/VehicleType.Route.js'; 
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 // --- Usuarios y Personal ---
 app.use('/api/users', userRouter);
 app.use('/api/shifts', employeeShiftRouter);
+app.use('/api/holidays', holidayRouter);
 
 // --- Vehículos ---
 app.use('/api/vehicles', VehicleRouter);
@@ -72,7 +74,7 @@ async function startServer() {
     await seedDatabase(orm.em.fork());
     await seedDatabaseAdmi(orm.em.fork());
 
-    app.listen(3000, () => {
+    app.listen(Number(process.env.PORT) || 3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');
     });
   } catch (error) {

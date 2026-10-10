@@ -35,8 +35,8 @@ export class UserService {
     return this.excludePassword(user);
   }
 
-  async findEmployeesByOwner(ownerId: string): Promise<Omit<User, 'password'>[]> {
-    const users = await this.userRepository.findByOwner(ownerId);
+  async findEmployeesByOwner(ownerId: string, status = UserStatus.ACTIVO): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userRepository.findByOwner(ownerId, status);
     return users.map((user) => this.excludePassword(user));
   }
 
@@ -52,8 +52,44 @@ export class UserService {
     if (!owner || owner.status !== UserStatus.ACTIVO || owner.type !== UserType.DUENO) {
       throw new AppError('Dueño no válido o inactivo', 400);
     }
+    if (!(await this.userRepository.ownsParking(ownerId, userData.parkingId!))) {
+      throw new AppError('El estacionamiento no pertenece a este dueño', 400);
+    }
 
     return this.createUser(userData, { type: UserType.EMPLEADO, ownerId });
+  }
+
+  // El empleado debe existir, tener ese estado y pertenecer al dueño
+  private async findOwnedEmployee(ownerId: string, id: string, status = UserStatus.ACTIVO): Promise<User> {
+    const employee = await this.userRepository.findOne({ id });
+    if (!employee || employee.type !== UserType.EMPLEADO || employee.ownerId !== ownerId || employee.status !== status) {
+      throw new AppError('Empleado no encontrado', 404);
+    }
+    return employee;
+  }
+
+  async updateEmployee(ownerId: string, id: string, userData: Partial<User>): Promise<Omit<User, 'password'>> {
+    await this.findOwnedEmployee(ownerId, id);
+    if (userData.parkingId && !(await this.userRepository.ownsParking(ownerId, userData.parkingId))) {
+      throw new AppError('El estacionamiento no pertenece a este dueño', 400);
+    }
+    if (userData.email) {
+      const existing = await this.userRepository.findOneForEmail(userData.email);
+      if (existing && existing.id !== id) throw new AppError('El email ya está registrado', 409);
+    }
+    const user = await this.userRepository.update(id, userData);
+    return this.excludePassword(user!);
+  }
+
+  async removeEmployee(ownerId: string, id: string): Promise<void> {
+    await this.findOwnedEmployee(ownerId, id);
+    await this.userRepository.remove({ id });
+  }
+
+  async reactivateEmployee(ownerId: string, id: string): Promise<Omit<User, 'password'>> {
+    await this.findOwnedEmployee(ownerId, id, UserStatus.BAJA);
+    const user = await this.userRepository.update(id, { status: UserStatus.ACTIVO });
+    return this.excludePassword(user!);
   }
 
   async update(params: { id: string }, userData: Partial<User>): Promise<Omit<User, 'password'> | null> {

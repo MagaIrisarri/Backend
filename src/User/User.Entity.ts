@@ -36,4 +36,8 @@ export class User {
 
   @Property({ type: 'string', nullable: true })
   ownerId?: string;
+
+  // Solo empleados: sucursal donde trabaja
+  @Property({ type: 'string', nullable: true })
+  parkingId?: string;
 }

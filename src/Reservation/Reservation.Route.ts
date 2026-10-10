@@ -10,6 +10,7 @@ import { createReservationSchema, updateReservationSchema, reservationIdSchema} 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
+import { scheduleService } from '../EmployeeShift/EmployeeShift.Route.js';
 
 export const reservationRouter = Router();
 
@@ -17,7 +18,7 @@ const reservationRepository = new ReservationRepository(orm.em);
 const invoiceRepository = new InvoiceRepository(orm.em);
 const parkingPriceRepository = new ParkingPriceRepository(orm.em);
 const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
-const reservationService = new ReservationService(reservationRepository, invoiceRepository, parkingPriceRepository, parkingSpaceRepository);
+const reservationService = new ReservationService(reservationRepository, invoiceRepository, parkingPriceRepository, parkingSpaceRepository, scheduleService);
 const reservationController = new ReservationController(reservationService);
 
 reservationRouter.get('/', reservationController.findAll);

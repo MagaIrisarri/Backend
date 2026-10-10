@@ -81,6 +81,13 @@ export class EmployeeShiftRepository implements Repository<EmployeeShift> {
     return await this.em.findOne(EmployeeShift, query);
   }
 
+  // R-02: los turnos de una sucursal no se solapan, sean del mismo empleado o de otro.
+  async findOverlappingInParking(parkingId: string, dayOfWeek: DayOfWeek, startTime: string, endTime: string, excludeShiftId?: string) {
+    const query: any = { parking: { id: parkingId }, dayOfWeek, isActive: true, startTime: { $lt: endTime }, endTime: { $gt: startTime } };
+    if (excludeShiftId) query.id = { $ne: excludeShiftId };
+    return await this.em.findOne(EmployeeShift, query);
+  }
+
   async findByParkingAndDay(parkingId: string, dayOfWeek: DayOfWeek): Promise<EmployeeShift[]> {
     return await this.em.find(
       EmployeeShift, 
