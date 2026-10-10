@@ -25,7 +25,8 @@ export class User {
   @Property({ type: 'string', unique: true })
   phone!: string;
   
-  @Property({ type: 'string' })
+  // hidden: nunca se serializa a JSON (tampoco anidado en reservas, vehículos o sucursales); el login la sigue leyendo.
+  @Property({ type: 'string', hidden: true })
   password!: string;
 
   @Property({ type: 'string', default: 'CLIENTE' })

@@ -46,5 +46,14 @@ export const reservationIdSchema = z.object({
   }),
 });
 
+export const changeSpaceSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("El ID de la reserva debe ser un UUID válido"),
+  }),
+  body: z.object({
+    parkingSpaceId: z.string().uuid("El ID de plaza debe ser un UUID válido"),
+  }),
+});
+
 export type CreateReservationInput = z.infer<typeof createReservationSchema>['body'];
 export type UpdateReservationInput = z.infer<typeof updateReservationSchema>['body'];

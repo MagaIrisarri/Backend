@@ -8,7 +8,7 @@ import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
-import { getVehicleVariants } from '../Shared/utils/vehicleTypes.js';
+import { matchesVehicleType } from '../Shared/utils/vehicleTypes.js';
 
 export interface CreateReservationParams {
   parking: Parking;
@@ -91,20 +91,60 @@ export class ReservationRepository implements Repository<Reservation> {
     return reservation;
   }
 
+  // R-17: pendientes o confirmadas cuyo horario terminó sin ingreso. No tienen factura ni ocupan la plaza
+  // (eso pasa recién en el check-in), así que alcanza con cambiar el estado.
+  async cancelExpired(now: Date): Promise<number> {
+    return await this.entityManager.fork().nativeUpdate(
+      Reservation,
+      { status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] }, endTime: { $lte: now } },
+      { status: ReservationStatus.CANCELADA },
+    );
+  }
+
+  async findActiveUser(id: string): Promise<User | null> {
+    return await this.entityManager.findOne(User, { id, status: 'ACTIVO' });
+  }
+
+  // Cambia la plaza con las mismas reglas que la elección manual al reservar: misma sucursal,
+  // tipo de vehículo compatible, plaza libre y activa, y sin otra reserva activa en el horario (con margen).
+  // Si el vehículo ya está adentro, libera la plaza anterior y ocupa la nueva.
+  async changeSpace(id: string, parkingSpaceId: string): Promise<void> {
+    await this.entityManager.transactional(async (em) => {
+      const reservation = await em.findOneOrFail(Reservation, { id },
+        { populate: ['parkingSpace', 'parkingSpace.parking', 'vehicle', 'vehicle.vehicleType'] as any });
+      const parking = reservation.parkingSpace.parking;
+
+      // El tipo se compara por categoría (AUTO, MOTO, CAMIONETA) y no por el texto guardado.
+      const candidate = await em.findOne(ParkingSpace, { id: parkingSpaceId, parking, state: SpaceState.LIBRE, isActive: true });
+      const space = candidate && matchesVehicleType(candidate.vehicleType, reservation.vehicle.vehicleType?.name) ? candidate : null;
+      if (!space) throw new AppError('La plaza elegida no existe, no está libre o no corresponde a este vehículo', 400);
+
+      const marginMs = parking.reservationMargin * 60 * 60 * 1000;
+      const conflicts = await em.count(Reservation, {
+        id: { $ne: reservation.id },
+        parkingSpace: space,
+        status: { $in: ACTIVE_RESERVATION_STATUSES },
+        $and: [
+          { startTime: { $lt: new Date(reservation.endTime.getTime() + marginMs) } },
+          { endTime: { $gt: new Date(reservation.startTime.getTime() - marginMs) } },
+        ],
+      });
+      if (conflicts) throw new AppError('La plaza elegida ya tiene otra reserva en ese horario', 409);
+
+      if (reservation.status === ReservationStatus.EN_CURSO) {
+        reservation.parkingSpace.state = SpaceState.LIBRE;
+        space.state = SpaceState.OCUPADO;
+      }
+      reservation.parkingSpace = space;
+    });
+  }
+
   async remove(item: { id: string }): Promise<boolean> {
     const res = await this.findOne(item);
     if (!res) return false;
     res.status = ReservationStatus.CANCELADA;
     await this.entityManager.flush();
     return true;
-  }
-
-  async findActiveBySpaceId(spaceId: string): Promise<Reservation[]> {
-    return this.entityManager.find(Reservation, {
-      parkingSpace: { id: spaceId },
-      status: { $in: ACTIVE_RESERVATION_STATUSES },
-      endTime: { $gte: new Date() },
-    });
   }
 
   async getDependencies(parkingId: string, vehicleId: string) {
@@ -165,17 +205,11 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   private async getManualSpace(em: EntityManager, parkingSpaceId: string, parking: Parking, vehicle: Vehicle, startWithMargin: Date, endWithMargin: Date): Promise<ParkingSpace> {
-    const allowedVariants = getVehicleVariants(vehicle.vehicleType?.name);
-    const space = await em.findOne(ParkingSpace, {
-      id: parkingSpaceId,
-      parking,
-      vehicleType: { $in: allowedVariants },
-      state: SpaceState.LIBRE,
-      isActive: true
-    });
+    const candidate = await em.findOne(ParkingSpace, { id: parkingSpaceId, parking, state: SpaceState.LIBRE, isActive: true });
+    const space = candidate && matchesVehicleType(candidate.vehicleType, vehicle.vehicleType?.name) ? candidate : null;
 
     if (!space) {
-      throw new Error("La plaza seleccionada no existe o no corresponde a este vehículo");
+      throw new AppError("La plaza seleccionada no existe o no corresponde a este vehículo", 400);
     }
 
     const conflictingReservations = await em.find(Reservation, {
@@ -188,23 +222,23 @@ export class ReservationRepository implements Repository<Reservation> {
     });
 
     if (conflictingReservations.length > 0) {
-      throw new Error("La plaza seleccionada ya no está disponible para el horario elegido");
+      throw new AppError("La plaza seleccionada ya no está disponible para el horario elegido", 409);
     }
 
     return space;
   }
 
   private async getAutomaticSpace(em: EntityManager, parking: Parking, vehicle: Vehicle, startWithMargin: Date, endWithMargin: Date): Promise<ParkingSpace> {
-    const allowedVariants = getVehicleVariants(vehicle.vehicleType?.name);
-    const candidateSpaces = await em.find(ParkingSpace, {
+    // El tipo se compara por categoría (AUTO, MOTO, CAMIONETA) y no por el texto guardado.
+    const candidateSpaces = (await em.find(ParkingSpace, {
       parking,
-      vehicleType: { $in: allowedVariants },
       state: SpaceState.LIBRE,
       isActive: true
-    }, { orderBy: { spaceCode: 'ASC' } });
+    }, { orderBy: { spaceCode: 'ASC' } }))
+      .filter(s => matchesVehicleType(s.vehicleType, vehicle.vehicleType?.name));
 
     if (candidateSpaces.length === 0) {
-      throw new Error("No hay plazas habilitadas para este tipo de vehículo en la cochera");
+      throw new AppError("No hay plazas habilitadas para este tipo de vehículo en la cochera", 409);
     }
 
     const conflictingReservations = await em.find(Reservation, {
@@ -221,7 +255,7 @@ export class ReservationRepository implements Repository<Reservation> {
     const targetSpace = candidateSpaces.find(s => !occupiedSpaceIds.has(s.id));
 
     if (!targetSpace) {
-      throw new Error("No hay plazas disponibles para este tipo de vehículo en el horario seleccionado");
+      throw new AppError("No hay plazas disponibles para este tipo de vehículo en el horario seleccionado", 409);
     }
 
     return targetSpace;

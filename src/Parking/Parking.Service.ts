@@ -6,6 +6,10 @@ import { CreateParkingInput } from './Parking.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { categorizeVehicleType, groupSpacesByVehicleType } from '../Shared/utils/vehicleTypes.js';
 
+// Plazas vigentes: las dadas de baja (isActive = false) siguen en la colección pero no cuentan.
+const activeSpaces = (parking: Parking): ParkingSpace[] =>
+  parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems().filter((s) => s.isActive !== false) : [];
+
 export class ParkingService {
   constructor(
     private readonly parkingRepository: ParkingRepository,
@@ -23,7 +27,7 @@ export class ParkingService {
       availableTruckSpaces: number;
     }
   ) {
-    const spaces = parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems() : [];
+    const spaces = activeSpaces(parking);
     const grouped = groupSpacesByVehicleType(spaces);
     const autoSpaces = grouped.auto;
     const motoSpaces = grouped.moto;
@@ -94,6 +98,9 @@ export class ParkingService {
       availableCarSpaces,
       availableMotorcycleSpaces,
       availableTruckSpaces,
+      maintenanceCarSpaces: autoSpaces.filter((s) => s.state === SpaceState.MANTENIMIENTO).length,
+      maintenanceMotorcycleSpaces: motoSpaces.filter((s) => s.state === SpaceState.MANTENIMIENTO).length,
+      maintenanceTruckSpaces: truckSpaces.filter((s) => s.state === SpaceState.MANTENIMIENTO).length,
       openingTime: parking.openingTime,
       closingTime: parking.closingTime,
       minReservationHours: parking.minReservationHours,
@@ -113,7 +120,7 @@ export class ParkingService {
 
   private async enrichWithLiveAvailability(parking: Parking): Promise<any> {
     try {
-      const spaces = parking.parkingSpaces?.isInitialized() ? parking.parkingSpaces.getItems() : [];
+      const spaces = activeSpaces(parking);
       const spaceIds = spaces.map((s) => s.id).filter(Boolean);
 
       const reservedMotoSpaceIds = new Set<string>();
@@ -124,18 +131,12 @@ export class ParkingService {
       let carResCount = 0;
       let truckResCount = 0;
 
+      // "En vivo" = vehículos adentro ahora (reservas EN CURSO). Las pendientes y confirmadas todavía no ocupan la plaza.
       if (spaceIds.length > 0) {
         try {
-          const now = new Date();
-          const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+          const inProgress = await this.parkingRepository.findInProgressReservationsForSpaces(spaceIds);
 
-          const activeReservations = await this.parkingRepository.findActiveReservationsForSpaces(
-            spaceIds,
-            now,
-            next24Hours
-          );
-
-          for (const r of activeReservations) {
+          for (const r of inProgress) {
             const spaceType = (r.parkingSpace?.vehicleType || '').trim();
             const vehicleType = (r.vehicle?.vehicleType?.name || '').trim();
             const type = spaceType || vehicleType;
@@ -167,21 +168,22 @@ export class ParkingService {
       const motoCap = parking.motorcycleCapacity ?? (motoSpaces.length > 0 ? motoSpaces.length : 0);
       const truckCap = parking.truckCapacity ?? (truckSpaces.length > 0 ? truckSpaces.length : 0);
 
-      const occupiedSpacesByStateCar = autoSpaces.filter((s) => s.state === 'OCUPADO').length;
-      const occupiedSpacesByStateMoto = motoSpaces.filter((s) => s.state === 'OCUPADO').length;
-      const occupiedSpacesByStateTruck = truckSpaces.filter((s) => s.state === 'OCUPADO').length;
-
-      const totalOccupiedCar = Math.max(occupiedSpacesByStateCar, reservedCarSpaceIds.size, carResCount);
-      const totalOccupiedMoto = Math.max(occupiedSpacesByStateMoto, reservedMotoSpaceIds.size, motoResCount);
-      const totalOccupiedTruck = Math.max(occupiedSpacesByStateTruck, reservedTruckSpaceIds.size, truckResCount);
+      // Ocupada = con un vehículo adentro por reserva o marcada OCUPADO a mano por el dueño, sin contar dos veces la misma plaza.
+      const occupied = (list: typeof spaces, reserved: Set<string>, resCount: number) =>
+        Math.max(new Set([...list.filter((s) => s.state === 'OCUPADO').map((s) => s.id), ...reserved]).size, resCount);
+      const totalOccupiedCar = occupied(autoSpaces, reservedCarSpaceIds, carResCount);
+      const totalOccupiedMoto = occupied(motoSpaces, reservedMotoSpaceIds, motoResCount);
+      const totalOccupiedTruck = occupied(truckSpaces, reservedTruckSpaceIds, truckResCount);
+      // En mantenimiento: fuera de servicio, no está libre ni ocupada.
+      const maint = (list: typeof spaces) => list.filter((s) => s.state === SpaceState.MANTENIMIENTO).length;
 
       return this.formatParkingResponse(parking, {
         carCapacity: carCap,
         motorcycleCapacity: motoCap,
         truckCapacity: truckCap,
-        availableCarSpaces: Math.max(0, carCap - totalOccupiedCar),
-        availableMotorcycleSpaces: Math.max(0, motoCap - totalOccupiedMoto),
-        availableTruckSpaces: Math.max(0, truckCap - totalOccupiedTruck),
+        availableCarSpaces: Math.max(0, carCap - totalOccupiedCar - maint(autoSpaces)),
+        availableMotorcycleSpaces: Math.max(0, motoCap - totalOccupiedMoto - maint(motoSpaces)),
+        availableTruckSpaces: Math.max(0, truckCap - totalOccupiedTruck - maint(truckSpaces)),
       });
     } catch (err) {
       console.error('Error calculando disponibilidad en vivo de la cochera:', err);
@@ -246,7 +248,7 @@ export class ParkingService {
     for (let i = 1; i <= (parking.motorcycleCapacity ?? 0); i++) {
       spacesToCreate.push({
         spaceCode: `M-${String(i).padStart(2, '0')}`,
-        vehicleType: 'MOTOCICLETA',
+        vehicleType: 'MOTO',
         state: SpaceState.LIBRE,
         parking,
       });
@@ -270,27 +272,8 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(parking);
   }
 
+  // La capacidad no se edita acá (updateParkingSchema la descarta): la ajustan las altas y bajas de plazas (R-18).
   async update(id: string, data: any): Promise<any | null> {
-    if (data.carCapacity !== undefined) {
-      const distinctReservedSpaces = await this.parkingRepository.countReservedSpaces(id, 'AUTO');
-      if (Number(data.carCapacity) < distinctReservedSpaces) {
-        throw new AppError(
-          `La nueva capacidad de autos (${data.carCapacity}) no puede ser menor a las plazas con reservas activas o futuras (${distinctReservedSpaces})`,
-          400
-        );
-      }
-    }
-
-    if (data.motorcycleCapacity !== undefined) {
-      const distinctReservedSpaces = await this.parkingRepository.countReservedSpaces(id, 'MOTOCICLETA');
-      if (Number(data.motorcycleCapacity) < distinctReservedSpaces) {
-        throw new AppError(
-          `La nueva capacidad de motos (${data.motorcycleCapacity}) no puede ser menor a las plazas con reservas activas o futuras (${distinctReservedSpaces})`,
-          400
-        );
-      }
-    }
-
     if (data.isActive === true) {
       const hasTariff = await this.parkingRepository.hasActivePrices(id);
       if (!hasTariff) {

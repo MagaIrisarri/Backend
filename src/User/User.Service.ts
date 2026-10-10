@@ -119,7 +119,19 @@ export class UserService {
     return true;
   }
 
+  // R-20: la baja (la pida el administrador o el propio usuario) no deja reservas ni sucursales activas sin responsable.
   async remove(params: { id: string }): Promise<boolean> {
+    const user = await this.userRepository.findOne(params);
+    if (!user) return false;
+
+    if (user.type === UserType.CLIENTE) {
+      const n = await this.userRepository.countActiveReservationsOfClient(user.id);
+      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} reserva(s) pendiente(s), confirmada(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
+    }
+    if (user.type === UserType.DUENO) {
+      const n = await this.userRepository.countActiveParkingsOfOwner(user.id);
+      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} sucursal(es) activa(s). Pausalas primero desde su panel.`, 409);
+    }
     return await this.userRepository.remove(params);
   }
 

@@ -2,6 +2,8 @@ import { EntityManager } from '@mikro-orm/core';
 import { Repository } from '../Shared/base.Repository.js';
 import { User } from './User.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
+import { Reservation } from '../Reservation/Reservation.Entity.js';
+import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 
 export class UserRepository implements Repository<User> {
   constructor(private em: EntityManager) {}
@@ -44,6 +46,15 @@ export class UserRepository implements Repository<User> {
 
   async findOneForEmail (email: string): Promise<User | null>{
     return await this.em.findOne(User, { email });
+  }
+
+  // Para la baja (R-20): reservas activas de los vehículos de un cliente y sucursales activas de un dueño.
+  async countActiveReservationsOfClient(clientId: string): Promise<number> {
+    return await this.em.count(Reservation, { vehicle: { client: { id: clientId } }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
+  }
+
+  async countActiveParkingsOfOwner(ownerId: string): Promise<number> {
+    return await this.em.count(Parking, { owner: { id: ownerId }, isActive: true });
   }
 
   async ownsParking(ownerId: string, parkingId: string): Promise<boolean> {

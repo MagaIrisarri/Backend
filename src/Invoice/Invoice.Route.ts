@@ -5,7 +5,7 @@ import { orm } from "../Shared/db/orm.js";
 import { InvoiceController } from "./Invoice.Controller.js";
 import { InvoiceRepository } from "./Invoice.Repository.js";
 import { InvoiceService } from "./Invoice.Service.js";
-import { createInvoiceSchema, updateInvoiceSchema, invoiceIdSchema } from "./Invoice.Schema.js";
+import { createInvoiceSchema, updateInvoiceSchema, invoiceIdSchema, payInvoiceSchema } from "./Invoice.Schema.js";
 
 export const invoiceRouter = Router();
 
@@ -17,7 +17,7 @@ invoiceRouter.get("/", invoiceController.findAll);
 invoiceRouter.get('/client/:clientId', invoiceController.findByClientId);
 invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), invoiceController.findOne);
 invoiceRouter.post("/", validateSchema(createInvoiceSchema), invoiceController.create);
-invoiceRouter.post("/:id/pay", validateSchema(invoiceIdSchema), invoiceController.pay);
+invoiceRouter.post("/:id/pay", validateSchema(invoiceIdSchema), validateSchema(payInvoiceSchema), invoiceController.pay);
 invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
 invoiceRouter.patch("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
 invoiceRouter.delete("/:id", validateSchema(invoiceIdSchema), invoiceController.remove);

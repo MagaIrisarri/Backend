@@ -5,7 +5,7 @@ import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ParkingPrice } from '../ParkingPrice/ParkingPrice.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
-import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
 
 export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
@@ -63,23 +63,6 @@ export class ParkingRepository implements Repository<Parking> {
     return count > 0;
   }
 
-  async countReservedSpaces(
-    parkingId: string,
-    vehicleType: 'AUTO' | 'MOTOCICLETA'
-  ): Promise<number> {
-    const qb = this.em.createQueryBuilder(Reservation, 'r')
-      .select(raw('count(distinct r.parking_space_id) as count'))
-      .join('r.parkingSpace', 'ps')
-      .where({
-        'ps.parking': parkingId,
-        'ps.vehicleType': vehicleType,
-        'r.status': { $in: ACTIVE_RESERVATION_STATUSES },
-        'r.endTime': { $gte: new Date() },
-      });
-    const result = await qb.execute<any>();
-    return Number(result?.[0]?.count ?? result?.count ?? 0);
-  }
-
   async getReservationStatusCounts(parkingId: string): Promise<Record<string, number>> {
     const counts: Record<string, number> = {
       PENDIENTE: 0,
@@ -120,23 +103,13 @@ export class ParkingRepository implements Repository<Parking> {
     return Number(result?.[0]?.total ?? result?.total ?? 0);
   }
 
-  async findActiveReservationsForSpaces(
-    spaceIds: string[],
-    from: Date,
-    to: Date
-  ): Promise<Reservation[]> {
-    if (!spaceIds || spaceIds.length === 0) return [];
+  // Vehículos adentro ahora: reservas EN CURSO (entre el check-in y el check-out), aunque se hayan pasado de hora.
+  async findInProgressReservationsForSpaces(spaceIds: string[]): Promise<Reservation[]> {
+    if (!spaceIds.length) return [];
     return await this.em.find(
       Reservation,
-      {
-        parkingSpace: { id: { $in: spaceIds } },
-        status: { $in: ACTIVE_RESERVATION_STATUSES },
-        $and: [
-          { startTime: { $lte: to } },
-          { endTime: { $gte: from } },
-        ],
-      },
-      { populate: ['parkingSpace', 'vehicle', 'vehicle.vehicleType'] as any }
+      { parkingSpace: { id: { $in: spaceIds } }, status: ReservationStatus.EN_CURSO },
+      { populate: ['parkingSpace', 'vehicle', 'vehicle.vehicleType'] as any },
     );
   }
 }

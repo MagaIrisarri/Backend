@@ -42,3 +42,9 @@ export const invoiceIdSchema = z.object({
     id: z.string().uuid("ID de factura inválido"),
   }),
 });
+
+export const payInvoiceSchema = z.object({
+  body: z.object({
+    paymentMethod: PaymentMethodSchema,
+  }),
+});

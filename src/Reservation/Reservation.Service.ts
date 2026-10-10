@@ -2,7 +2,7 @@ import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation } from './Reservation.Entity.js';
 import { CreateReservationInput, UpdateReservationInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
@@ -95,15 +95,30 @@ export class ReservationService {
     return await this.repo.findByClientId(clientId);
   }
 
-  async findByParkingId(parkingId: string): Promise<Reservation[]> {
-    return await this.repo.findByParkingId(parkingId);
+  // Suma a cada reserva `amount` (total de la factura vigente, null si no hay) y la factura con el detalle del cobro (R-14).
+  private async withInvoice(reservations: Reservation[]): Promise<any[]> {
+    const invoices = await this.invoiceRepo.byReservation(reservations.map(r => r.id));
+    const num = (v: unknown) => (v == null ? null : Number(v));
+    return reservations.map(r => {
+      const inv = invoices.get(r.id);
+      return Object.assign(wrap(r).toObject(), {
+        amount: inv ? Number(inv.totalAmount) : null,
+        invoice: inv ? {
+          id: inv.id, status: inv.status, paymentMethod: inv.paymentMethod,
+          reservedHours: inv.reservedHours ?? null, extraHours: inv.extraHours ?? null,
+          hourlyRate: num(inv.hourlyRate), servicesAmount: num(inv.servicesAmount),
+        } : null,
+      });
+    });
   }
 
-  // Incluye `amount` (total de la factura, null si todavía no se cobró) para el panel del dueño.
-  async findByOwnerId(ownerId: string): Promise<(Reservation & { amount: number | null })[]> {
-    const reservations = await this.repo.findByOwnerId(ownerId);
-    const amounts = await this.invoiceRepo.totalsByReservation(reservations.map(r => r.id));
-    return reservations.map(r => Object.assign(wrap(r).toObject(), { amount: amounts.get(r.id) ?? null }) as any);
+  // Terminal del empleado: también usa la factura para cobrar las pendientes.
+  async findByParkingId(parkingId: string): Promise<any[]> {
+    return this.withInvoice(await this.repo.findByParkingId(parkingId));
+  }
+
+  async findByOwnerId(ownerId: string): Promise<any[]> {
+    return this.withInvoice(await this.repo.findByOwnerId(ownerId));
   }
 
   async remove(id: string, userId: string): Promise<boolean> {
@@ -142,6 +157,43 @@ export class ReservationService {
     return await this.repo.remove({ id });
   }
 
+  async changeSpace(id: string, parkingSpaceId: string, userId: string): Promise<Reservation> {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede cambiar la plaza de la reserva");
+
+    if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
+      throw new AppError("Solo se cambia la plaza de una reserva pendiente, confirmada o en curso", 400);
+    }
+    // Una reserva sin ingreso cuyo horario terminó se cancela sola (R-17); hasta que corra esa tarea, no se mueve.
+    if (reservation.status !== ReservationStatus.EN_CURSO && reservation.endTime.getTime() <= Date.now()) {
+      throw new AppError("La reserva ya venció: no se puede cambiar la plaza", 400);
+    }
+    if (reservation.parkingSpace?.id === parkingSpaceId) {
+      throw new AppError("La reserva ya está en esa plaza", 400);
+    }
+
+    await this.repo.changeSpace(id, parkingSpaceId);
+    return (await this.repo.findOne({ id }))!;
+  }
+
+  async cancelExpired(): Promise<number> {
+    return await this.repo.cancelExpired(new Date());
+  }
+
+  // Ingreso, salida y cambio de plaza los hace un empleado activo de la sucursal de la reserva, o el dueño de esa sucursal.
+  private async assertStaffOf(
+    reservation: Reservation,
+    userId: string,
+    message = "Solo el personal de esta sucursal puede registrar el ingreso o la salida",
+  ): Promise<void> {
+    const user = await this.repo.findActiveUser(userId);
+    const parking = reservation.parkingSpace?.parking;
+    const isEmployee = user?.type === UserType.EMPLEADO && user.parkingId === parking?.id;
+    const isOwner = user?.type === UserType.DUENO && parking?.owner?.id === user.id;
+    if (!isEmployee && !isOwner) throw new AppError(message, 403);
+  }
+
   async confirm(id: string): Promise<Reservation> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
@@ -157,9 +209,19 @@ export class ReservationService {
   async checkIn(id: string, employeeId: string): Promise<Reservation> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, employeeId);
 
     if (reservation.status !== ReservationStatus.PENDIENTE && reservation.status !== ReservationStatus.CONFIRMADA) {
       throw new AppError("La reserva no se encuentra en estado válido para Check-in", 400);
+    }
+
+    // El ingreso solo se registra dentro del horario reservado (R-13, R-16): después del fin el cobro iría
+    // desde un inicio muy anterior, y antes del inicio la plaza puede seguir asignada a otra reserva.
+    if (reservation.endTime.getTime() <= Date.now()) {
+      throw new AppError("La reserva ya venció: no se puede registrar el ingreso", 400);
+    }
+    if (reservation.startTime.getTime() > Date.now()) {
+      throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde ese horario`, 400);
     }
 
     const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId });
@@ -172,16 +234,20 @@ export class ReservationService {
   async checkOut(id: string, employeeId: string): Promise<any> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, employeeId);
 
     if (reservation.status !== ReservationStatus.EN_CURSO) {
       throw new AppError("La reserva debe estar EN CURSO para realizar el Check-out", 400);
     }
 
-    // Calcular horas (mínimo 1 hora, redondeo hacia arriba)
+    // Se cobran las horas reservadas aunque se retire antes; si se queda más, se suman las horas extra
+    // (cada hora empezada cuenta entera).
     const endTime = new Date();
-    const durationMs = endTime.getTime() - reservation.startTime.getTime();
     const MS_PER_HOUR = 1000 * 60 * 60;
-    const durationHours = Math.max(1, Math.ceil(durationMs / MS_PER_HOUR));
+    const reservedHours = Math.ceil((reservation.endTime.getTime() - reservation.startTime.getTime()) / MS_PER_HOUR);
+    const stayedHours = Math.ceil((endTime.getTime() - reservation.startTime.getTime()) / MS_PER_HOUR);
+    const durationHours = Math.max(1, reservedHours, stayedHours);
+    const extraHours = Math.max(0, durationHours - Math.max(1, reservedHours));
 
     // Obtener tarifa activa a través de su repositorio inyectado
     const priceRecord = await this.parkingPriceRepo.findActive(
@@ -193,7 +259,8 @@ export class ReservationService {
       throw new AppError("No se encontró tarifa activa para este tipo de vehículo en la cochera", 500);
     }
 
-    const parkingCost = durationHours * priceRecord.price;
+    const hourlyRate = Number(priceRecord.price);
+    const parkingCost = durationHours * hourlyRate;
     
     // Sumar servicios adicionales usando el repo
     await this.repo.populateServices(reservation);
@@ -214,10 +281,14 @@ export class ReservationService {
       await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.LIBRE });
     }
 
-    // Generamos la factura
+    // Generamos la factura con el detalle del cobro, para poder explicar el total después.
     const invoice = await this.invoiceRepo.add({
       reservationId: id,
       totalAmount,
+      reservedHours: durationHours - extraHours,
+      extraHours,
+      hourlyRate,
+      servicesAmount: servicesCost,
       status: 'PENDIENTE',
       paymentMethod: 'EFECTIVO' // Valor por defecto
     });

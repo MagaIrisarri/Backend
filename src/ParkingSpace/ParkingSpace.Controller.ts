@@ -62,28 +62,27 @@ export class ParkingSpaceController {
 
   update = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const updatedSpace = await this.parkingSpaceService.update(id, req.body);
+    const { space, moved } = await this.parkingSpaceService.update(id, req.body);
 
-    if (!updatedSpace) {
+    if (!space) {
       throw new AppError('Plaza no encontrada', 404);
     }
 
     return res.status(200).json({
       message: 'Plaza actualizada con éxito',
-      data: updatedSpace,
+      data: space,
+      moved, // reservas que se pasaron a otra plaza (R-19)
     });
   });
 
+  // ?relocate=true confirma pasar las reservas futuras a otras plazas libres (R-19).
   remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const isDeleted = await this.parkingSpaceService.remove(id);
-
-    if (!isDeleted) {
-      throw new AppError('Plaza no encontrada', 404);
-    }
+    const { moved } = await this.parkingSpaceService.remove(id, req.query.relocate === 'true');
 
     return res.status(200).json({
       message: 'Plaza dada de baja con éxito',
+      moved,
     });
   });
 

@@ -22,8 +22,11 @@ import parkingpriceRoutes from './ParkingPrice/ParkingPrice.Route.js';
 import serviceCatalogRouter from './ServiceCatalog/ServiceCatalog.Route.js';
 import servicePriceRouter from './ServicePrice/ServicePrice.Route.js';
 
-import reservationRouter from './Reservation/Reservation.Route.js';
+import reservationRouter, { reservationService } from './Reservation/Reservation.Route.js';
+import { EXPIRED_RESERVATIONS_CHECK_MINUTES } from './Shared/constants/schedule.js';
+import { ParkingSpaceRepository } from './ParkingSpace/ParkingSpace.Repository.js';
 import invoiceRouter from './Invoice/Invoice.Route.js';
+import statsRouter from './Stats/Stats.Route.js';
 
 const app = express();
 // ==========================================
@@ -63,6 +66,7 @@ app.use('/api/parkings', servicePriceRouter);
 // --- Reserva ---
 app.use('/api/reservations', reservationRouter);
 app.use('/api/billing', invoiceRouter);
+app.use('/api/stats', statsRouter);
 
 app.use(errorHandler);
 
@@ -73,6 +77,18 @@ async function startServer() {
     await syncSchema(); 
     await seedDatabase(orm.em.fork());
     await seedDatabaseAdmi(orm.em.fork());
+
+    // Unifica el tipo de las plazas viejas ('MOTOCICLETA' → 'MOTO', 'Camioneta' → 'CAMIONETA'); las nuevas ya se guardan así.
+    const normalized = await new ParkingSpaceRepository(orm.em).normalizeVehicleTypes();
+    if (normalized) console.log(`Plazas con el tipo unificado: ${normalized}`);
+
+    // R-17: al arrancar y cada pocos minutos, cancela las reservas cuyo horario terminó sin ingreso.
+    // shortcut: R-17, tarea en memoria del proceso, pasar a un job programado si el backend corre en varias instancias
+    const cancelExpired = () => reservationService.cancelExpired()
+      .then(n => { if (n) console.log(`Reservas vencidas sin ingreso canceladas: ${n}`); })
+      .catch(err => console.error('Error al cancelar reservas vencidas:', err));
+    await cancelExpired();
+    setInterval(cancelExpired, EXPIRED_RESERVATIONS_CHECK_MINUTES * 60 * 1000);
 
     app.listen(Number(process.env.PORT) || 3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');

@@ -48,8 +48,11 @@ export const createParkingSchema = z.object({
   ),
 });
 
+// Sin capacidades: después del alta, la capacidad sigue a las plazas que se agregan o dan de baja (R-18).
+// Si llegan, zod las descarta.
 export const updateParkingSchema = z.object({
   body: parkingBodyBaseSchema
+    .omit({ carCapacity: true, motorcycleCapacity: true, truckCapacity: true })
     .partial()
     .refine(
       (data) => {

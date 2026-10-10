@@ -57,6 +57,14 @@ export class ReservationController {
     });
   });
 
+  public changeSpace = catchAsync(async (req: Request, res: Response) => {
+    const userId = (req.headers['x-user-id'] || req.body.userId) as string;
+    if (!userId) throw new AppError('userId es requerido para cambiar la plaza', 400);
+
+    const reservation = await this.service.changeSpace(req.params.id as string, req.body.parkingSpaceId, userId);
+    return res.status(200).json({ message: 'Plaza de la reserva actualizada', data: reservation });
+  });
+
   public confirm = catchAsync(async (req: Request, res: Response) => {
     const reservation = await this.service.confirm(req.params.id as string);
     return res.status(200).json({ message: 'Reserva confirmada con éxito', data: reservation });
