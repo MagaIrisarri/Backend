@@ -2,6 +2,7 @@ import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/decorators/l
 import { Rel } from "@mikro-orm/core";
 import { Parking } from "../Parking/Parking.Entity.js";
 import crypto from "node:crypto";
+import { LocalDateType } from '../Shared/db/LocalDateType.js';
 
 @Entity()
 export class ParkingPrice {
@@ -14,10 +15,10 @@ export class ParkingPrice {
   @Property({ type: 'decimal', nullable: false })
   price!: number;
 
-  @Property({ type: 'date', nullable: true })
+  @Property({ type: LocalDateType, nullable: true })
   expirationDate?: Date | null = null;
 
-  @Property({ type: 'date' })
+  @Property({ type: LocalDateType })
   startDate?: Date = new Date();
 
   @ManyToOne(() => Parking, { eager: true })

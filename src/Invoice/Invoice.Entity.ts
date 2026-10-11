@@ -2,6 +2,7 @@ import { Entity, PrimaryKey, Property, OneToOne } from '@mikro-orm/decorators/le
 import { Rel } from '@mikro-orm/core'
 import crypto from "node:crypto";
 import { Reservation } from "../Reservation/Reservation.Entity.js";
+import { LocalDateType } from '../Shared/db/LocalDateType.js';
 
 @Entity()
 export class Invoice {
@@ -35,7 +36,7 @@ export class Invoice {
   @Property({ type: 'string', default: 'PENDIENTE' })
   status?: string = 'PENDIENTE'; 
 
-  @Property({ type: 'date' })
+  @Property({ type: LocalDateType })
   createdAt?: Date = new Date();
 
   @OneToOne(() => Reservation, { owner: true, eager: true })

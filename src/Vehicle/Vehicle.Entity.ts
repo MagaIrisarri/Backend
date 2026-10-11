@@ -5,6 +5,7 @@ import { Model } from './Model/Model.Entity.js';
 import { VehicleType } from './VehicleType/VehicleType.Entity.js';
 import { Insurance } from './Insurance/Insurance.Entity.js';
 import { User } from '../User/User.Entity.js'; 
+import { LocalDateType } from '../Shared/db/LocalDateType.js';
 
 @Entity()
 export class Vehicle {
@@ -41,9 +42,9 @@ export class Vehicle {
   @ManyToOne(() => User)
   client!: User;
   
-  @Property({ type: 'date' })
+  @Property({ type: LocalDateType })
   createdAt: Date = new Date();
 
-  @Property({ type: 'date', onUpdate: () => new Date() })
+  @Property({ type: LocalDateType, onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 }
