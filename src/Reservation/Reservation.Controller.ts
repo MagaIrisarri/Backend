@@ -66,7 +66,10 @@ export class ReservationController {
   });
 
   public confirm = catchAsync(async (req: Request, res: Response) => {
-    const reservation = await this.service.confirm(req.params.id as string);
+    const userId = (req.headers['x-user-id'] || req.body?.userId) as string; // un PATCH sin cuerpo deja req.body sin definir
+    if (!userId) throw new AppError('userId es requerido para confirmar la reserva', 400);
+
+    const reservation = await this.service.confirm(req.params.id as string, userId);
     return res.status(200).json({ message: 'Reserva confirmada con éxito', data: reservation });
   });
 

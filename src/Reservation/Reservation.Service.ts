@@ -181,7 +181,7 @@ export class ReservationService {
     return await this.repo.cancelExpired(new Date());
   }
 
-  // Ingreso, salida y cambio de plaza los hace un empleado activo de la sucursal de la reserva, o el dueño de esa sucursal.
+  // Confirmación, ingreso, salida y cambio de plaza los hace un empleado activo de la sucursal de la reserva, o el dueño de esa sucursal.
   private async assertStaffOf(
     reservation: Reservation,
     userId: string,
@@ -194,9 +194,10 @@ export class ReservationService {
     if (!isEmployee && !isOwner) throw new AppError(message, 403);
   }
 
-  async confirm(id: string): Promise<Reservation> {
+  async confirm(id: string, userId: string): Promise<Reservation> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede confirmar la reserva");
 
     if (reservation.status !== ReservationStatus.PENDIENTE) {
       throw new AppError("La reserva no se encuentra en estado PENDIENTE", 400);
