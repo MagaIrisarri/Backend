@@ -6,11 +6,6 @@ import { AppError } from "../Shared/utils/AppError.js";
 export class ServicePriceController {
   constructor(private service: ServicePriceService) {}
 
-  public findAll = catchAsync(async (_req: Request, res: Response) => {
-    const prices = await this.service.findAll();
-    res.status(200).json({ data: prices });
-  });
-
   public findOne = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const price = await this.service.findOne(id);

@@ -23,7 +23,6 @@ const spaceService = new ParkingSpaceService(spaceRepo, parkingRepo);
 const spaceController = new ParkingSpaceController(spaceService);
 
 parkingSpaceRouter.get("/:parkingId/spaces", validateSchema(parkingSpaceQuerySchema), spaceController.findByParking);
-parkingSpaceRouter.get("/:parkingId/spaces/available", validateSchema(parkingSpaceQuerySchema), spaceController.findAvailable);
 parkingSpaceRouter.post("/:parkingId/spaces", validateSchema(createSpaceSchema), spaceController.create);
 parkingSpaceRouter.put("/:parkingId/spaces", validateSchema(createBulkSpaceSchema), spaceController.createBulk);
 parkingSpaceRouter.get("/:parkingId/spaces/availability", validateSchema(parkingSpaceavailability), spaceController.checkAvailability);

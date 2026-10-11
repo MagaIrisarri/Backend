@@ -109,7 +109,6 @@ export class ParkingRepository implements Repository<Parking> {
     return await this.em.find(
       Reservation,
       { parkingSpace: { id: { $in: spaceIds } }, status: ReservationStatus.EN_CURSO },
-      { populate: ['parkingSpace', 'vehicle', 'vehicle.vehicleType'] as any },
     );
   }
 }

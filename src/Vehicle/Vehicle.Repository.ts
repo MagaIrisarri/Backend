@@ -55,6 +55,10 @@ export class VehicleRepository implements Repository<Vehicle> {
     );
   }
 
+  async findActiveByPlate(plate: string): Promise<Vehicle | null> {
+    return await this.em.findOne(Vehicle, { plate, isActive: true });
+  }
+
   async countActiveReservations(vehicleId: string): Promise<number> {
     return await this.em.count(Reservation, { vehicle: vehicleId, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
   }

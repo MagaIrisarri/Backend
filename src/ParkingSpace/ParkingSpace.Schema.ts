@@ -14,11 +14,11 @@ export const createBulkSpaceSchema = z.object({
   }),
 });
 
+// Solo el estado: cambiar el tipo o el código de una plaza no ajusta la capacidad (R-18) ni mueve sus reservas (R-19).
+// Para otro tipo, se da de baja y se agrega una plaza nueva.
 export const updateSpaceSchema = z.object({
   body: z.object({
-    spaceCode: z.string().min(1).optional(),
-    vehicleType: z.string().min(2).optional(),
-    state: z.enum(["LIBRE", "OCUPADO", "MANTENIMIENTO"]).optional(),
+    state: z.enum(["LIBRE", "OCUPADO", "MANTENIMIENTO"]),
     relocate: z.boolean().optional(), // al pasar a mantenimiento: confirma reubicar las reservas futuras (R-19)
   }),
 });

@@ -22,25 +22,14 @@ export class ParkingPriceService {
     });
   }
 
+  // Modificar una tarifa vence la vigente y crea una versión nueva (fecha de vigencia): el historial no se pisa.
   async update(id: string, data: { price: number; vehicleType?: string }): Promise<ParkingPrice> {
-    const price = await this.repo.findOne({ id });
-    if (!price || price.expirationDate !== null) {
+    const current = await this.repo.findOne({ id });
+    if (!current || current.expirationDate !== null) {
       throw new AppError('Tarifa no encontrada o inactiva', 404);
     }
-
-    let officialName: string | undefined;
-    if (data.vehicleType) {
-      const officialType = await this.repo.findOfficialVehicleType(data.vehicleType);
-      officialName = officialType ? officialType.name : data.vehicleType.trim();
-    }
-
-    const updated = await this.repo.update(id, {
-      price: data.price,
-      ...(officialName ? { vehicleType: officialName } : {}),
-    });
-
-    if (!updated) throw new AppError('No se pudo actualizar la tarifa', 400);
-    return updated;
+    await this.repo.remove({ id });
+    return await this.create(current.parking.id, { vehicleType: data.vehicleType ?? current.vehicleType, price: data.price });
   }
 
   async findOne(id: string): Promise<ParkingPrice | null> {

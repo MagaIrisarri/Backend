@@ -14,10 +14,6 @@ export class ParkingSpaceService {
     return await this.spaceRepo.findByParking(parkingId);
   }
 
-  async findAvailable(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
-    return await this.spaceRepo.findAvailableByParking(parkingId, vehicleType);
-  }
-
   async findOne(id: string): Promise<ParkingSpace | null> {
     return await this.spaceRepo.findOne({ id });
   }

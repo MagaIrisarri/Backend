@@ -171,12 +171,6 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
     );
   }
 
-  async findAvailableByParking(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
-    const filter: any = { parking: { id: parkingId }, state: SpaceState.LIBRE, isActive: true };
-    if (vehicleType) filter.vehicleType = vehicleType;
-    return await this.em.find(ParkingSpace, filter);
-  }
-
   // Pasa a la categoría ('AUTO', 'MOTO', 'CAMIONETA') las plazas guardadas antes del hook de la entidad
   // ('MOTOCICLETA', 'Camioneta'…). Corre al arrancar; si ya está todo unificado, no cambia nada.
   async normalizeVehicleTypes(): Promise<number> {

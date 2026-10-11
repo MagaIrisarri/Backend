@@ -12,7 +12,8 @@ export class Vehicle {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 
-  @Property({ type: 'string', unique: true })
+  // Única entre los vehículos activos (lo valida VehicleService): una patente dada de baja se puede volver a cargar.
+  @Property({ type: 'string', index: true })
   plate!: string;
 
   @Property({ type: 'string', nullable: true })

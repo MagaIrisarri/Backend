@@ -16,17 +16,6 @@ export class ParkingSpaceController {
     });
   });
 
-  findAvailable = catchAsync(async (req: Request, res: Response) => {
-    const parkingId = req.params.parkingId as string;
-    const vehicleType = req.query.vehicleType as string | undefined;
-    const spaces = await this.parkingSpaceService.findAvailable(parkingId, vehicleType);
-
-    return res.status(200).json({
-      message: 'Plazas disponibles encontradas',
-      data: spaces,
-    });
-  });
-
   findOne = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const space = await this.parkingSpaceService.findOne(id);

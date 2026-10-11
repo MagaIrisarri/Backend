@@ -5,10 +5,6 @@ import { AppError } from '../Shared/utils/AppError.js';
 export class ServicePriceService {
   constructor(private repo: ServicePriceRepository) {}
 
-  async findAll(): Promise<ServicePrice[]> {
-    return await this.repo.findAll();
-  }
-
   async findOne(id: string): Promise<ServicePrice | null> {
     return await this.repo.findOne({ id });
   }
