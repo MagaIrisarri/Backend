@@ -34,8 +34,8 @@ reservationRouter.patch('/:id/rating', validateSchema(rateReservationSchema), re
 reservationRouter.put('/:id/services', validateSchema(reservationServicesSchema), reservationController.setServices);
 reservationRouter.post('/:id/check-in', validateSchema(reservationIdSchema), reservationController.checkIn);
 reservationRouter.post('/:id/check-out', validateSchema(reservationIdSchema), reservationController.checkOut);
-reservationRouter.put('/:id', validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.update);
-reservationRouter.patch('/:id', validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.update);
+reservationRouter.put('/:id', validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.assignEmployee);
+reservationRouter.patch('/:id', validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.assignEmployee);
 reservationRouter.delete('/:id', validateSchema(reservationIdSchema), reservationController.remove);
 
 export default reservationRouter;

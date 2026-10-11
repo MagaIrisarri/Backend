@@ -106,6 +106,14 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     return activePrices.find((p) => matchesVehicleType(p.vehicleType, vehicleTypeName)) || null;
   }
 
+  // Tarifa para cobrar la salida (R-14): la vigente o, si el dueño la dio de baja con el vehículo adentro, la última que tuvo ese tipo.
+  async findForCheckout(parkingId: string, vehicleTypeName: string): Promise<ParkingPrice | null> {
+    const active = await this.findActive(parkingId, vehicleTypeName);
+    if (active) return active;
+    const all = await this.em.find(ParkingPrice, { parking: { id: parkingId } }, { orderBy: { expirationDate: 'DESC', startDate: 'DESC' } });
+    return all.find((p) => matchesVehicleType(p.vehicleType, vehicleTypeName)) ?? null;
+  }
+
   async findByParking(parkingId: string): Promise<ParkingPrice[]> {
     const prices = await this.em.find(
       ParkingPrice,

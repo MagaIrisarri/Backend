@@ -5,7 +5,7 @@ import { orm } from "../Shared/db/orm.js";
 import { InvoiceController } from "./Invoice.Controller.js";
 import { InvoiceRepository } from "./Invoice.Repository.js";
 import { InvoiceService } from "./Invoice.Service.js";
-import { createInvoiceSchema, updateInvoiceSchema, invoiceIdSchema, payInvoiceSchema } from "./Invoice.Schema.js";
+import { invoiceIdSchema, payInvoiceSchema } from "./Invoice.Schema.js";
 
 export const invoiceRouter = Router();
 
@@ -13,13 +13,8 @@ const invoiceRepository = new InvoiceRepository(orm.em);
 const invoiceService = new InvoiceService(invoiceRepository);
 const invoiceController = new InvoiceController(invoiceService);
 
-invoiceRouter.get("/", invoiceController.findAll);
+// La factura la crea el check-out (R-14) y la anula la cancelación de la reserva: acá solo se consulta y se cobra.
 invoiceRouter.get('/client/:clientId', invoiceController.findByClientId);
-invoiceRouter.get("/:id", validateSchema(invoiceIdSchema), invoiceController.findOne);
-invoiceRouter.post("/", validateSchema(createInvoiceSchema), invoiceController.create);
 invoiceRouter.post("/:id/pay", validateSchema(invoiceIdSchema), validateSchema(payInvoiceSchema), invoiceController.pay);
-invoiceRouter.put("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
-invoiceRouter.patch("/:id", validateSchema(invoiceIdSchema), validateSchema(updateInvoiceSchema), invoiceController.update);
-invoiceRouter.delete("/:id", validateSchema(invoiceIdSchema), invoiceController.remove);
 
 export default invoiceRouter;

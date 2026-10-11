@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-export const reservationStatusEnum = z.enum(['PENDIENTE', 'CONFIRMADA', 'CANCELADA', 'FINALIZADA'], {
-  message: 'Estado de reserva no válido',
-});
-
 export const createReservationSchema = z.object({
   body: z.object({
     vehicleId: z.string().uuid("El ID de vehículo debe ser un UUID válido"),
@@ -31,12 +27,10 @@ export const createReservationSchema = z.object({
   }),
 });
 
+// R-07: solo se cambia el empleado asignado. Horario y estado tienen sus propias acciones con reglas (extender, confirmar, ingreso, salida, cancelar).
 export const updateReservationSchema = z.object({
   body: z.object({
-    startTime: z.coerce.date().optional(),
-    endTime: z.coerce.date().optional(),
-    status: reservationStatusEnum.optional(),
-    attendedById: z.string().uuid("ID de empleado inválido").optional(),
+    attendedById: z.string().uuid("ID de empleado inválido"),
   }),
 });
 

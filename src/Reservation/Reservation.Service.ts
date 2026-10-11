@@ -1,8 +1,8 @@
 import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation } from './Reservation.Entity.js';
-import { CreateReservationInput, UpdateReservationInput } from './Reservation.Schema.js';
+import { CreateReservationInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 import { sendMail, type SendMail } from '../Shared/utils/mailer.js';
 import { REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
@@ -122,8 +122,19 @@ export class ReservationService {
   });
 }
 
-  async update(id: string, data: UpdateReservationInput): Promise<Reservation | null> {
-    return await this.repo.update(id, data);
+  // R-07: el personal de la sucursal cambia el empleado asignado mientras la reserva está activa; tiene que ser de esa sucursal.
+  async assignEmployee(id: string, employeeId: string, userId: string): Promise<Reservation> {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede asignar el empleado de la reserva");
+    if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
+      throw new AppError("Solo se asigna el empleado de una reserva pendiente, confirmada o en curso", 400);
+    }
+    const employee = await this.repo.findActiveUser(employeeId);
+    if (employee?.type !== UserType.EMPLEADO || employee.parkingId !== reservation.parkingSpace?.parking?.id) {
+      throw new AppError("El empleado no existe, está dado de baja o no trabaja en esta sucursal", 400);
+    }
+    return (await this.repo.update(id, { attendedById: employeeId }))!;
   }
 
   async findByClientId(clientId: string): Promise<Reservation[]> {
@@ -160,13 +171,12 @@ export class ReservationService {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) return false;
 
-    const entityManager = (this.repo as any).entityManager;
-    const { User } = await import('../User/User.Entity.js');
-    const user = await entityManager.findOne(User, { id: userId, status: UserStatus.ACTIVO });
-
+    // Cancela el cliente de la reserva, el administrador o el personal de esa sucursal (misma regla que assertStaffOf).
+    const user = await this.repo.findActiveUser(userId);
+    const parking = reservation.parkingSpace?.parking;
     const isClient = reservation.vehicle?.client?.id === userId;
-    const isOwner = reservation.parkingSpace?.parking?.owner?.id === userId;
-    const isAdminOrStaff = user?.type === UserType.ADMINISTRADOR || user?.type === UserType.EMPLEADO;
+    const isOwner = user?.type === UserType.DUENO && parking?.owner?.id === userId;
+    const isAdminOrStaff = user?.type === UserType.ADMINISTRADOR || (user?.type === UserType.EMPLEADO && user.parkingId === parking?.id);
 
     const canCancelReservation = isClient || isOwner || isAdminOrStaff;
     if (!canCancelReservation) {
@@ -338,14 +348,13 @@ export class ReservationService {
     const durationHours = Math.max(1, reservedHours, stayedHours);
     const extraHours = Math.max(0, durationHours - Math.max(1, reservedHours));
 
-    // Obtener tarifa activa a través de su repositorio inyectado
-    const priceRecord = await this.parkingPriceRepo.findActive(
+    const priceRecord = await this.parkingPriceRepo.findForCheckout(
       reservation.parkingSpace.parking.id,
       reservation.vehicle.vehicleType.name
     );
 
     if (!priceRecord) {
-      throw new AppError("No se encontró tarifa activa para este tipo de vehículo en la cochera", 500);
+      throw new AppError("La cochera nunca tuvo una tarifa para este tipo de vehículo: cargala para registrar la salida", 409);
     }
 
     const hourlyRate = Number(priceRecord.price);
@@ -360,29 +369,15 @@ export class ReservationService {
 
     const totalAmount = parkingCost + servicesCost;
 
-    const updated = await this.repo.update(id, { 
-      status: ReservationStatus.FINALIZADA, 
-      attendedById: employeeId,
-      endTime 
-    });
-
-    // La plaza queda libre solo si no hay otro vehículo adentro (R-21).
-    if (updated?.parkingSpace && !(await this.repo.findInProgressOnSpace(updated.parkingSpace.id, id))) {
-      await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.LIBRE });
-    }
-
-    // Generamos la factura con el detalle del cobro, para poder explicar el total después.
-    const invoice = await this.invoiceRepo.add({
-      reservationId: id,
+    // Salida, plaza y factura (con el detalle del cobro) en una sola transacción.
+    const invoice = await this.repo.finishWithInvoice(id, employeeId, endTime, {
       totalAmount,
       reservedHours: durationHours - extraHours,
       extraHours,
       hourlyRate,
       servicesAmount: servicesCost,
-      status: 'PENDIENTE',
-      paymentMethod: 'EFECTIVO' // Valor por defecto
     });
 
-    return { reservation: updated, invoice };
+    return { reservation: await this.repo.findOne({ id }), invoice };
   }
 }

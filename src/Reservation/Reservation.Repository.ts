@@ -1,10 +1,11 @@
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, LockMode } from '@mikro-orm/core';
 import crypto from 'node:crypto';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
 import { User } from '../User/User.Entity.js';
+import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
@@ -20,6 +21,10 @@ export interface CreateReservationParams {
   parkingSpaceId?: string;
   serviceIds?: string[];
 }
+
+// Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
+const lockParking = (em: EntityManager, parkingId: string) =>
+  em.findOneOrFail(Parking, { id: parkingId }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
 
 export class ReservationRepository implements Repository<Reservation> {
   constructor(private entityManager: EntityManager) {}
@@ -103,6 +108,23 @@ export class ReservationRepository implements Repository<Reservation> {
     );
   }
 
+  // R-14: la salida, la plaza y la factura se guardan juntas: si algo falla no queda una reserva finalizada sin cobrar.
+  // La plaza queda libre solo si no hay otro vehículo adentro (R-21).
+  async finishWithInvoice(
+    id: string, attendedById: string, endTime: Date,
+    charge: { totalAmount: number; reservedHours: number; extraHours: number; hourlyRate: number; servicesAmount: number },
+  ): Promise<Invoice> {
+    return await this.entityManager.transactional(async (em) => {
+      const reservation = await em.findOneOrFail(Reservation, { id, status: ReservationStatus.EN_CURSO }, { populate: ['parkingSpace'] as any });
+      reservation.status = ReservationStatus.FINALIZADA;
+      reservation.endTime = endTime;
+      reservation.attendedBy = em.getReference(User, attendedById);
+      const othersInside = await em.count(Reservation, { parkingSpace: reservation.parkingSpace, status: ReservationStatus.EN_CURSO, id: { $ne: id } });
+      if (!othersInside) reservation.parkingSpace.state = SpaceState.LIBRE;
+      return em.create(Invoice, { reservation, ...charge, status: 'PENDIENTE', paymentMethod: 'EFECTIVO', paymentDate: null });
+    });
+  }
+
   async findActiveUser(id: string): Promise<User | null> {
     return await this.entityManager.findOne(User, { id, status: 'ACTIVO' });
   }
@@ -135,6 +157,7 @@ export class ReservationRepository implements Repository<Reservation> {
     await this.entityManager.transactional(async (em) => {
       const reservation = await em.findOneOrFail(Reservation, { id },
         { populate: ['parkingSpace', 'parkingSpace.parking', 'vehicle', 'vehicle.vehicleType'] as any });
+      await lockParking(em, reservation.parkingSpace.parking.id);
       const space = await this.chosenSpace(em, await this.freeSpacesFor(reservation, em), parkingSpaceId,
         reservation.parkingSpace.parking, reservation.vehicle.vehicleType?.name);
 
@@ -189,6 +212,7 @@ export class ReservationRepository implements Repository<Reservation> {
   async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
     const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds } = params;
     return await this.entityManager.transactional(async (transactionalEntityManager) => {
+      await lockParking(transactionalEntityManager, parking.id);
       await this.validateVehicleOverlap(transactionalEntityManager, vehicle, reqStartTime, reqEndTime);
 
       // La elegida si está libre en el horario, o la primera libre del tipo del vehículo (findFreeSpaces).
@@ -272,6 +296,7 @@ export class ReservationRepository implements Repository<Reservation> {
   async extend(id: string, endTime: Date): Promise<{ code: string; from: string; to: string }[]> {
     return await this.entityManager.transactional(async (em) => {
       const reservation = await em.findOneOrFail(Reservation, { id }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
+      await lockParking(em, reservation.parkingSpace.parking.id);
       const space = reservation.parkingSpace, margin = Number(space.parking.reservationMargin ?? 0) * 60 * 60 * 1000;
       const clashes = await em.find(Reservation, {
         id: { $ne: id }, parkingSpace: space, status: { $in: ACTIVE_RESERVATION_STATUSES },
