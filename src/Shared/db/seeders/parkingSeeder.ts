@@ -3,6 +3,8 @@ import { Parking } from '../../../Parking/Parking.Entity.js';
 import { ParkingPrice } from '../../../ParkingPrice/ParkingPrice.Entity.js';
 import { ParkingSpace, SpaceState } from '../../../ParkingSpace/ParkingSpace.Entity.js';
 import { User } from '../../../User/User.Entity.js';
+import { capacityField } from '../../../ParkingSpace/ParkingSpace.Repository.js';
+import { VEHICLE_CATEGORIES, categorizeVehicleType, type VehicleCategory } from '../../utils/vehicleTypes.js';
 
 interface ParkingData {
   name:                string;
@@ -585,15 +587,32 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
   },
 ];
 
+// Plazas libres con código correlativo por tipo (A-01, M-01, C-01…), a continuación del último código usado.
+const addSpaces = (em: EntityManager, parking: Parking, type: VehicleCategory, after: number, count: number) => {
+  for (let i = after + 1; i <= after + count; i++) {
+    em.create(ParkingSpace, { parking, spaceCode: `${type[0]}-${String(i).padStart(2, '0')}`, vehicleType: type, state: SpaceState.LIBRE, isActive: true });
+  }
+};
+
 // Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan y completa el barrio y la provincia de las que no los tienen.
+// La capacidad de cada tipo es la cantidad de plazas activas (R-18), igual que al dar de alta una sucursal desde la API.
 export const seedParkings = async (em: EntityManager, owner1: User, owner2: User): Promise<void> => {
-  const existing = new Map((await em.find(Parking, {})).map((p) => [p.name, p]));
+  const existing = new Map((await em.find(Parking, {}, { populate: ['parkingSpaces', 'parkingpriceHistory'] })).map((p) => [p.name, p]));
   for (const pData of PARKINGS_DATA(owner1, owner2)) {
     const found = existing.get(pData.name);
     if (found) {
       // Cocheras sembradas antes de que existiera el barrio: se completa solo si está vacío (no pisa lo que cargó el dueño).
       if (!found.neighborhood) found.neighborhood = pData.neighborhood;
       if (!found.province) found.province = pData.province;
+      // El seeder anterior creaba menos plazas que la capacidad: se completan las que faltan (las dadas de baja ya descontaron capacidad).
+      for (const type of VEHICLE_CATEGORIES) {
+        const ofType = found.parkingSpaces.getItems().filter((s) => categorizeVehicleType(s.vehicleType) === type);
+        const missing = Number(found[capacityField(type)] ?? 0) - ofType.filter((s) => s.isActive !== false).length;
+        const last = Math.max(0, ...ofType.map((s) => parseInt(s.spaceCode.slice(2), 10) || 0));
+        if (missing > 0) addSpaces(em, found, type, last, missing);
+      }
+      // Tarifas en $0 que sembraba la versión anterior para tipos sin plazas: la API no las admite (precio > 0).
+      em.remove(found.parkingpriceHistory.getItems().filter((p) => Number(p.price) <= 0));
       continue;
     }
     const parking = em.create(Parking, {
@@ -618,38 +637,12 @@ export const seedParkings = async (em: EntityManager, owner1: User, owner2: User
       isActive:            true,
     });
 
-    em.create(ParkingPrice, { parking, vehicleType: 'AUTO',      price: pData.priceAuto });
-    em.create(ParkingPrice, { parking, vehicleType: 'MOTO',      price: pData.priceMoto });
-    em.create(ParkingPrice, { parking, vehicleType: 'CAMIONETA', price: pData.priceCamioneta });
+    // Una tarifa tiene que ser mayor a 0 (ParkingPrice.Schema): el tipo sin precio queda "Sin tarifa".
+    const prices: [VehicleCategory, number][] = [['AUTO', pData.priceAuto], ['MOTO', pData.priceMoto], ['CAMIONETA', pData.priceCamioneta]];
+    for (const [vehicleType, price] of prices) if (price > 0) em.create(ParkingPrice, { parking, vehicleType, price });
 
-    for (let i = 1; i <= Math.min(pData.carCapacity, 8); i++) {
-      em.create(ParkingSpace, {
-        parking,
-        spaceCode:   `A-${String(i).padStart(2, '0')}`,
-        vehicleType: 'AUTO',
-        state:       i === 1 ? SpaceState.OCUPADO : SpaceState.LIBRE,
-        isActive:    true,
-      });
-    }
-
-    for (let i = 1; i <= Math.min(pData.motorcycleCapacity, 4); i++) {
-      em.create(ParkingSpace, {
-        parking,
-        spaceCode:   `M-${String(i).padStart(2, '0')}`,
-        vehicleType: 'MOTO',
-        state:       SpaceState.LIBRE,
-        isActive:    true,
-      });
-    }
-
-    for (let i = 1; i <= Math.min(pData.truckCapacity, 2); i++) {
-      em.create(ParkingSpace, {
-        parking,
-        spaceCode:   `C-${String(i).padStart(2, '0')}`,
-        vehicleType: 'CAMIONETA',
-        state:       SpaceState.LIBRE,
-        isActive:    true,
-      });
-    }
+    addSpaces(em, parking, 'AUTO', 0, pData.carCapacity);
+    addSpaces(em, parking, 'MOTO', 0, pData.motorcycleCapacity);
+    addSpaces(em, parking, 'CAMIONETA', 0, pData.truckCapacity);
   }
 };

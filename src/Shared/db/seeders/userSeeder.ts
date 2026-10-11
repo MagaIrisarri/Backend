@@ -4,6 +4,8 @@ import { User } from '../../../User/User.Entity.js';
 
 export const OWNER1_EMAIL = 'dueno1@cocheras.com';
 export const OWNER2_EMAIL = 'dueno2@cocheras.com';
+export const EMPLOYEE1_EMAIL = 'empleado1@cocheras.com';
+export const CLIENT1_EMAIL = 'cliente1@cocheras.com';
 
 export const seedUsers = async (em: EntityManager): Promise<{
   adminUser: User;
@@ -55,7 +57,7 @@ export const seedUsers = async (em: EntityManager): Promise<{
     name: 'Lucas',
     last_name: 'Operador',
     date_of_birth: new Date('1995-11-25'),
-    email: 'empleado1@cocheras.com',
+    email: EMPLOYEE1_EMAIL,
     phone: '3416005566',
     password: defaultPassword,
     type: 'EMPLEADO',
@@ -68,7 +70,7 @@ export const seedUsers = async (em: EntityManager): Promise<{
     name: 'Mariano',
     last_name: 'Moreno',
     date_of_birth: new Date('1992-09-08'),
-    email: 'cliente1@cocheras.com',
+    email: CLIENT1_EMAIL,
     phone: '3416007788',
     password: defaultPassword,
     type: 'CLIENTE',
