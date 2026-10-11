@@ -23,7 +23,7 @@ import serviceCatalogRouter from './ServiceCatalog/ServiceCatalog.Route.js';
 import servicePriceRouter from './ServicePrice/ServicePrice.Route.js';
 
 import reservationRouter, { reservationService } from './Reservation/Reservation.Route.js';
-import { EXPIRED_RESERVATIONS_CHECK_MINUTES } from './Shared/constants/schedule.js';
+import { EXPIRED_RESERVATIONS_CHECK_MINUTES, REMINDER_CHECK_MINUTES } from './Shared/constants/schedule.js';
 import { ParkingSpaceRepository } from './ParkingSpace/ParkingSpace.Repository.js';
 import invoiceRouter from './Invoice/Invoice.Route.js';
 import statsRouter from './Stats/Stats.Route.js';
@@ -81,6 +81,8 @@ async function startServer() {
     // Unifica el tipo de las plazas viejas ('MOTOCICLETA' → 'MOTO', 'Camioneta' → 'CAMIONETA'); las nuevas ya se guardan así.
     const normalized = await new ParkingSpaceRepository(orm.em).normalizeVehicleTypes();
     if (normalized) console.log(`Plazas con el tipo unificado: ${normalized}`);
+    const coded = await reservationService.fillMissingCodes();
+    if (coded) console.log(`Reservas con código asignado: ${coded}`);
 
     // R-17: al arrancar y cada pocos minutos, cancela las reservas cuyo horario terminó sin ingreso.
     // shortcut: R-17, tarea en memoria del proceso, pasar a un job programado si el backend corre en varias instancias
@@ -89,6 +91,14 @@ async function startServer() {
       .catch(err => console.error('Error al cancelar reservas vencidas:', err));
     await cancelExpired();
     setInterval(cancelExpired, EXPIRED_RESERVATIONS_CHECK_MINUTES * 60 * 1000);
+
+    // R-28: recordatorio por email antes del inicio de cada reserva.
+    // shortcut: L-27, tarea en memoria del proceso, pasar a un job o una cola si el backend corre en varias instancias
+    const sendReminders = () => reservationService.sendReminders()
+      .then(n => { if (n) console.log(`Recordatorios de reserva enviados: ${n}`); })
+      .catch(err => console.error('Error al enviar recordatorios:', err));
+    await sendReminders();
+    setInterval(sendReminders, REMINDER_CHECK_MINUTES * 60 * 1000);
 
     app.listen(Number(process.env.PORT) || 3000, () => {
       console.log('Servidor corriendo en http://localhost:3000');

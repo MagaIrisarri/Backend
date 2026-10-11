@@ -5,7 +5,7 @@ import { orm } from '../Shared/db/orm.js';
 import { ReservationController } from './Reservation.Controller.js';
 import { ReservationRepository } from './Reservation.Repository.js';
 import { ReservationService } from './Reservation.Service.js';
-import { createReservationSchema, updateReservationSchema, reservationIdSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema } from './Reservation.Schema.js';
+import { createReservationSchema, updateReservationSchema, reservationIdSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema } from './Reservation.Schema.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
@@ -30,6 +30,7 @@ reservationRouter.post('/', validateSchema(createReservationSchema), reservation
 reservationRouter.patch('/:id/confirm', validateSchema(reservationIdSchema), reservationController.confirm);
 reservationRouter.patch('/:id/space', validateSchema(changeSpaceSchema), reservationController.changeSpace);
 reservationRouter.patch('/:id/end', validateSchema(extendReservationSchema), reservationController.extend);
+reservationRouter.patch('/:id/rating', validateSchema(rateReservationSchema), reservationController.rate);
 reservationRouter.put('/:id/services', validateSchema(reservationServicesSchema), reservationController.setServices);
 reservationRouter.post('/:id/check-in', validateSchema(reservationIdSchema), reservationController.checkIn);
 reservationRouter.post('/:id/check-out', validateSchema(reservationIdSchema), reservationController.checkOut);

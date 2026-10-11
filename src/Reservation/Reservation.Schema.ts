@@ -70,6 +70,11 @@ export const extendReservationSchema = z.object({
 });
 
 // Servicios de la reserva que deja el empleado (R-24): tarifas de servicio de la cochera (ServicePrice.id).
+export const rateReservationSchema = z.object({
+  params: reservationId,
+  body: z.object({ rating: z.number().int().min(1, "La valoración va de 1 a 5").max(5, "La valoración va de 1 a 5") }),
+});
+
 export const reservationServicesSchema = z.object({
   params: reservationId,
   body: z.object({ serviceIds: z.array(z.string().uuid("ID de servicio inválido")) }),

@@ -1,5 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
-import { Reservation } from './Reservation.Entity.js';
+import crypto from 'node:crypto';
+import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
@@ -145,6 +146,32 @@ export class ReservationRepository implements Repository<Reservation> {
     });
   }
 
+  // R-28: pendientes o confirmadas que empiezan dentro de la ventana y todavía no tuvieron recordatorio.
+  async findDueReminders(now: Date, until: Date): Promise<Reservation[]> {
+    return await this.entityManager.fork().find(Reservation, {
+      status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] },
+      startTime: { $gt: now, $lte: until },
+      reminderSentAt: null,
+    }, { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
+  }
+
+  async markReminderSent(id: string, at: Date): Promise<void> {
+    await this.entityManager.fork().nativeUpdate(Reservation, { id }, { reminderSentAt: at });
+  }
+
+  async setRating(reservation: Reservation, rating: number): Promise<Reservation> {
+    reservation.rating = rating;
+    await this.entityManager.flush();
+    return reservation;
+  }
+
+  // R-26: completa el código de las reservas anteriores con el mismo que ya mostraba la interfaz.
+  async fillMissingCodes(): Promise<number> {
+    const result = await this.entityManager.getConnection().execute(
+      "UPDATE reservation SET code = CONCAT('R-', UPPER(LEFT(id, 6))) WHERE code IS NULL", [], 'run');
+    return result.affectedRows ?? 0;
+  }
+
   async remove(item: { id: string }): Promise<boolean> {
     const res = await this.findOne(item);
     if (!res) return false;
@@ -171,7 +198,12 @@ export class ReservationRepository implements Repository<Reservation> {
         : free[0];
       if (!targetSpace) throw new AppError("No hay plazas disponibles para este tipo de vehículo en el horario seleccionado", 409);
 
+      // R-26: el código sale del id; si ya lo usa otra reserva se elige otro id.
+      let id = crypto.randomUUID();
+      while (await transactionalEntityManager.count(Reservation, { code: reservationCode(id) })) id = crypto.randomUUID();
       const reservation = transactionalEntityManager.create(Reservation, {
+        id,
+        code: reservationCode(id),
         startTime: reqStartTime,
         endTime: reqEndTime,
         vehicle,
@@ -245,7 +277,7 @@ export class ReservationRepository implements Repository<Reservation> {
         id: { $ne: id }, parkingSpace: space, status: { $in: ACTIVE_RESERVATION_STATUSES },
         startTime: { $lt: new Date(endTime.getTime() + margin) }, endTime: { $gt: new Date(reservation.endTime.getTime() - margin) },
       }, { populate: ['vehicle', 'vehicle.vehicleType'] as any, orderBy: { startTime: 'ASC' } });
-      const code = (r: Reservation) => 'R-' + r.id.slice(0, 6).toUpperCase();
+      const code = (r: Reservation) => r.code ?? reservationCode(r.id);
       const inside = clashes.find((r) => r.status === ReservationStatus.EN_CURSO);
       if (inside) throw new AppError(`La plaza ${space.spaceCode} tiene otro vehículo adentro (${code(inside)}): no se puede extender hasta las ${formatTimeHHMM(endTime)}`, 409);
 

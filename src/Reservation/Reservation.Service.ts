@@ -4,6 +4,8 @@ import { CreateReservationInput, UpdateReservationInput } from './Reservation.Sc
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
+import { sendMail, type SendMail } from '../Shared/utils/mailer.js';
+import { REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
@@ -208,6 +210,48 @@ export class ReservationService {
 
     await this.repo.changeSpace(id, parkingSpaceId);
     return (await this.repo.findOne({ id }))!;
+  }
+
+  // R-27: el cliente valora una sola vez, si quiere, una reserva finalizada.
+  async rate(id: string, rating: number, userId: string): Promise<Reservation> {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    if (reservation.vehicle?.client?.id !== userId) throw new AppError("Solo el cliente de la reserva puede valorarla", 403);
+    if (reservation.status !== ReservationStatus.FINALIZADA) throw new AppError("Solo se valora una reserva finalizada", 400);
+    if (reservation.rating != null) throw new AppError("Esta reserva ya está valorada", 400);
+    return await this.repo.setRating(reservation, rating);
+  }
+
+  // R-28: recordatorio por email antes del inicio. Si el envío falla queda sin marcar y se reintenta en la próxima vuelta.
+  async sendReminders(now = new Date(), send: SendMail = sendMail): Promise<number> {
+    const due = await this.repo.findDueReminders(now, new Date(now.getTime() + REMINDER_HOURS_BEFORE * 60 * 60 * 1000));
+    let sent = 0;
+    for (const r of due) {
+      const client = r.vehicle?.client, parking = r.parkingSpace?.parking;
+      if (!client?.email || !parking) continue;
+      try {
+        await send({
+          to: client.email,
+          subject: `Recordatorio de tu reserva ${r.code} en ${parking.name}`,
+          text: [
+            `Hola ${client.name}:`,
+            `Te recordamos tu reserva ${r.code} en ${parking.name} (${[parking.address, parking.locality].filter(Boolean).join(', ')}).`,
+            `Día: ${r.startTime.toLocaleDateString('es-AR')}, de ${formatTimeHHMM(r.startTime)} a ${formatTimeHHMM(r.endTime)}.`,
+            `Plaza ${r.parkingSpace.spaceCode} · Vehículo ${r.vehicle.plate}.`,
+            'Si no vas a usarla, cancelala desde Mis reservas.',
+          ].join('\n'),
+        });
+        await this.repo.markReminderSent(r.id, now);
+        sent++;
+      } catch (err) {
+        console.error(`No se pudo enviar el recordatorio de la reserva ${r.code}:`, err);
+      }
+    }
+    return sent;
+  }
+
+  async fillMissingCodes(): Promise<number> {
+    return await this.repo.fillMissingCodes();
   }
 
   async cancelExpired(): Promise<number> {

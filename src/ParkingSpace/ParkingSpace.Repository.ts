@@ -1,6 +1,6 @@
 import { EntityManager } from "@mikro-orm/core";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
-import { Reservation } from "../Reservation/Reservation.Entity.js";
+import { Reservation, reservationCode } from "../Reservation/Reservation.Entity.js";
 import { Repository } from "../Shared/base.Repository.js";
 import { AppError } from "../Shared/utils/AppError.js";
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from "../Shared/constants/status.js";
@@ -87,7 +87,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
 
       const plan = await this.planRelocation(tx, space);
       const conflicts: Relocation[] = plan.map(({ reservation: r, target }) => ({
-        reservationId: r.id, code: 'R-' + r.id.slice(0, 6).toUpperCase(), plate: r.vehicle?.plate ?? '',
+        reservationId: r.id, code: r.code ?? reservationCode(r.id), plate: r.vehicle?.plate ?? '',
         startTime: r.startTime, endTime: r.endTime, toSpaceId: target?.id ?? null, toSpaceCode: target?.spaceCode ?? null,
       }));
       const stuck = conflicts.filter(c => !c.toSpaceId).length;

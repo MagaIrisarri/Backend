@@ -81,6 +81,14 @@ export class ReservationController {
     return res.status(200).json({ message: 'Servicios de la reserva actualizados', data: reservation });
   });
 
+  public rate = catchAsync(async (req: Request, res: Response) => {
+    const userId = (req.headers['x-user-id'] || req.body.userId) as string;
+    if (!userId) throw new AppError('userId es requerido para valorar la reserva', 400);
+
+    const reservation = await this.service.rate(req.params.id as string, req.body.rating, userId);
+    return res.status(200).json({ message: 'Gracias por tu valoración', data: reservation });
+  });
+
   public confirm = catchAsync(async (req: Request, res: Response) => {
     const userId = (req.headers['x-user-id'] || req.body?.userId) as string; // un PATCH sin cuerpo deja req.body sin definir
     if (!userId) throw new AppError('userId es requerido para confirmar la reserva', 400);
