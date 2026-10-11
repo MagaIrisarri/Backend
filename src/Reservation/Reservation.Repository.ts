@@ -49,7 +49,7 @@ export class ReservationRepository implements Repository<Reservation> {
     return await this.entityManager.find(
       Reservation,
       { vehicle: { client: { id: clientId } } },
-      { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any }
+      { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any }
     );
   }
 

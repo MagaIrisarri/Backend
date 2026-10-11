@@ -43,6 +43,7 @@ API de cocheras (Express 5 + MikroORM 7 + MySQL, TypeScript ESM con pnpm). La co
   - vehículo con reservas;
   - feriado nuevo con reservas ese día.
 - **Filtro por localidad:** siempre va con la provincia. En el panel del administrador, `GET /api/stats/summary?province=&locality=` limita cocheras, plazas, reservas y facturación; los usuarios siguen siendo de todo el sistema. El panel del dueño filtra en el frontend con los datos que ya tiene.
+- **Vehículos:** la patente se valida con los formatos argentinos (`PLATE_REGEX` en `Vehicle.Schema.ts`: `AB123CD`, `ABC123`, `A123BCD`, `123ABC`; el formulario del Frontend usa la misma regla en `utils/plate.ts`, hay que mantener las dos). El año es opcional y va de `MIN_VEHICLE_YEAR` (1960, L-28) al año próximo; el `PUT` acepta `year: null` para quitarlo. Las reservas del cliente (`findByClientId`) cargan marca y modelo: sin eso la API devuelve sus ids.
 - **Estados de reserva** en `Shared/constants/status.ts`. El estado en curso es el texto `'EN CURSO'`, con espacio.
 
 ## Convenciones
