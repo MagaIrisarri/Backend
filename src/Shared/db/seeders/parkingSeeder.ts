@@ -3,6 +3,7 @@ import { Parking } from '../../../Parking/Parking.Entity.js';
 import { ParkingPrice } from '../../../ParkingPrice/ParkingPrice.Entity.js';
 import { ParkingSpace, SpaceState } from '../../../ParkingSpace/ParkingSpace.Entity.js';
 import { User } from '../../../User/User.Entity.js';
+import { OWNER1_EMAIL, OWNER2_EMAIL } from './userSeeder.js';
 import { capacityField } from '../../../ParkingSpace/ParkingSpace.Repository.js';
 import { VEHICLE_CATEGORIES, categorizeVehicleType, type VehicleCategory } from '../../utils/vehicleTypes.js';
 
@@ -23,14 +24,15 @@ interface ParkingData {
   carCapacity:         number;
   motorcycleCapacity:  number;
   truckCapacity:       number;
-  owner:               User;
+  owner:               string; // email del dueño (userSeeder)
   imageUrl:            string;
   priceAuto:           number;
   priceMoto:           number;
-  priceCamioneta:      number;
+  priceCamioneta:      number; // 0: sin tarifa para ese tipo (si tiene plazas de ese tipo, el panel avisa "Falta tarifa")
+  isActive?:           boolean; // false: sucursal pausada
 }
 
-const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
+const PARKINGS_DATA: ParkingData[] = [
   {
     name: 'Estacionamiento Central Plaza',
     neighborhood: 'Centro',
@@ -48,7 +50,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 20,
     motorcycleCapacity: 10,
     truckCapacity: 5,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1800,
     priceMoto: 900,
@@ -71,7 +73,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 30,
     motorcycleCapacity: 15,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2000,
     priceMoto: 1000,
@@ -94,7 +96,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 40,
     motorcycleCapacity: 20,
     truckCapacity: 10,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2200,
     priceMoto: 1100,
@@ -117,7 +119,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 25,
     motorcycleCapacity: 10,
     truckCapacity: 5,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1900,
     priceMoto: 950,
@@ -140,7 +142,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 50,
     motorcycleCapacity: 20,
     truckCapacity: 15,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2500,
     priceMoto: 1200,
@@ -164,7 +166,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 18,
     motorcycleCapacity: 8,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1700,
     priceMoto: 850,
@@ -187,7 +189,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 35,
     motorcycleCapacity: 15,
     truckCapacity: 6,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2100,
     priceMoto: 1050,
@@ -210,7 +212,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 28,
     motorcycleCapacity: 12,
     truckCapacity: 4,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1600,
     priceMoto: 800,
@@ -233,7 +235,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 22,
     motorcycleCapacity: 10,
     truckCapacity: 0,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1500,
     priceMoto: 750,
@@ -256,7 +258,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 16,
     motorcycleCapacity: 8,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1300,
     priceMoto: 650,
@@ -279,7 +281,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 30,
     motorcycleCapacity: 14,
     truckCapacity: 8,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1400,
     priceMoto: 700,
@@ -302,7 +304,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 14,
     motorcycleCapacity: 6,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1550,
     priceMoto: 780,
@@ -325,7 +327,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 45,
     motorcycleCapacity: 20,
     truckCapacity: 10,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2400,
     priceMoto: 1200,
@@ -348,7 +350,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 20,
     motorcycleCapacity: 10,
     truckCapacity: 3,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1950,
     priceMoto: 980,
@@ -371,7 +373,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 24,
     motorcycleCapacity: 8,
     truckCapacity: 0,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2050,
     priceMoto: 1000,
@@ -394,7 +396,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 38,
     motorcycleCapacity: 16,
     truckCapacity: 12,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1200,
     priceMoto: 600,
@@ -417,7 +419,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 26,
     motorcycleCapacity: 12,
     truckCapacity: 6,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1350,
     priceMoto: 680,
@@ -440,7 +442,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 15,
     motorcycleCapacity: 7,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1450,
     priceMoto: 720,
@@ -463,7 +465,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 60,
     motorcycleCapacity: 25,
     truckCapacity: 10,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 2300,
     priceMoto: 1150,
@@ -486,7 +488,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 32,
     motorcycleCapacity: 14,
     truckCapacity: 10,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1250,
     priceMoto: 620,
@@ -509,7 +511,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 22,
     motorcycleCapacity: 12,
     truckCapacity: 0,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1800,
     priceMoto: 900,
@@ -533,7 +535,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 18,
     motorcycleCapacity: 8,
     truckCapacity: 2,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1500,
     priceMoto: 750,
@@ -556,7 +558,7 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 25,
     motorcycleCapacity: 10,
     truckCapacity: 4,
-    owner: owner2,
+    owner: OWNER2_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1400,
     priceMoto: 700,
@@ -579,11 +581,91 @@ const PARKINGS_DATA = (owner1: User, owner2: User): ParkingData[] => [
     carCapacity: 15,
     motorcycleCapacity: 6,
     truckCapacity: 0,
-    owner: owner1,
+    owner: OWNER1_EMAIL,
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1200,
     priceMoto: 600,
     priceCamioneta: 0,
+  },
+  // Dueño 3: Córdoba (tres barrios) y Villa Carlos Paz. "Cochera Villa Cabrera" está pausada.
+  {
+    name: 'Cochera Nueva Córdoba', neighborhood: 'Nueva Córdoba', address: 'Av. Hipólito Yrigoyen 350', province: 'Córdoba', locality: 'Córdoba', postalCode: '5000',
+    latitude: -31.4250, longitude: -64.1860, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    carCapacity: 24, motorcycleCapacity: 10, truckCapacity: 4, owner: 'dueno3@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1600, priceMoto: 800, priceCamioneta: 2300,
+  },
+  {
+    name: 'Estacionamiento Plaza San Martín', neighborhood: 'Centro', address: '27 de Abril 250', province: 'Córdoba', locality: 'Córdoba', postalCode: '5000',
+    latitude: -31.4165, longitude: -64.1855, openingTime: '08:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    carCapacity: 18, motorcycleCapacity: 6, truckCapacity: 0, owner: 'dueno3@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1500, priceMoto: 750, priceCamioneta: 0,
+  },
+  {
+    name: 'Parking Güemes', neighborhood: 'Güemes', address: 'Belgrano 750', province: 'Córdoba', locality: 'Córdoba', postalCode: '5000',
+    latitude: -31.4268, longitude: -64.1915, openingTime: '09:00', closingTime: '23:00', minReservationHours: 1, maxReservationHours: 12, reservationMargin: 0,
+    carCapacity: 12, motorcycleCapacity: 8, truckCapacity: 2, owner: 'dueno3@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1400, priceMoto: 700, priceCamioneta: 2100,
+  },
+  {
+    name: 'Cochera Villa Cabrera', neighborhood: 'Villa Cabrera', address: 'Av. Rafael Núñez 3900', province: 'Córdoba', locality: 'Córdoba', postalCode: '5009',
+    latitude: -31.3725, longitude: -64.2160, openingTime: '08:00', closingTime: '20:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    carCapacity: 10, motorcycleCapacity: 4, truckCapacity: 0, owner: 'dueno3@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1300, priceMoto: 650, priceCamioneta: 0, isActive: false,
+  },
+  {
+    name: 'Cochera Costanera Carlos Paz', neighborhood: 'Centro', address: 'Av. San Martín 400', province: 'Córdoba', locality: 'Villa Carlos Paz', postalCode: '5152',
+    latitude: -31.4241, longitude: -64.4978, openingTime: '08:00', closingTime: '23:59', minReservationHours: 2, maxReservationHours: 12, reservationMargin: 1,
+    carCapacity: 30, motorcycleCapacity: 12, truckCapacity: 6, owner: 'dueno3@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1700, priceMoto: 850, priceCamioneta: 2400,
+  },
+  // Dueño 4: Santa Fe (capital) y Paraná, en dos provincias. "Cochera Bulevar" tiene plazas de camioneta sin tarifa (aviso "Falta tarifa").
+  {
+    name: 'Estacionamiento Peatonal San Martín', neighborhood: 'Centro', address: 'San Martín 2350', province: 'Santa Fe', locality: 'Santa Fe', postalCode: '3000',
+    latitude: -31.6440, longitude: -60.7020, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    carCapacity: 22, motorcycleCapacity: 8, truckCapacity: 3, owner: 'dueno4@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1500, priceMoto: 700, priceCamioneta: 2200,
+  },
+  {
+    name: 'Cochera Bulevar', neighborhood: 'Candioti Sur', address: 'Bv. Pellegrini 2800', province: 'Santa Fe', locality: 'Santa Fe', postalCode: '3000',
+    latitude: -31.6355, longitude: -60.6975, openingTime: '06:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 12, reservationMargin: 1,
+    carCapacity: 16, motorcycleCapacity: 6, truckCapacity: 4, owner: 'dueno4@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1400, priceMoto: 650, priceCamioneta: 0,
+  },
+  {
+    name: 'Parking Plaza 1° de Mayo', neighborhood: 'Centro', address: 'Urquiza 1000', province: 'Entre Ríos', locality: 'Paraná', postalCode: '3100',
+    latitude: -31.7330, longitude: -60.5290, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    carCapacity: 20, motorcycleCapacity: 10, truckCapacity: 2, owner: 'dueno4@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1300, priceMoto: 600, priceCamioneta: 1900,
+  },
+  // Dueño 5: Mendoza y una en Rosario.
+  {
+    name: 'Cochera Peatonal Sarmiento', neighborhood: 'Centro', address: 'Sarmiento 250', province: 'Mendoza', locality: 'Mendoza', postalCode: '5500',
+    latitude: -32.8895, longitude: -68.8420, openingTime: '08:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    carCapacity: 26, motorcycleCapacity: 10, truckCapacity: 4, owner: 'dueno5@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1600, priceMoto: 800, priceCamioneta: 2300,
+  },
+  {
+    name: 'Estacionamiento Parque Central', neighborhood: 'Cuarta Sección', address: 'Av. Las Heras 700', province: 'Mendoza', locality: 'Mendoza', postalCode: '5500',
+    latitude: -32.8820, longitude: -68.8390, openingTime: '07:00', closingTime: '23:00', minReservationHours: 1, maxReservationHours: 12, reservationMargin: 0,
+    carCapacity: 14, motorcycleCapacity: 6, truckCapacity: 2, owner: 'dueno5@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1450, priceMoto: 700, priceCamioneta: 2050,
+  },
+  {
+    name: 'Cochera Barrio Lourdes', neighborhood: 'Lourdes', address: 'Mendoza 3100', province: 'Santa Fe', locality: 'Rosario', postalCode: '2000',
+    latitude: -32.9520, longitude: -60.6720, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    carCapacity: 12, motorcycleCapacity: 6, truckCapacity: 0, owner: 'dueno5@cocheras.com',
+    imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
+    priceAuto: 1300, priceMoto: 650, priceCamioneta: 0,
   },
 ];
 
@@ -596,9 +678,9 @@ const addSpaces = (em: EntityManager, parking: Parking, type: VehicleCategory, a
 
 // Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan y completa el barrio y la provincia de las que no los tienen.
 // La capacidad de cada tipo es la cantidad de plazas activas (R-18), igual que al dar de alta una sucursal desde la API.
-export const seedParkings = async (em: EntityManager, owner1: User, owner2: User): Promise<void> => {
+export const seedParkings = async (em: EntityManager, users: Map<string, User>): Promise<void> => {
   const existing = new Map((await em.find(Parking, {}, { populate: ['parkingSpaces', 'parkingpriceHistory'] })).map((p) => [p.name, p]));
-  for (const pData of PARKINGS_DATA(owner1, owner2)) {
+  for (const pData of PARKINGS_DATA) {
     const found = existing.get(pData.name);
     if (found) {
       // Cocheras sembradas antes de que existiera el barrio: se completa solo si está vacío (no pisa lo que cargó el dueño).
@@ -632,9 +714,9 @@ export const seedParkings = async (em: EntityManager, owner1: User, owner2: User
       carCapacity:         pData.carCapacity,
       motorcycleCapacity:  pData.motorcycleCapacity,
       truckCapacity:       pData.truckCapacity,
-      owner:               pData.owner,
+      owner:               users.get(pData.owner)!,
       imageUrl:            pData.imageUrl,
-      isActive:            true,
+      isActive:            pData.isActive ?? true,
     });
 
     // Una tarifa tiene que ser mayor a 0 (ParkingPrice.Schema): el tipo sin precio queda "Sin tarifa".
