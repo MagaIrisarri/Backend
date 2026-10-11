@@ -10,8 +10,17 @@ export class Parking {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 
+  // Provincia: en Argentina hay localidades con el mismo nombre en distintas provincias (San Martín, Concepción…).
+  // Nullable solo por las filas previas; el alta la exige y el seeder la completa.
+  @Property({ type: 'string', nullable: true })
+  province?: string | null;
+
   @Property({ type: 'string', nullable: false })
   locality!: string;
+
+  // Barrio o zona (Centro, Pichincha…): es lo que la gente busca en el mapa; la localidad es la ciudad.
+  @Property({ type: 'string', nullable: true })
+  neighborhood?: string | null;
 
   @Property({ type: 'string', nullable: false })
   postalCode!: string;

@@ -3,7 +3,9 @@ import { TIME_REGEX } from "../Shared/utils/validation.js";
 
 const parkingBodyBaseSchema = z.object({
   ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
+  province: z.string().trim().min(4, "Elegí la provincia").max(60),
   locality: z.string().min(3, "La localidad debe tener al menos 3 caracteres"),
+  neighborhood: z.string().trim().max(60, "El barrio no puede superar los 60 caracteres").optional().nullable(),
   // 4 dígitos (2000) o formato CPA (S2000ABC); se guarda en mayúsculas.
   postalCode: z
     .string()
@@ -15,7 +17,7 @@ const parkingBodyBaseSchema = z.object({
     .min(5, "La dirección debe tener al menos 5 caracteres")
     .max(100, "La dirección no puede superar los 100 caracteres"),
   carCapacity: z.union([
-    z.number().int().min(1, "La capacidad de autos debe ser al menos 1"),
+    z.number().int().min(0, "La capacidad de autos no puede ser negativa"),
     z.string().regex(/^\d+$/).transform(Number),
   ]),
   motorcycleCapacity: z.union([

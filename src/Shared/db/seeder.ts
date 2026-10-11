@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { User } from '../../User/User.Entity.js';
-import { seedUsers } from './seeders/userSeeder.js';
+import { seedUsers, OWNER1_EMAIL, OWNER2_EMAIL } from './seeders/userSeeder.js';
 import { seedVehicles } from './seeders/vehicleSeeder.js';
 import { seedParkings } from './seeders/parkingSeeder.js';
 import { seedHolidays } from './seeders/holidaySeeder.js';
@@ -12,7 +12,14 @@ export const seedDatabase = async (em: EntityManager) => {
 
   const usersCount = await em.count(User, {});
   if (usersCount > 0) {
-    console.log('Omitiendo seeding: ya existen datos en la base de datos.');
+    // Base ya sembrada: solo completa las cocheras que falten (por nombre) para no duplicar nada.
+    const owner1 = await em.findOne(User, { email: OWNER1_EMAIL });
+    const owner2 = await em.findOne(User, { email: OWNER2_EMAIL });
+    if (owner1 && owner2) {
+      await seedParkings(em, owner1, owner2);
+      await em.flush();
+    }
+    console.log('Omitiendo seeding de usuarios: ya existen datos en la base de datos.');
     return;
   }
 

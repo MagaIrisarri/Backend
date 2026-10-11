@@ -2,6 +2,9 @@ import { EntityManager } from '@mikro-orm/core';
 import argon2 from 'argon2';
 import { User } from '../../../User/User.Entity.js';
 
+export const OWNER1_EMAIL = 'dueno1@cocheras.com';
+export const OWNER2_EMAIL = 'dueno2@cocheras.com';
+
 export const seedUsers = async (em: EntityManager): Promise<{
   adminUser: User;
   owner1: User;
@@ -28,7 +31,7 @@ export const seedUsers = async (em: EntityManager): Promise<{
     name: 'Carlos',
     last_name: 'Gardel',
     date_of_birth: new Date('1980-03-20'),
-    email: 'dueno1@cocheras.com',
+    email: OWNER1_EMAIL,
     phone: '3415001122',
     password: defaultPassword,
     type: 'DUEÑO',
@@ -40,7 +43,7 @@ export const seedUsers = async (em: EntityManager): Promise<{
     name: 'Roberto',
     last_name: 'Arlt',
     date_of_birth: new Date('1982-07-10'),
-    email: 'dueno2@cocheras.com',
+    email: OWNER2_EMAIL,
     phone: '3415003344',
     password: defaultPassword,
     type: 'DUEÑO',

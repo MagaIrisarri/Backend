@@ -89,7 +89,9 @@ export class ParkingService {
 
     return {
       id: parking.id,
+      province: parking.province ?? null,
       locality: parking.locality,
+      neighborhood: parking.neighborhood ?? null,
       postalCode: parking.postalCode,
       address: parking.address,
       carCapacity: carCap,

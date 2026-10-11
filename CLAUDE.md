@@ -6,4 +6,5 @@
 - Una columna `date` de MikroORM se lee como `'YYYY-MM-DD'` (string): no se le asigna un `Date`.
 - Constantes de negocio en `src/Shared/constants/` (p. ej. `PLANNING_HORIZON_MONTHS`, `ACTIVE_RESERVATION_STATUSES`); no se repiten números en el código.
 - Las pruebas no se versionan (son locales). Las de turnos se corrían con `tsx` y, contra MySQL, solo sobre una base que termine en `_test`.
-- Las reglas de formato visual del rol dueño están en el `CLAUDE.md` del repo Frontend.
+- Las reglas de formato visual (un solo sistema de interfaz para dueño y cliente) y el arnés `pnpm verify` están en el `CLAUDE.md` del repo Frontend.
+- El seeder de cocheras (`src/Shared/db/seeders/parkingSeeder.ts`) es idempotente por nombre y también corre en bases ya sembradas: para sumar una cochera al mapa se agrega a `PARKINGS_DATA` (con su `province` y su `neighborhood`: barrio o zona, que usa el buscador del mapa) y se reinicia el servidor; en las ya sembradas completa el barrio y la provincia si están vacíos. Una dirección en Argentina se guarda como provincia, localidad, barrio (opcional), calle y altura, y código postal (4 dígitos o CPA); la provincia es obligatoria en el alta porque hay localidades con el mismo nombre en distintas provincias.
