@@ -104,7 +104,9 @@ async function startServer() {
       console.log(`Servidor corriendo en http://localhost:${port}`);
     });
   } catch (error) {
+    // Sale con error: el pool de MikroORM dejaría el proceso vivo y sin atender, y no se notaría que el arranque falló.
     console.error('Error al iniciar el servidor:', error);
+    process.exit(1);
   }
 }
 // ==========================================
