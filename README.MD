@@ -40,4 +40,4 @@ El sistema soporta 4 roles: `CLIENTE`, `DUEÑO`, `EMPLEADO` y `ADMIN`:
 
 ### 6. Consistencia de Fechas y Zona Horaria
 
-- Todo el entorno de ejecución fija la zona horaria en `America/Argentina/Buenos_Aires` (`process.env.TZ`), garantizando paridad entre el cálculo de reservas, vigencia de precios, turnos y columnas `DATETIME` de MySQL sin desfasajes de UTC.
+- El proceso fija la zona horaria en `America/Argentina/Buenos_Aires` (`process.env.TZ`, en `src/Shared/db/orm.ts`) para los cálculos de reservas, precios y turnos. MikroORM guarda y lee los `DATETIME` en UTC. Las columnas `date` del sistema usan `LocalDateType` para guardar el día local; si no, una fecha asignada después de las 21 h quedaría con el día siguiente.
