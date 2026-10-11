@@ -6,8 +6,6 @@ import { seedParkings } from './seeders/parkingSeeder.js';
 import { seedHolidays } from './seeders/holidaySeeder.js';
 import { seedReservations } from './seeders/reservationSeeder.js';
 
-export const seedDatabaseAdmi = async (_em: EntityManager) => {};
-
 export const seedDatabase = async (em: EntityManager) => {
   await seedHolidays(em);
 

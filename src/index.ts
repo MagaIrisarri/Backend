@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
-import { seedDatabase, seedDatabaseAdmi } from './Shared/db/seeder.js'; 
+import { seedDatabase } from './Shared/db/seeder.js';
 import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
@@ -76,7 +76,6 @@ async function startServer() {
   try {
     await syncSchema(); 
     await seedDatabase(orm.em.fork());
-    await seedDatabaseAdmi(orm.em.fork());
 
     // Unifica el tipo de las plazas viejas ('MOTOCICLETA' → 'MOTO', 'Camioneta' → 'CAMIONETA'); las nuevas ya se guardan así.
     const normalized = await new ParkingSpaceRepository(orm.em).normalizeVehicleTypes();
@@ -100,8 +99,9 @@ async function startServer() {
     await sendReminders();
     setInterval(sendReminders, REMINDER_CHECK_MINUTES * 60 * 1000);
 
-    app.listen(Number(process.env.PORT) || 3000, () => {
-      console.log('Servidor corriendo en http://localhost:3000');
+    const port = Number(process.env.PORT) || 3000;
+    app.listen(port, () => {
+      console.log(`Servidor corriendo en http://localhost:${port}`);
     });
   } catch (error) {
     console.error('Error al iniciar el servidor:', error);
