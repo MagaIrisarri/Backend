@@ -6,7 +6,6 @@ import { ParkingSpaceController } from "./ParkingSpace.Controller.js";
 import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
 import { ParkingSpaceService } from "./ParkingSpace.Service.js";
-import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
 import {
   createSpaceSchema,
   createBulkSpaceSchema,
@@ -20,8 +19,7 @@ export const parkingSpaceRouter = Router();
 
 const spaceRepo = new ParkingSpaceRepository(orm.em);
 const parkingRepo = new ParkingRepository(orm.em);
-const reservationRepo = new ReservationRepository(orm.em);
-const spaceService = new ParkingSpaceService(spaceRepo, parkingRepo, reservationRepo);
+const spaceService = new ParkingSpaceService(spaceRepo, parkingRepo);
 const spaceController = new ParkingSpaceController(spaceService);
 
 parkingSpaceRouter.get("/:parkingId/spaces", validateSchema(parkingSpaceQuerySchema), spaceController.findByParking);

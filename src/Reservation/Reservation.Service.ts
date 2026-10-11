@@ -10,6 +10,7 @@ import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 import { SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
+import type { Parking } from '../Parking/Parking.Entity.js';
 import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 import { wrap } from '@mikro-orm/core';
 
@@ -30,6 +31,56 @@ export class ReservationService {
     return await this.repo.findOne({ id });
   }
 
+  // Duración, horario de atención y un empleado de turno (R-01): al reservar y al extender (R-23).
+  private async assertSchedule(parking: Parking, startTime: Date, endTime: Date): Promise<void> {
+    const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+    if (durationHours < parking.minReservationHours) {
+      throw new AppError(`La duración mínima de la reserva es de ${parking.minReservationHours} hora(s)`, 400);
+    }
+    if (durationHours > parking.maxReservationHours) {
+      throw new AppError(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`, 400);
+    }
+    const openTime = parking.openingTime.slice(0, 5);
+    const closeTime = parking.closingTime.slice(0, 5);
+    if (formatTimeHHMM(startTime) < openTime || formatTimeHHMM(endTime) > closeTime) {
+      throw new AppError(`El horario de reserva está fuera del horario de atención (${openTime} a ${closeTime})`, 400);
+    }
+    await this.scheduleService.assertCovered(parking, startTime, endTime); // R-01
+  }
+
+  // R-23: el empleado extiende el fin (p. ej. el cliente avisa que se queda más). Mismas reglas que al reservar, y la plaza
+  // tiene que quedar libre hasta el nuevo fin: las reservas siguientes que todavía no entraron pasan a otra plaza.
+  async extend(id: string, endTime: Date, userId: string) {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede modificar la reserva");
+    if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
+      throw new AppError("Solo se extiende una reserva pendiente, confirmada o en curso", 400);
+    }
+    if (endTime.getTime() <= Math.max(reservation.endTime.getTime(), Date.now())) {
+      throw new AppError(`El nuevo fin tiene que ser posterior al actual (${formatTimeHHMM(reservation.endTime)}) y a la hora actual`, 400);
+    }
+    await this.assertSchedule(reservation.parkingSpace.parking, reservation.startTime, endTime);
+    const clash = await this.repo.findConflictingVehicleReservation(reservation.vehicle.id, reservation.endTime, endTime);
+    if (clash && clash.id !== id) {
+      throw new AppError(`Este vehículo tiene otra reserva desde las ${formatTimeHHMM(clash.startTime)}: no se puede extender hasta las ${formatTimeHHMM(endTime)}`, 400);
+    }
+    const moved = await this.repo.extend(id, endTime);
+    return { reservation: await this.repo.findOne({ id }), moved };
+  }
+
+  // R-24: el empleado agrega o quita servicios mientras la reserva no terminó; se cobran en la salida (R-14).
+  async setServices(id: string, serviceIds: string[], userId: string): Promise<Reservation> {
+    const reservation = await this.repo.findOne({ id });
+    if (!reservation) throw new AppError("Reserva no encontrada", 404);
+    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede modificar la reserva");
+    if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
+      throw new AppError("Los servicios se cambian solo en una reserva pendiente, confirmada o en curso", 400);
+    }
+    await this.repo.setServices(reservation, serviceIds);
+    return reservation;
+  }
+
   async create(data: CreateReservationInput): Promise<Reservation> {
   const startTime = new Date(data.startTime);
   const endTime = new Date(data.endTime);
@@ -39,25 +90,7 @@ export class ReservationService {
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
 
-  const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-  
-  if (durationHours < parking.minReservationHours) {
-    throw new AppError(`La duración mínima de la reserva es de ${parking.minReservationHours} hora(s)`, 400);
-  }
-  if (durationHours > parking.maxReservationHours) {
-    throw new AppError(`La duración máxima de la reserva es de ${parking.maxReservationHours} hora(s)`, 400);
-  }
-
-  const requestedStartTimeString = formatTimeHHMM(startTime);
-  const requestedEndTimeString = formatTimeHHMM(endTime);
-  const openTime = parking.openingTime.slice(0, 5);
-  const closeTime = parking.closingTime.slice(0, 5);
-
-  if (requestedStartTimeString < openTime || requestedEndTimeString > closeTime) {
-    throw new AppError(`El horario de reserva está fuera del horario de atención (${openTime} a ${closeTime})`, 400);
-  }
-
-  await this.scheduleService.assertCovered(parking, startTime, endTime); // R-01
+  await this.assertSchedule(parking, startTime, endTime);
 
   const conflictingVehicleReservation = await this.repo.findConflictingVehicleReservation(
     data.vehicleId,
@@ -224,6 +257,17 @@ export class ReservationService {
     if (reservation.startTime.getTime() > Date.now()) {
       throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde ese horario`, 400);
     }
+    // R-21: si el cliente anterior de la plaza se quedó de más, su vehículo sigue adentro: la reserva pasa a la primera
+    // plaza libre del mismo tipo (misma regla que al reservar) y el ingreso se registra ahí. Si no hay ninguna, no entra.
+    const inside = await this.repo.findInProgressOnSpace(reservation.parkingSpace.id, id);
+    if (inside) {
+      const [to] = await this.repo.freeSpacesFor(reservation);
+      if (!to) {
+        const overdue = inside.endTime.getTime() < Date.now() ? ', que se pasó de hora' : '';
+        throw new AppError(`La plaza ${reservation.parkingSpace.spaceCode} sigue ocupada por ${inside.vehicle?.plate ?? 'otro vehículo'}${overdue}, y no hay otra plaza libre para este vehículo.`, 409);
+      }
+      reservation.parkingSpace = to; // se guarda con el cambio de estado
+    }
 
     const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId });
     if (updated?.parkingSpace) {
@@ -278,7 +322,8 @@ export class ReservationService {
       endTime 
     });
 
-    if (updated?.parkingSpace) {
+    // La plaza queda libre solo si no hay otro vehículo adentro (R-21).
+    if (updated?.parkingSpace && !(await this.repo.findInProgressOnSpace(updated.parkingSpace.id, id))) {
       await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.LIBRE });
     }
 

@@ -57,3 +57,20 @@ export const changeSpaceSchema = z.object({
 
 export type CreateReservationInput = z.infer<typeof createReservationSchema>['body'];
 export type UpdateReservationInput = z.infer<typeof updateReservationSchema>['body'];
+const reservationId = z.object({ id: z.string().uuid("El ID de la reserva debe ser un UUID válido") });
+
+// El empleado extiende el fin de una reserva (R-23): en horas enteras, como al reservar.
+export const extendReservationSchema = z.object({
+  params: reservationId,
+  body: z.object({ endTime: z.coerce.date() })
+    .refine(data => data.endTime.getMinutes() === 0 && data.endTime.getSeconds() === 0, {
+      message: "El fin de la reserva debe ser en horas enteras",
+      path: ["endTime"],
+    }),
+});
+
+// Servicios de la reserva que deja el empleado (R-24): tarifas de servicio de la cochera (ServicePrice.id).
+export const reservationServicesSchema = z.object({
+  params: reservationId,
+  body: z.object({ serviceIds: z.array(z.string().uuid("ID de servicio inválido")) }),
+});

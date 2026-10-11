@@ -34,7 +34,7 @@ export class InvoiceRepository implements Repository<Invoice> {
     return await this.em.find(
       Invoice,
       { reservation: { vehicle: { client: { id: clientId } } }, status: { $ne: 'ANULADA' } },
-      { populate: ['reservation', 'reservation.parkingSpace', 'reservation.parkingSpace.parking', 'reservation.vehicle'] as any }
+      { populate: ['reservation', 'reservation.parkingSpace', 'reservation.parkingSpace.parking', 'reservation.vehicle', 'reservation.services', 'reservation.services.serviceCatalog'] as any }
     );
   }
 

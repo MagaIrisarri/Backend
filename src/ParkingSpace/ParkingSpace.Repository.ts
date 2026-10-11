@@ -16,8 +16,58 @@ export interface Relocation {
   toSpaceId: string | null; toSpaceCode: string | null; // null: no hay plaza libre para esa reserva
 }
 
+type Interval = [number, number];
+const HOUR_MS = 60 * 60 * 1000;
+const overlaps = (list: Interval[] = [], from: number, to: number) => list.some(([a, b]) => a < to && b > from);
+
+// Horarios tomados en cada plaza por reservas activas. Un vehículo adentro que se pasó de hora la ocupa al menos hasta ahora (R-21).
+async function busyIntervals(em: EntityManager, spaceIds: string[], exceptReservationId?: string): Promise<Map<string, Interval[]>> {
+  const busy = new Map<string, Interval[]>();
+  if (!spaceIds.length) return busy;
+  const taken = await em.find(Reservation, {
+    parkingSpace: { $in: spaceIds }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] },
+    ...(exceptReservationId ? { id: { $ne: exceptReservationId } } : {}),
+  }, { populate: ['parkingSpace'] });
+  for (const r of taken) {
+    const end = r.status === ReservationStatus.EN_CURSO ? Math.max(r.endTime.getTime(), Date.now()) : r.endTime.getTime();
+    busy.set(r.parkingSpace.id, [...(busy.get(r.parkingSpace.id) ?? []), [r.startTime.getTime(), end]]);
+  }
+  return busy;
+}
+
+// Plazas que pueden recibir reservas: activas, fuera de mantenimiento y del tipo del vehículo.
+const candidates = async (em: EntityManager, parkingId: string, vehicleType: string | undefined, exceptSpaceId?: string) =>
+  (await em.find(ParkingSpace, {
+    parking: parkingId, isActive: true, state: { $ne: SpaceState.MANTENIMIENTO }, ...(exceptSpaceId ? { id: { $ne: exceptSpaceId } } : {}),
+  }, { orderBy: { spaceCode: 'ASC' } })).filter((s) => matchesVehicleType(s.vehicleType, vehicleType));
+
+// Libre para [from, to]: sin choque con otra reserva y, si el horario ya empezó, libre ahora (sin un vehículo marcado adentro).
+// Que hoy esté ocupada no importa para más tarde: una cochera llena ahora acepta reservas para otro horario.
+const isFree = (s: ParkingSpace, busy: Map<string, Interval[]>, from: number, to: number) =>
+  (from > Date.now() || s.state === SpaceState.LIBRE) && !overlaps(busy.get(s.id), from, to);
+
+/**
+ * Única regla para saber qué plazas están libres en un horario: alta de reserva (automática o elegida), cambio de plaza (R-15),
+ * disponibilidad, reubicación (R-19) e ingreso con la plaza ocupada (R-21). Sin choque con otra reserva activa en
+ * [inicio − margen, fin + margen] de la sucursal; ordenadas por código.
+ */
+export async function findFreeSpaces(
+  em: EntityManager, parking: { id: string; reservationMargin: number }, vehicleType: string | undefined,
+  start: Date, end: Date, exceptReservationId?: string,
+): Promise<ParkingSpace[]> {
+  const margin = Number(parking.reservationMargin ?? 0) * HOUR_MS;
+  const from = start.getTime() - margin, to = end.getTime() + margin;
+  const spaces = await candidates(em, parking.id, vehicleType);
+  const busy = await busyIntervals(em, spaces.map((s) => s.id), exceptReservationId);
+  return spaces.filter((s) => isFree(s, busy, from, to));
+}
+
 export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   constructor(private em: EntityManager) {}
+
+  freeSpaces(parking: { id: string; reservationMargin: number }, vehicleType: string, start: Date, end: Date): Promise<ParkingSpace[]> {
+    return findFreeSpaces(this.em, parking, vehicleType, start, end);
+  }
 
   /**
    * R-18/R-19: pasa la plaza a mantenimiento o la da de baja. Si tiene reservas futuras (pendientes o confirmadas),
@@ -68,26 +118,13 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
     }, { populate: ['vehicle'] as any, orderBy: { startTime: 'ASC' } });
     if (!reservations.length) return [];
 
-    const candidates = (await tx.find(ParkingSpace, {
-      parking: space.parking, state: SpaceState.LIBRE, isActive: true, id: { $ne: space.id },
-    }, { orderBy: { spaceCode: 'ASC' } })).filter(c => matchesVehicleType(c.vehicleType, space.vehicleType));
-
-    const margin = space.parking.reservationMargin * 60 * 60 * 1000;
-    const busy = new Map<string, [number, number][]>();
-    const taken = await tx.find(Reservation, {
-      parkingSpace: { $in: candidates.map(c => c.id) },
-      status: { $in: ACTIVE_RESERVATION_STATUSES },
-      $or: [{ status: ReservationStatus.EN_CURSO }, { endTime: { $gt: new Date(Date.now() - margin) } }],
-    }, { populate: ['parkingSpace'] });
-    for (const r of taken) {
-      // Un vehículo adentro que se pasó de hora ocupa la plaza al menos hasta ahora.
-      const end = r.status === ReservationStatus.EN_CURSO ? Math.max(r.endTime.getTime(), Date.now()) : r.endTime.getTime();
-      busy.set(r.parkingSpace.id, [...(busy.get(r.parkingSpace.id) ?? []), [r.startTime.getTime(), end]]);
-    }
+    const spaces = await candidates(tx, space.parking.id, space.vehicleType, space.id);
+    const margin = Number(space.parking.reservationMargin ?? 0) * HOUR_MS;
+    const busy = await busyIntervals(tx, spaces.map(c => c.id));
 
     return reservations.map(reservation => {
       const from = reservation.startTime.getTime() - margin, to = reservation.endTime.getTime() + margin;
-      const target = candidates.find(c => !(busy.get(c.id) ?? []).some(([a, b]) => a < to && b > from)) ?? null;
+      const target = spaces.find(c => isFree(c, busy, from, to)) ?? null;
       if (target) busy.set(target.id, [...(busy.get(target.id) ?? []), [reservation.startTime.getTime(), reservation.endTime.getTime()]]);
       return { reservation, target };
     });
