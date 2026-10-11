@@ -3,7 +3,10 @@ import { Repository } from '../Shared/base.Repository.js';
 import { User } from './User.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
+import { EmployeeShift } from '../EmployeeShift/EmployeeShift.Entity.js';
+import { DayException } from '../EmployeeShift/DayException.Entity.js';
 import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+import { isoDate } from '../Shared/utils/dateUtils.js';
 
 export class UserRepository implements Repository<User> {
   constructor(private em: EntityManager) {}
@@ -55,6 +58,17 @@ export class UserRepository implements Repository<User> {
 
   async countActiveParkingsOfOwner(ownerId: string): Promise<number> {
     return await this.em.count(Parking, { owner: { id: ownerId }, isActive: true });
+  }
+
+  // Para la baja de un empleado: turnos de la semana tipo, días especiales desde hoy y reservas activas que tiene asignados.
+  async countPendingWorkOfEmployee(employee: User): Promise<{ shifts: number; reservations: number }> {
+    const [template, exceptions, reservations] = await Promise.all([
+      this.em.count(EmployeeShift, { employee: { id: employee.id }, isActive: true }),
+      employee.parkingId ? this.em.find(DayException, { parking: { id: employee.parkingId }, date: { $gte: isoDate(new Date()) } }) : [],
+      this.em.count(Reservation, { attendedBy: { id: employee.id }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } }),
+    ]);
+    const special = exceptions.filter((e) => e.shifts.some((s) => s.employeeId === employee.id)).length;
+    return { shifts: template + special, reservations };
   }
 
   async ownsParking(ownerId: string, parkingId: string): Promise<boolean> {

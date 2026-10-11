@@ -198,6 +198,15 @@ export class ScheduleService {
     return this.resolveDay(parking, holiday.date);
   }
 
+  // R-10: un feriado nuevo cierra todas las sucursales, así que no se carga si alguna tiene reservas activas o pendientes ese día.
+  async assertNoReservationsOn(date: string): Promise<void> {
+    const start = dayStart(date);
+    const reservations = await this.repo.activeReservations(null, start, new Date(start.getTime() + 24 * 3600_000));
+    if (reservations.length) {
+      throw new AppError('No se puede cargar el feriado: hay reservas activas o pendientes ese día', 409, this.conflicts(reservations, date, 'feriado'));
+    }
+  }
+
   // R-01: las horas sin cobertura no admiten reservas. Solo se exige si la sucursal ya tiene turnos cargados.
   // shortcut: R-01, sucursales sin ningún turno no se validan, exigir cobertura siempre cuando todas tengan turnos
   async assertCovered(parking: Parking, start: Date, end: Date): Promise<void> {

@@ -29,10 +29,10 @@ export class ScheduleRepository {
     return this.em.findOne(HolidayParking, { holiday: { id: holidayId }, parking: { id: parkingId } });
   }
 
-  // Reservas activas (pendientes, confirmadas o en curso) de la sucursal que tocan el día.
-  activeReservations(parkingId: string, dayStart: Date, dayEnd: Date) {
+  // Reservas activas (pendientes, confirmadas o en curso) que tocan el día: de una sucursal o, con null, de todas.
+  activeReservations(parkingId: string | null, dayStart: Date, dayEnd: Date) {
     return this.em.find(Reservation, {
-      parkingSpace: { parking: { id: parkingId } },
+      ...(parkingId ? { parkingSpace: { parking: { id: parkingId } } } : {}),
       status: { $in: [...ACTIVE_RESERVATION_STATUSES] },
       startTime: { $lt: dayEnd },
       endTime: { $gt: dayStart },

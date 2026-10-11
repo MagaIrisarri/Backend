@@ -13,11 +13,11 @@ import { dayParamsSchema, saveDaySchema, createClosureSchema, closureIdSchema, p
 
 export const employeeShiftRouter = Router();
 
-const employeeShiftRepository = new EmployeeShiftRepository(orm.em);
-const employeeShiftService = new EmployeeShiftService(employeeShiftRepository);
-const employeeShiftController = new EmployeeShiftController(employeeShiftService);
-
 export const scheduleService = new ScheduleService(new ScheduleRepository(orm.em));
+
+const employeeShiftRepository = new EmployeeShiftRepository(orm.em);
+const employeeShiftService = new EmployeeShiftService(employeeShiftRepository, scheduleService);
+const employeeShiftController = new EmployeeShiftController(employeeShiftService);
 const scheduleController = new ScheduleController(scheduleService);
 
 // Calendario por fecha y cierres de la semana tipo (antes de '/:id')

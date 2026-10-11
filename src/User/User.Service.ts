@@ -82,8 +82,16 @@ export class UserService {
   }
 
   async removeEmployee(ownerId: string, id: string): Promise<void> {
-    await this.findOwnedEmployee(ownerId, id);
+    await this.assertNoPendingWork(await this.findOwnedEmployee(ownerId, id));
     await this.userRepository.remove({ id });
+  }
+
+  // Como R-20: un empleado dado de baja no puede seguir cubriendo turnos (R-01) ni quedar asignado a reservas activas (R-07).
+  private async assertNoPendingWork(employee: User): Promise<void> {
+    const { shifts, reservations } = await this.userRepository.countPendingWorkOfEmployee(employee);
+    if (shifts || reservations) {
+      throw new AppError(`No se puede dar de baja: tiene ${shifts} turno(s) cargados y ${reservations} reserva(s) activas asignadas. Sacalo de los turnos y reasigná sus reservas primero.`, 409);
+    }
   }
 
   async reactivateEmployee(ownerId: string, id: string): Promise<Omit<User, 'password'>> {
@@ -128,6 +136,7 @@ export class UserService {
       const n = await this.userRepository.countActiveReservationsOfClient(user.id);
       if (n) throw new AppError(`No se puede dar de baja: tiene ${n} reserva(s) pendiente(s), confirmada(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
     }
+    if (user.type === UserType.EMPLEADO) await this.assertNoPendingWork(user);
     if (user.type === UserType.DUENO) {
       const n = await this.userRepository.countActiveParkingsOfOwner(user.id);
       if (n) throw new AppError(`No se puede dar de baja: tiene ${n} sucursal(es) activa(s). Pausalas primero desde su panel.`, 409);
@@ -135,14 +144,11 @@ export class UserService {
     return await this.userRepository.remove(params);
   }
 
-  async login(email: string, password: string): Promise<Omit<User, 'password'> | { error: string }> {
+  // Un solo 401 para email inexistente, contraseña incorrecta o usuario dado de baja: la respuesta no dice qué emails existen.
+  async login(email: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOneForEmail(email);
-    if (!user) return { error: 'Usuario no encontrado' };
-    if (user.status !== UserStatus.ACTIVO) return { error: 'El usuario no está activo' };
-
-    const isValid = await argon2.verify(user.password, password);
-    if (!isValid) return { error: 'Contraseña incorrecta' };
-
+    const ok = user?.status === UserStatus.ACTIVO && (await argon2.verify(user.password, password));
+    if (!ok) throw new AppError('Email o contraseña incorrectos', 401);
     return this.excludePassword(user);
   }
 }

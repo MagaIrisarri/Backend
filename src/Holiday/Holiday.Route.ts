@@ -7,7 +7,7 @@ import { HolidayService } from './Holiday.Service.js';
 import { listHolidaysSchema, createHolidaySchema, holidayIdSchema, holidayOpenSchema } from './Holiday.Schema.js';
 
 export const holidayRouter = Router();
-const controller = new HolidayController(new HolidayService(orm.em), scheduleService);
+const controller = new HolidayController(new HolidayService(orm.em, scheduleService), scheduleService);
 
 holidayRouter.get('/', validateSchema(listHolidaysSchema), controller.list);
 holidayRouter.post('/', validateSchema(createHolidaySchema), controller.create);

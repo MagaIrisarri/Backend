@@ -57,8 +57,8 @@ export class UserController {
 
   public reactivate = catchAsync(async (req: Request, res: Response) => {
     const reactivatedUser = await this.userService.reactivate({ id: req.params.id as string });
-    if (!reactivatedUser) throw new AppError('User not found', 404);
-    res.status(200).json({ message: 'Usuario reactivado Exitosamente', data: reactivatedUser });
+    if (!reactivatedUser) throw new AppError('Usuario no encontrado', 404);
+    res.status(200).json({ message: 'Usuario reactivado exitosamente', data: reactivatedUser });
   });
 
   public updatePassword = catchAsync(async (req: Request, res: Response) => {
@@ -70,16 +70,13 @@ export class UserController {
 
   public delete = catchAsync(async (req: Request, res: Response) => {
     const deleted = await this.userService.remove({ id: req.params.id as string });
-    if (!deleted) throw new AppError('User not found', 404);
-    res.status(200).json({ message: 'Usuario eliminado Exitosamente' });
+    if (!deleted) throw new AppError('Usuario no encontrado', 404);
+    res.status(200).json({ message: 'Usuario eliminado exitosamente' });
   });
 
   public login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await this.userService.login(email, password);
-    
-    // El servicio ya devuelve el mensaje en español
-    if ('error' in user) throw new AppError(user.error, user.error === 'Usuario no encontrado' ? 404 : 401);
     res.status(200).json({ data: user });
   });
 }

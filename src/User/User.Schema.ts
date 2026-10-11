@@ -50,7 +50,7 @@ export const updateUserSchema = z.object({
     dni: baseUserFields.dni.optional(),
     name: baseUserFields.name.optional(),
     last_name: baseUserFields.last_name.optional(),
-    date_of_birth: dateOfBirthSchema,
+    date_of_birth: dateOfBirthSchema.optional(),
     email: baseUserFields.email.optional(),
     phone: baseUserFields.phone.optional(),
   }),
@@ -62,7 +62,6 @@ export const updateEmployeeSchema = z.object({
     id: z.string().uuid('ID de empleado inválido'),
   }),
   body: updateUserSchema.shape.body.extend({
-    date_of_birth: dateOfBirthSchema.optional(),
     parkingId: z.string().uuid('Estacionamiento inválido').optional(),
   }),
 });

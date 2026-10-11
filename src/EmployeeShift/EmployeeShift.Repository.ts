@@ -1,7 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
 import { EmployeeShift, DayOfWeek } from './EmployeeShift.Entity.js';
-import { User } from '../User/User.Entity.js';
-import { Parking } from '../Parking/Parking.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
 
 export class EmployeeShiftRepository implements Repository<EmployeeShift> {
@@ -52,40 +50,6 @@ export class EmployeeShiftRepository implements Repository<EmployeeShift> {
     shift.isActive = false;
     await this.em.flush();
     return true;
-  }
-
-  async findUserById(userId: string): Promise<User | null> {
-    return await this.em.findOne(User, { id: userId, status: 'ACTIVO' });
-  }
-
-  async findParkingById(parkingId: string): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: parkingId, isActive: true });
-  }
-
-  async findOverlappingShift(
-    employee: User, 
-    dayOfWeek: DayOfWeek, 
-    startTime: string, 
-    endTime: string,
-    excludeShiftId?: string // ignorar el turno actual durante un update ?
-  ): Promise<EmployeeShift | null> {
-    const query: any = { employee, dayOfWeek, isActive: true,
-      $and: [
-        { startTime: { $lt: endTime } },
-        { endTime: { $gt: startTime } }
-      ]
-    };
-    
-    if (excludeShiftId) query.id = { $ne: excludeShiftId };
-    
-    return await this.em.findOne(EmployeeShift, query);
-  }
-
-  // R-02: los turnos de una sucursal no se solapan, sean del mismo empleado o de otro.
-  async findOverlappingInParking(parkingId: string, dayOfWeek: DayOfWeek, startTime: string, endTime: string, excludeShiftId?: string) {
-    const query: any = { parking: { id: parkingId }, dayOfWeek, isActive: true, startTime: { $lt: endTime }, endTime: { $gt: startTime } };
-    if (excludeShiftId) query.id = { $ne: excludeShiftId };
-    return await this.em.findOne(EmployeeShift, query);
   }
 
   async findByParkingAndDay(parkingId: string, dayOfWeek: DayOfWeek): Promise<EmployeeShift[]> {

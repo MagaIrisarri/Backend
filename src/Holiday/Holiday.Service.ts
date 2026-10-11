@@ -2,9 +2,10 @@ import { EntityManager } from '@mikro-orm/core';
 import { Holiday } from './Holiday.Entity.js';
 import { HolidayParking } from './HolidayParking.Entity.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import type { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 
 export class HolidayService {
-  constructor(private em: EntityManager) {}
+  constructor(private em: EntityManager, private schedule: ScheduleService) {}
 
   // Con parkingId cada feriado trae si esa sucursal lo abre (por defecto cierra, R-10).
   async list(year?: number, parkingId?: string) {
@@ -18,6 +19,7 @@ export class HolidayService {
 
   async create(data: { date: string; name: string }) {
     if (await this.em.findOne(Holiday, { date: data.date })) throw new AppError('Ya hay un feriado en esa fecha', 409);
+    await this.schedule.assertNoReservationsOn(data.date);
     const holiday = this.em.create(Holiday, { ...data, origin: 'manual' });
     await this.em.flush();
     return holiday;
