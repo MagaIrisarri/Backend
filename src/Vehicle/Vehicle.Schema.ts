@@ -14,7 +14,12 @@ export const createVehicleSchema = z.object({
 
 export type CreateVehicleInput = z.infer<typeof createVehicleSchema>;
 
-export const UpdateVehicleSchema = createVehicleSchema.partial();
+// Todos los campos opcionales; insuranceId en null quita el seguro.
+export const UpdateVehicleSchema = z.object({
+  body: createVehicleSchema.shape.body.partial().extend({
+    insuranceId: z.string().uuid("ID de seguro inválido").nullable().optional(),
+  }),
+});
 
 export const ClientIdSchema = z.object({
   params: z.object({

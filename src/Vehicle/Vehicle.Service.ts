@@ -26,15 +26,7 @@ export class VehicleService {
     if (user.type === 'EMPLEADO') {
       throw new AppError("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO", 403);
     }
-    const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
-    
-    if (!model) {
-      throw new AppError("El modelo seleccionado no existe en la base de datos.", 404);
-    }
-   
-    if (model.brand.id !== data.brandId) {
-      throw new AppError("Marca y modelo no coinciden", 400);
-    }
+    const model = await this.resolveModel(data.brandId, data.modelId);
 
     const vehicleData = {
       ...data,               
@@ -48,8 +40,33 @@ export class VehicleService {
     return await this.vehicleRepository.add(vehicleData);
   }
 
+  private async resolveModel(brandId: string, modelId: string) {
+    const model = await this.vehicleRepository.findModelWithDetails(modelId);
+    if (!model) {
+      throw new AppError("El modelo seleccionado no existe en la base de datos.", 404);
+    }
+    if (model.brand.id !== brandId) {
+      throw new AppError("Marca y modelo no coinciden", 400);
+    }
+    return model;
+  }
+
   async update(id: string, data: any): Promise<Vehicle | null> {
-    return await this.vehicleRepository.update(id, data);
+    const vehicle = await this.vehicleRepository.findOne({ id });
+    if (!vehicle) return null;
+
+    const { brandId, modelId, insuranceId, ...changes } = data;
+    if (brandId !== undefined || modelId !== undefined) {
+      const model = await this.resolveModel(brandId ?? vehicle.brand.id, modelId ?? vehicle.model.id);
+      // R-25: la plaza de una reserva activa es del tipo del vehículo; cambiarlo la dejaría en una plaza incompatible.
+      if (model.vehicleType.id !== vehicle.vehicleType.id && await this.vehicleRepository.countActiveReservations(id)) {
+        throw new AppError("No se puede cambiar el tipo de un vehículo con reservas pendientes, confirmadas o en curso", 400);
+      }
+      Object.assign(changes, { brand: model.brand, model, vehicleType: model.vehicleType });
+    }
+    if (insuranceId !== undefined) changes.insurance = insuranceId;
+
+    return await this.vehicleRepository.update(id, changes);
   }
 
   async remove(id: string): Promise<boolean> {
