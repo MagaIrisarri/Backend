@@ -23,7 +23,7 @@ export class InvoiceService {
       status: 'PAGADA',
       paymentMethod: data.paymentMethod,
       paymentDate: new Date(),
-      amountReceived: cash ? data.amountReceived ?? null : null,
+      amountReceived: cash && data.amountReceived != null ? String(data.amountReceived) : null, // una columna decimal se asigna como string
       receiptNumber: cash ? null : data.receiptNumber ?? null,
     });
   }

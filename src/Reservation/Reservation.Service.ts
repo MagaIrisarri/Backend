@@ -213,6 +213,7 @@ export class ReservationService {
           id: inv.id, status: inv.status, paymentMethod: inv.paymentMethod,
           reservedHours: inv.reservedHours ?? null, extraHours: inv.extraHours ?? null,
           hourlyRate: num(inv.hourlyRate), servicesAmount: num(inv.servicesAmount),
+          amountReceived: num(inv.amountReceived), receiptNumber: inv.receiptNumber ?? null,
         } : null,
       });
     });
