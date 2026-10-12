@@ -210,7 +210,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
   async getDependencies(parkingId: string, vehicleId: string) {
     const parking = await this.entityManager.findOne(Parking, { id: parkingId, isActive: true });
-    const vehicle = await this.entityManager.findOne(Vehicle, { id: vehicleId, isActive: true }, { populate: ['vehicleType'] as any });
+    const vehicle = await this.entityManager.findOne(Vehicle, { id: vehicleId, isActive: true }, { populate: ['vehicleType', 'client'] as any });
     return { parking, vehicle };
   }
 
@@ -338,9 +338,10 @@ export class ReservationRepository implements Repository<Reservation> {
 
   // Alta de mostrador en una sola transacción: cliente y vehículo (si la patente es nueva), reserva EN CURSO y plaza ocupada.
   async createWalkIn(p: {
-    parking: Parking; plate: string; model: Model; name: string; phone: string; start: Date; end: Date;
-    employeeId: string; serviceIds?: string[];
+    parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[];
+    client: { name: string; last_name: string; dni: string; email: string; phone?: string; passwordHash: string };
   }): Promise<Reservation> {
+    const c = p.client;
     return await this.entityManager.transactional(async (em) => {
       await lockParking(em, p.parking.id);
       let vehicle = await em.findOne(Vehicle, { plate: p.plate, isActive: true }, { populate: ['vehicleType'] as any });
@@ -349,9 +350,20 @@ export class ReservationRepository implements Repository<Reservation> {
         const inside = await em.findOne(Reservation, { vehicle, status: ReservationStatus.EN_CURSO }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
         if (inside) throw new AppError(`${p.plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
       } else {
-        // Un contacto de mostrador anterior con el mismo teléfono se reutiliza (phone es único); si es un usuario con cuenta, también.
-        const client = await em.findOne(User, { phone: p.phone })
-          ?? em.create(User, { name: p.name, last_name: '-', phone: p.phone, guest: true, type: UserType.CLIENTE, status: 'ACTIVO' });
+        // shortcut: L-36, email sin verificar y DNI como contraseña inicial, verificar por mail cuando haya envío
+        // R-29: el email identifica al cliente. Con cuenta → el vehículo va a su nombre; sin cuenta → se crea con el DNI
+        // como contraseña (la cambia él después). Email, DNI y teléfono siguen siendo únicos (RA-08).
+        let client = await em.findOne(User, { email: c.email });
+        if (client && (client.type !== UserType.CLIENTE || client.status !== 'ACTIVO')) throw new AppError('Ese email es de un usuario que no es un cliente activo', 409);
+        if (client && client.dni !== c.dni) throw new AppError('Ese email ya está registrado con otro DNI', 409);
+        if (!client) {
+          if (await em.count(User, { dni: c.dni })) throw new AppError('El DNI ya está registrado con otro email', 409);
+          if (c.phone && await em.count(User, { phone: c.phone })) throw new AppError('El teléfono ya está registrado', 409);
+          client = em.create(User, {
+            name: c.name, last_name: c.last_name, dni: c.dni, email: c.email, phone: c.phone ?? null, password: c.passwordHash, mustChangePassword: true,
+            type: UserType.CLIENTE, status: 'ACTIVO',
+          });
+        }
         vehicle = em.create(Vehicle, { plate: p.plate, brand: p.model.brand, model: p.model, vehicleType: p.model.vehicleType, client, isActive: true, createdAt: new Date(), updatedAt: new Date() });
       }
       await this.validateVehicleOverlap(em, vehicle, p.start, p.end);
@@ -365,7 +377,7 @@ export class ReservationRepository implements Repository<Reservation> {
       const employee = em.getReference(User, p.employeeId);
       const reservation = em.create(Reservation, {
         id, code: reservationCode(id), startTime: p.start, endTime: p.end, vehicle, parkingSpace: space,
-        status: ReservationStatus.EN_CURSO, checkedInBy: employee, attendedBy: employee, contactName: p.name, contactPhone: p.phone,
+        status: ReservationStatus.EN_CURSO, checkedInBy: employee, attendedBy: employee, contactName: `${c.name} ${c.last_name}`, contactPhone: c.phone ?? null,
       });
       if (p.serviceIds?.length) await this.attachServices(em, reservation, p.serviceIds, p.parking);
       return reservation;

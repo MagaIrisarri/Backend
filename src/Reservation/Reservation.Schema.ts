@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PLATE_REGEX } from "../Vehicle/Vehicle.Schema.js";
+import { baseUserFields } from "../User/User.Schema.js";
 
 export const createReservationSchema = z.object({
   body: z.object({
@@ -61,7 +62,7 @@ export const extendReservationSchema = z.object({
   body: z.object({ endTime: z.coerce.date() }),
 });
 
-// Alta de mostrador: el inicio lo fija el servidor (ahora, sin segundos) y el fin es inicio + horas completas.
+// Alta de mostrador (R-29): el inicio lo fija el servidor (ahora, sin segundos) y el fin es inicio + horas completas.
 export const walkInSchema = z.object({
   body: z.object({
     parkingId: z.string().uuid("El ID de estacionamiento debe ser un UUID válido"),
@@ -70,8 +71,12 @@ export const walkInSchema = z.object({
     modelId: z.string().uuid("ID de modelo inválido"),
     hours: z.number().int("Las horas son un número entero").min(1, "Mínimo 1 hora"),
     serviceIds: z.array(z.string().uuid()).optional(),
-    name: z.string().trim().min(1, "Falta el nombre").max(100),
-    phone: z.string().trim().min(6, "Teléfono inválido").max(20),
+    // Cliente (R-29): si el email no tiene cuenta se crea con el DNI como contraseña; nacimiento y teléfono los completa él.
+    name: baseUserFields.name,
+    last_name: baseUserFields.last_name,
+    dni: baseUserFields.dni,
+    email: baseUserFields.email,
+    phone: baseUserFields.phone.optional(),
   }),
 });
 export type WalkInInput = z.infer<typeof walkInSchema>['body'];

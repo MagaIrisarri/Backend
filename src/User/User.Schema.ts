@@ -16,7 +16,7 @@ const dateOfBirthSchema = z.coerce
     return age >= 18;
   }, { message: 'Debés ser mayor de 18 años para registrarte' });
 
-const baseUserFields = {
+export const baseUserFields = {
   dni: z
     .string()
     .trim()

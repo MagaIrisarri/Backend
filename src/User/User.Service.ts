@@ -129,11 +129,14 @@ export class UserService {
     const user = await this.userRepository.findOne({ id });
     if (!user) return false;
 
-    const isValid = !!user.password && await argon2.verify(user.password, currentPass);
+    const isValid = await argon2.verify(user.password, currentPass);
     if (!isValid) return false;
 
+    // R-29: la cuenta del mostrador empieza con el DNI como contraseña; nadie puede volver a usarlo.
+    if (newPass === user.dni) throw new AppError('La contraseña nueva no puede ser tu DNI', 400);
+
     const hashedNew = await argon2.hash(newPass);
-    await this.userRepository.update(id, { password: hashedNew });
+    await this.userRepository.update(id, { password: hashedNew, mustChangePassword: false });
     return true;
   }
 
@@ -157,7 +160,7 @@ export class UserService {
   // Un solo 401 para email inexistente, contraseña incorrecta o usuario dado de baja: la respuesta no dice qué emails existen.
   async login(email: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOneForEmail(email);
-    const ok = user?.status === UserStatus.ACTIVO && !!user.password && (await argon2.verify(user.password, password));
+    const ok = user?.status === UserStatus.ACTIVO && (await argon2.verify(user.password, password));
     if (!ok) throw new AppError('Email o contraseña incorrectos', 401);
     return this.excludePassword(user);
   }

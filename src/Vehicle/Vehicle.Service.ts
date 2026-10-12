@@ -1,6 +1,7 @@
 import { Vehicle } from './Vehicle.Entity.js';
 import { VehicleRepository } from './Vehicle.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
 
 export class VehicleService {
   constructor(private readonly vehicleRepository: VehicleRepository) {}
@@ -26,6 +27,7 @@ export class VehicleService {
     if (user.type === 'EMPLEADO') {
       throw new AppError("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO", 403);
     }
+    if (user.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
     await this.assertPlateFree(data.plate);
     const model = await this.resolveModel(data.brandId, data.modelId);
 

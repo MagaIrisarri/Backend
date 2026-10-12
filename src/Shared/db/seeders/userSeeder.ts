@@ -35,7 +35,7 @@ export const defaultPassword = () => argon2.hash('password123');
 
 // Idempotente por email: en una base ya sembrada solo crea los que faltan. Devuelve todos por email.
 export const seedUsers = async (em: EntityManager): Promise<Map<string, User>> => {
-  const existing = new Map((await em.find(User, { email: USERS.map(u => u.email) })).map(u => [u.email!, u]));
+  const existing = new Map((await em.find(User, { email: USERS.map(u => u.email) })).map(u => [u.email, u]));
   const password = await defaultPassword();
   for (const u of USERS) {
     if (existing.has(u.email)) continue;

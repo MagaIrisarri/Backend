@@ -16,6 +16,8 @@ import type { Parking } from '../Parking/Parking.Entity.js';
 import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 import { NotificationService } from '../Notification/Notification.Service.js';
 import { wrap } from '@mikro-orm/core';
+import argon2 from 'argon2';
+import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
 
 const MS_PER_HOUR = 1000 * 60 * 60;
 
@@ -109,6 +111,7 @@ export class ReservationService {
   
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
+  if (vehicle.client.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
 
   await this.assertSchedule(parking, startTime, endTime);
 
@@ -171,7 +174,11 @@ export class ReservationService {
     start.setSeconds(0, 0);
     const end = new Date(start.getTime() + data.hours * MS_PER_HOUR);
     await this.assertSchedule(parking, start, end);
-    const reservation = await this.repo.createWalkIn({ parking, plate: data.plate, model, name: data.name, phone: data.phone, start, end, employeeId: userId, serviceIds: data.serviceIds });
+    const { parkingId, plate, brandId, modelId, hours, serviceIds, ...client } = data;
+    const reservation = await this.repo.createWalkIn({
+      parking, plate, model, start, end, employeeId: userId, serviceIds,
+      client: { ...client, passwordHash: await argon2.hash(client.dni) }, // R-29: el DNI es la contraseña inicial
+    });
     return (await this.repo.findOne({ id: reservation.id }))!;
   }
 
