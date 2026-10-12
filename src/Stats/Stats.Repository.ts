@@ -5,6 +5,7 @@ import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ReservationStatus, UserStatus } from '../Shared/constants/status.js';
+import { listLocalities } from '../Parking/Parking.Repository.js';
 import type { LocalityScope } from './Stats.Schema.js';
 
 // Conteos y sumas para el panel del administrador: todo se calcula en la base (COUNT/SUM), sin traer filas.
@@ -23,9 +24,7 @@ export class StatsRepository {
 
   // Localidades con cocheras, para elegir el alcance del panel.
   async localities(): Promise<LocalityScope[]> {
-    const rows: LocalityScope[] = await this.em.getConnection().execute(
-      'SELECT DISTINCT province, locality FROM parking WHERE province IS NOT NULL ORDER BY province, locality');
-    return rows.map(r => ({ province: r.province, locality: r.locality }));
+    return listLocalities(this.em);
   }
 
   async parkings(scope?: LocalityScope): Promise<{ total: number; active: number }> {

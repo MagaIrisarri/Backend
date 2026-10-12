@@ -8,8 +8,7 @@ export class UserService {
   constructor(private userRepository: UserRepository) {}
 
   private async createUser(userData: Partial<User>, overrides: Partial<User> = {}): Promise<Omit<User, 'password'>> {
-    const existing = await this.userRepository.findOneForEmail(userData.email!);
-    if (existing) throw new AppError('El email ya está registrado', 409);
+    await this.assertUnique(userData);
 
     userData.password = await argon2.hash(userData.password!);
     userData.status = UserStatus.ACTIVO;
@@ -17,6 +16,12 @@ export class UserService {
     const user = await this.userRepository.add({ ...userData, ...overrides });
     const { password, ...rest } = user;
     return rest;
+  }
+
+  // RA-08: email, DNI y teléfono son únicos en el alta y en la edición de cualquier rol.
+  private async assertUnique(data: Partial<User>, exceptId?: string): Promise<void> {
+    const field = await this.userRepository.findDuplicateField(data, exceptId);
+    if (field) throw new AppError(`${{ email: 'El email', dni: 'El DNI', phone: 'El teléfono' }[field]} ya está registrado`, 409);
   }
 
   private excludePassword(user: User): Omit<User, 'password'> {
@@ -27,6 +32,11 @@ export class UserService {
   async findAll(): Promise<Omit<User, 'password'>[]> {
     const users = await this.userRepository.findAll();
     return users.map((user) => this.excludePassword(user));
+  }
+
+  async findPage(options: { page: number; limit: number; q?: string; role?: string; status?: string }) {
+    const { items, total, counts } = await this.userRepository.findPage(options);
+    return { data: items.map((u) => this.excludePassword(u)), meta: { page: options.page, limit: options.limit, total, counts } };
   }
 
   async findOne(params: { id: string }): Promise<Omit<User, 'password'> | null> {
@@ -69,14 +79,13 @@ export class UserService {
   }
 
   async updateEmployee(ownerId: string, id: string, userData: Partial<User>): Promise<Omit<User, 'password'>> {
-    await this.findOwnedEmployee(ownerId, id);
+    const employee = await this.findOwnedEmployee(ownerId, id);
     if (userData.parkingId && !(await this.userRepository.ownsParking(ownerId, userData.parkingId))) {
       throw new AppError('El estacionamiento no pertenece a este dueño', 400);
     }
-    if (userData.email) {
-      const existing = await this.userRepository.findOneForEmail(userData.email);
-      if (existing && existing.id !== id) throw new AppError('El email ya está registrado', 409);
-    }
+    // RA-18: cambiar de sucursal dejaría turnos y reservas de la actual sin responsable, igual que la baja (R-20).
+    if (userData.parkingId && userData.parkingId !== employee.parkingId) await this.assertNoPendingWork(employee, 'cambiar de sucursal');
+    await this.assertUnique(userData, id);
     const user = await this.userRepository.update(id, userData);
     return this.excludePassword(user!);
   }
@@ -87,10 +96,10 @@ export class UserService {
   }
 
   // Como R-20: un empleado dado de baja no puede seguir cubriendo turnos (R-01) ni quedar asignado a reservas activas (R-07).
-  private async assertNoPendingWork(employee: User): Promise<void> {
+  private async assertNoPendingWork(employee: User, action = 'dar de baja'): Promise<void> {
     const { shifts, reservations } = await this.userRepository.countPendingWorkOfEmployee(employee);
     if (shifts || reservations) {
-      throw new AppError(`No se puede dar de baja: tiene ${shifts} turno(s) cargados y ${reservations} reserva(s) activas asignadas. Sacalo de los turnos y reasigná sus reservas primero.`, 409);
+      throw new AppError(`No se puede ${action}: tiene ${shifts} turno(s) cargados y ${reservations} reserva(s) activas asignadas. Sacalo de los turnos y reasigná sus reservas primero.`, 409);
     }
   }
 
@@ -104,6 +113,7 @@ export class UserService {
     if (userData.password) {
       userData.password = await argon2.hash(userData.password);
     }
+    await this.assertUnique(userData, params.id);
     const user = await this.userRepository.update(params.id, userData);
     if (!user) return null;
     return this.excludePassword(user);

@@ -2,13 +2,7 @@ import { Request, Response } from 'express';
 import { ReservationService } from './Reservation.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
-
-// Quién hace la acción: el frontend lo manda siempre en x-user-id (sin autenticación, ver revision-alcance).
-const actorId = (req: Request, action: string): string => {
-  const id = req.headers['x-user-id'];
-  if (typeof id !== 'string' || !id) throw new AppError(`Falta el usuario (x-user-id) para ${action}`, 400);
-  return id;
-};
+import { actorId } from '../Shared/utils/actorId.js';
 
 export class ReservationController {
   constructor(private service: ReservationService) {}

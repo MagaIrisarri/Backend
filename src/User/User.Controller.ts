@@ -7,7 +7,9 @@ import { UserStatus } from '../Shared/constants/status.js';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  public findAll = catchAsync(async (_req: Request, res: Response) => {
+  public findAll = catchAsync(async (req: Request, res: Response) => {
+    const { page, ...rest } = req.query as any; // ya validado por listUsersQuerySchema
+    if (page) return res.status(200).json(await this.userService.findPage({ page, ...rest }));
     const users = await this.userService.findAll();
     res.status(200).json({ data: users });
   });

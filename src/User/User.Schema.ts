@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pageQuery } from '../Shared/utils/pagination.js';
 
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
 export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
@@ -30,6 +31,16 @@ const baseUserFields = {
     .regex(/^\d{6,15}$/, 'El teléfono debe contener solo dígitos numéricos'),
   password: z.string().trim().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 };
+
+// Listado paginado del administrador (todos los campos son opcionales; sin `page` devuelve todos).
+export const listUsersQuerySchema = z.object({
+  query: z.object({
+    ...pageQuery,
+    q: z.string().trim().max(100).optional(),
+    role: UserTypeSchema.optional(),
+    status: UserStatusSchema.optional(),
+  }),
+});
 
 export const createPublicUserSchema = z.object({
   body: z.object({

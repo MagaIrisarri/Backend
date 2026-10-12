@@ -5,13 +5,43 @@ import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ParkingPrice } from '../ParkingPrice/ParkingPrice.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { likeWords } from '../Shared/utils/pagination.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+
+// Localidades con cocheras (con su provincia: hay localidades homónimas), para elegir el alcance de un listado o del panel.
+export const listLocalities = (em: EntityManager): Promise<{ province: string; locality: string }[]> =>
+  em.getConnection().execute('SELECT DISTINCT province, locality FROM parking WHERE province IS NOT NULL ORDER BY province, locality');
+
+export interface ParkingPageOptions { page: number; limit: number; q?: string; province?: string; locality?: string; status?: 'on' | 'off' }
 
 export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Parking[]> {
     return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+  }
+
+  // Una página de cocheras con búsqueda (nombre, dirección, barrio o dueño), localidad y estado. `counts` ignora el estado para rotular sus filtros.
+  async findPage(o: ParkingPageOptions): Promise<{ items: Parking[]; total: number; counts: { on: number; off: number } }> {
+    const filters: any[] = [];
+    if (o.province) filters.push({ province: o.province });
+    if (o.locality) filters.push({ locality: o.locality });
+    for (const w of likeWords(o.q)) {
+      filters.push({ $or: [{ name: { $like: w } }, { address: { $like: w } }, { neighborhood: { $like: w } }, { owner: { $or: [{ name: { $like: w } }, { last_name: { $like: w } }] } }] });
+    }
+    const where: any = filters.length ? { $and: filters } : {};
+    const [[items, total], on, off] = await Promise.all([
+      this.em.findAndCount(Parking, { ...where, ...(o.status && { isActive: o.status === 'on' }) }, {
+        populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' }, limit: o.limit, offset: (o.page - 1) * o.limit,
+      }),
+      this.em.count(Parking, { ...where, isActive: true }),
+      this.em.count(Parking, { ...where, isActive: false }),
+    ]);
+    return { items, total, counts: { on, off } };
+  }
+
+  async localities() {
+    return listLocalities(this.em);
   }
 
   async findActive(): Promise<Parking[]> {

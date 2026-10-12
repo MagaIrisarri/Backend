@@ -6,7 +6,7 @@ import { ParkingController } from './Parking.Controller.js';
 import { ParkingRepository } from './Parking.Repository.js';
 import { ParkingService } from './Parking.Service.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
-import { createParkingSchema, updateParkingSchema, parkingIdSchema, parkingIdOwnerSchema } from './Parking.Schema.js';
+import { createParkingSchema, updateParkingSchema, parkingIdSchema, parkingIdOwnerSchema, listParkingsQuerySchema } from './Parking.Schema.js';
 
 export const parkingRouter = Router();
 
@@ -15,7 +15,7 @@ const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
 const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
 const parkingController = new ParkingController(parkingService);
 
-parkingRouter.get('/', parkingController.findAll);
+parkingRouter.get('/', validateSchema(listParkingsQuerySchema), parkingController.findAll);
 parkingRouter.get('/active', parkingController.findActive);
 parkingRouter.get('/:id/metrics', validateSchema(parkingIdSchema), parkingController.getMetrics);
 parkingRouter.post('/:id/reactivate', validateSchema(parkingIdSchema), parkingController.reactivate);

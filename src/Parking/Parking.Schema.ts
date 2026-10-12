@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TIME_REGEX } from "../Shared/utils/validation.js";
+import { pageQuery } from "../Shared/utils/pagination.js";
 
 const parkingBodyBaseSchema = z.object({
   ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
@@ -68,6 +69,17 @@ export const updateParkingSchema = z.object({
         path: ["closingTime"],
       }
     ),
+});
+
+// Listado paginado del administrador (todos los campos son opcionales; sin `page` devuelve todas).
+export const listParkingsQuerySchema = z.object({
+  query: z.object({
+    ...pageQuery,
+    q: z.string().trim().max(100).optional(),
+    province: z.string().trim().max(60).optional(),
+    locality: z.string().trim().max(100).optional(),
+    status: z.enum(['on', 'off']).optional(),
+  }),
 });
 
 export const parkingIdSchema = z.object({

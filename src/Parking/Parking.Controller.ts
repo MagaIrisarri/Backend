@@ -6,7 +6,12 @@ import { AppError } from '../Shared/utils/AppError.js';
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
   
-  public findAll = catchAsync(async (_req: Request, res: Response) => {
+  public findAll = catchAsync(async (req: Request, res: Response) => {
+    const { page, ...rest } = req.query as any; // ya validado por listParkingsQuerySchema
+    if (page) {
+      const { data, meta } = await this.parkingService.findPage({ page, ...rest });
+      return res.status(200).json({ message: data.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados', data, meta });
+    }
     const parkings = await this.parkingService.findAll();
     return res.status(200).json({
       message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',

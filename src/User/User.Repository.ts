@@ -7,12 +7,32 @@ import { EmployeeShift } from '../EmployeeShift/EmployeeShift.Entity.js';
 import { DayException } from '../EmployeeShift/DayException.Entity.js';
 import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 import { isoDate } from '../Shared/utils/dateUtils.js';
+import { likeWords } from '../Shared/utils/pagination.js';
 
 export class UserRepository implements Repository<User> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<User[]> {
     return await this.em.find(User, {});
+  }
+
+  // Una página de usuarios con búsqueda (nombre, apellido, email o DNI), rol y estado.
+  // `counts` rotula los filtros: por rol respeta el estado elegido y por estado respeta el rol, los dos con la búsqueda.
+  async findPage(o: { page: number; limit: number; q?: string; role?: string; status?: string }) {
+    const filters = likeWords(o.q).map((w) => ({ $or: [{ name: { $like: w } }, { last_name: { $like: w } }, { email: { $like: w } }, { dni: { $like: w } }] }));
+    const base: any = filters.length ? { $and: filters } : {};
+    const roles = ['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR'];
+    const statuses = ['ACTIVO', 'BAJA'];
+    const [[items, total], byRole, byStatus] = await Promise.all([
+      this.em.findAndCount(User, { ...base, ...(o.role && { type: o.role }), ...(o.status && { status: o.status }) },
+        { orderBy: { name: 'ASC', last_name: 'ASC' }, limit: o.limit, offset: (o.page - 1) * o.limit }),
+      Promise.all(roles.map((type) => this.em.count(User, { ...base, ...(o.status && { status: o.status }), type }))),
+      Promise.all(statuses.map((status) => this.em.count(User, { ...base, ...(o.role && { type: o.role }), status }))),
+    ]);
+    return {
+      items, total,
+      counts: { role: Object.fromEntries(roles.map((r, i) => [r, byRole[i]])), status: Object.fromEntries(statuses.map((s, i) => [s, byStatus[i]])) },
+    };
   }
 
   async findOne(item: { id: string }): Promise<User | null> {
@@ -35,6 +55,14 @@ export class UserRepository implements Repository<User> {
     if (date_of_birth) (user as any).date_of_birth = date_of_birth instanceof Date ? date_of_birth.toISOString().slice(0, 10) : date_of_birth;
     await this.em.flush();
     return user;
+  }
+
+  // Primer campo único (email, DNI o teléfono) que ya usa otro usuario.
+  async findDuplicateField(data: Partial<User>, exceptId?: string): Promise<'email' | 'dni' | 'phone' | null> {
+    const fields = (['email', 'dni', 'phone'] as const).filter((f) => data[f]);
+    if (!fields.length) return null;
+    const found = await this.em.findOne(User, { $or: fields.map((f) => ({ [f]: data[f] })), ...(exceptId && { id: { $ne: exceptId } }) } as any);
+    return found ? (fields.find((f) => String(found[f]).toLowerCase() === String(data[f]).toLowerCase()) ?? fields[0]) : null;
   }
 
   async remove(item: { id: string }): Promise<boolean> {

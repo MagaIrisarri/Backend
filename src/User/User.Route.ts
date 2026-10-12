@@ -14,6 +14,7 @@ import {
   ownerIdSchema,
   loginSchema,
   updatePasswordSchema,
+  listUsersQuerySchema,
 } from './User.Schema.js';
 
 export const userRouter = Router();
@@ -33,7 +34,7 @@ userRouter.post('/:ownerId/employee/:id/reactivate', validateSchema(employeeIdSc
 userRouter.delete('/:ownerId/employee/:id', validateSchema(employeeIdSchema), userController.deleteEmployee);
 
 // --- CRUD general ---
-userRouter.get('/', userController.findAll);
+userRouter.get('/', validateSchema(listUsersQuerySchema), userController.findAll);
 userRouter.get('/:id', validateSchema(userIdSchema), userController.findById);
 userRouter.put('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
 userRouter.patch('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);

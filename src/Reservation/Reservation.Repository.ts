@@ -100,12 +100,14 @@ export class ReservationRepository implements Repository<Reservation> {
 
   // R-17: pendientes o confirmadas cuyo horario terminó sin ingreso. No tienen factura ni ocupan la plaza
   // (eso pasa recién en el check-in), así que alcanza con cambiar el estado.
-  async cancelExpired(now: Date): Promise<number> {
-    return await this.entityManager.fork().nativeUpdate(
-      Reservation,
-      { status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] }, endTime: { $lte: now } },
-      { status: ReservationStatus.CANCELADA },
-    );
+  // Devuelve las canceladas (con su cliente y sucursal) para avisarles.
+  async cancelExpired(now: Date): Promise<Reservation[]> {
+    const em = this.entityManager.fork();
+    const status = { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] };
+    const expired = await em.find(Reservation, { status, endTime: { $lte: now } },
+      { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
+    if (expired.length) await em.nativeUpdate(Reservation, { id: { $in: expired.map((r) => r.id) }, status }, { status: ReservationStatus.CANCELADA });
+    return expired;
   }
 
   // R-14: la salida, la plaza y la factura se guardan juntas: si algo falla no queda una reserva finalizada sin cobrar.

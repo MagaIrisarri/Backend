@@ -1,5 +1,5 @@
 import { Parking } from './Parking.Entity.js';
-import { ParkingRepository } from './Parking.Repository.js';
+import { ParkingRepository, type ParkingPageOptions } from './Parking.Repository.js';
 import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
 import type { Reservation } from '../Reservation/Reservation.Entity.js';
@@ -115,6 +115,12 @@ export class ParkingService {
   async findAll(): Promise<any[]> {
     const parkings = await this.parkingRepository.findAll();
     return await this.withLiveAvailability(parkings);
+  }
+
+  // Listado paginado del administrador: la disponibilidad en vivo se calcula solo para la página pedida.
+  async findPage(options: ParkingPageOptions) {
+    const [{ items, total, counts }, localities] = await Promise.all([this.parkingRepository.findPage(options), this.parkingRepository.localities()]);
+    return { data: await this.withLiveAvailability(items), meta: { page: options.page, limit: options.limit, total, counts, localities } };
   }
 
   async findActive(): Promise<any[]> {

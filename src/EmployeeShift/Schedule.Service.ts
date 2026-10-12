@@ -152,6 +152,7 @@ export class ScheduleService {
     }
     const moves = this.checkLoss(affected, null, before, after, input.transfers);
 
+    // shortcut: L-30, el empleado que recibe la reserva no se entera en la app, notificarlo con NotificationService
     for (const [r, toId] of moves) r.attendedBy = em.getReference(User, toId);
     const [rows, closures] = await Promise.all([this.repo.templateShifts(parking.id, dayOfWeek), this.repo.templateClosures(parking.id, dayOfWeek)]);
     rows.forEach(s => { s.isActive = false; });
@@ -327,6 +328,7 @@ export class ScheduleService {
     const base = await this.templateDay(parking, date);
     const exception = await this.repo.findException(parking.id, date);
     const em = this.repo.em;
+    // shortcut: L-30, el empleado que recibe la reserva no se entera en la app, notificarlo con NotificationService
     for (const [r, toId] of moves) r.attendedBy = em.getReference(User, toId);
     if (sameDay(after, base)) { if (exception) em.remove(exception); }
     else if (exception) { exception.shifts = after.shifts; exception.closures = after.closures; }

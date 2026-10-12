@@ -14,6 +14,7 @@ import { vehicleTypeRouter } from './Vehicle/VehicleType/VehicleType.Route.js';
 import { insuranceRouter } from './Vehicle/Insurance/Insurance.Route.js';
 import { brandRouter } from './Vehicle/Brand/Brand.Route.js';
 import { modelRouter } from './Vehicle/Model/Model.Route.js';
+import { catalogRouter } from './Vehicle/Catalog/Catalog.Route.js';
 
 import parkingRoutes from './Parking/Parking.Route.js';
 import parkingspaceRoutes from './ParkingSpace/ParkingSpace.Route.js';
@@ -27,6 +28,7 @@ import { EXPIRED_RESERVATIONS_CHECK_MINUTES, REMINDER_CHECK_MINUTES } from './Sh
 import { ParkingSpaceRepository } from './ParkingSpace/ParkingSpace.Repository.js';
 import invoiceRouter from './Invoice/Invoice.Route.js';
 import statsRouter from './Stats/Stats.Route.js';
+import notificationRouter from './Notification/Notification.Route.js';
 
 const app = express();
 // ==========================================
@@ -34,7 +36,9 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }));
-app.use(express.json()); 
+// Importar el catálogo del DNRPA manda hasta 5.000 modelos: más que los 100 kb por defecto. Va antes del parser global, que después lo saltea.
+app.use('/api/catalog', express.json({ limit: '2mb' }));
+app.use(express.json());
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
@@ -53,6 +57,7 @@ app.use('/api/vehicle-types', vehicleTypeRouter);
 app.use('/api/insurances', insuranceRouter);
 app.use('/api/brands', brandRouter);
 app.use('/api/models', modelRouter);
+app.use('/api/catalog', catalogRouter);
 
 // --- Estacionamiento ---
 app.use('/api/parkings', parkingRoutes);
@@ -67,6 +72,7 @@ app.use('/api/parkings', servicePriceRouter);
 app.use('/api/reservations', reservationRouter);
 app.use('/api/billing', invoiceRouter);
 app.use('/api/stats', statsRouter);
+app.use('/api/notifications', notificationRouter);
 
 app.use(errorHandler);
 
