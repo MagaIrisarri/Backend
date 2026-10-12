@@ -27,6 +27,11 @@ export class ReservationController {
     return res.status(201).json({ message: 'Reserva creada con éxito', data: reservation });
   });
 
+  public walkIn = catchAsync(async (req: Request, res: Response) => {
+    const reservation = await this.service.walkIn(req.body, actorId(req, 'registrar el ingreso de mostrador'));
+    return res.status(201).json({ message: 'Ingreso de mostrador registrado', data: reservation });
+  });
+
   public assignEmployee = catchAsync(async (req: Request, res: Response) => {
     const userId = actorId(req, 'asignar el empleado');
     const reservation = await this.service.assignEmployee(req.params.id as string, req.body.attendedById, userId);

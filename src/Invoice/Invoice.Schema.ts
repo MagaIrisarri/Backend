@@ -19,5 +19,7 @@ export const invoiceIdSchema = z.object({
 export const payInvoiceSchema = z.object({
   body: z.object({
     paymentMethod: PaymentMethodSchema,
+    amountReceived: z.number().positive("El efectivo recibido debe ser mayor a 0").optional(),
+    receiptNumber: z.string().trim().min(1).max(60).optional(),
   }),
 });

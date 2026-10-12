@@ -4,11 +4,12 @@ import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { ParkingSpace, SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import { Vehicle } from '../Vehicle/Vehicle.Entity.js';
+import { Model } from '../Vehicle/Model/Model.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
 import { matchesVehicleType } from '../Shared/utils/vehicleTypes.js';
 import { findFreeSpaces } from '../ParkingSpace/ParkingSpace.Repository.js';
@@ -83,6 +84,7 @@ export class ReservationRepository implements Repository<Reservation> {
     const reservation = await this.findOne({ id });
     if (!reservation) return null;
 
+    if (data.checkedInById) reservation.checkedInBy = this.entityManager.getReference(User, data.checkedInById);
     if (data.attendedById) {
       const employee = await this.entityManager.findOne(User, { id: data.attendedById, status: 'ACTIVO' });
       if (employee) reservation.attendedBy = employee;
@@ -113,14 +115,15 @@ export class ReservationRepository implements Repository<Reservation> {
   // R-14: la salida, la plaza y la factura se guardan juntas: si algo falla no queda una reserva finalizada sin cobrar.
   // La plaza queda libre solo si no hay otro vehículo adentro (R-21).
   async finishWithInvoice(
-    id: string, attendedById: string, endTime: Date,
+    id: string, employeeId: string, endTime: Date,
     charge: { totalAmount: number; reservedHours: number; extraHours: number; hourlyRate: number; servicesAmount: number },
   ): Promise<Invoice> {
     return await this.entityManager.transactional(async (em) => {
       const reservation = await em.findOneOrFail(Reservation, { id, status: ReservationStatus.EN_CURSO }, { populate: ['parkingSpace'] as any });
       reservation.status = ReservationStatus.FINALIZADA;
       reservation.endTime = endTime;
-      reservation.attendedBy = em.getReference(User, attendedById);
+      reservation.attendedBy = reservation.checkedOutBy = em.getReference(User, employeeId);
+      reservation.checkedOutAt = endTime;
       const othersInside = await em.count(Reservation, { parkingSpace: reservation.parkingSpace, status: ReservationStatus.EN_CURSO, id: { $ne: id } });
       if (!othersInside) reservation.parkingSpace.state = SpaceState.LIBRE;
       return em.create(Invoice, { reservation, ...charge, status: 'PENDIENTE', paymentMethod: 'EFECTIVO', paymentDate: null });
@@ -319,6 +322,53 @@ export class ReservationRepository implements Repository<Reservation> {
         moved.push({ code: code(other), from: space.spaceCode, to: to.spaceCode });
       }
       return moved;
+    });
+  }
+
+  // Vehículo EN CURSO en cualquier sucursal, sin mirar el horario: uno pasado de hora sigue ocupando lugar.
+  async findVehicleInside(vehicleId: string, exceptReservationId: string): Promise<Reservation | null> {
+    return await this.entityManager.findOne(Reservation, {
+      vehicle: { id: vehicleId }, status: ReservationStatus.EN_CURSO, id: { $ne: exceptReservationId },
+    }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
+  }
+
+  async findModel(brandId: string, modelId: string): Promise<Model | null> {
+    return await this.entityManager.findOne(Model, { id: modelId, brand: { id: brandId }, isActive: true }, { populate: ['brand', 'vehicleType'] as any });
+  }
+
+  // Alta de mostrador en una sola transacción: cliente y vehículo (si la patente es nueva), reserva EN CURSO y plaza ocupada.
+  async createWalkIn(p: {
+    parking: Parking; plate: string; model: Model; name: string; phone: string; start: Date; end: Date;
+    employeeId: string; serviceIds?: string[];
+  }): Promise<Reservation> {
+    return await this.entityManager.transactional(async (em) => {
+      await lockParking(em, p.parking.id);
+      let vehicle = await em.findOne(Vehicle, { plate: p.plate, isActive: true }, { populate: ['vehicleType'] as any });
+      if (vehicle) {
+        if (vehicle.vehicleType.id !== p.model.vehicleType.id) throw new AppError(`La patente ${p.plate} está registrada con otro tipo de vehículo`, 409);
+        const inside = await em.findOne(Reservation, { vehicle, status: ReservationStatus.EN_CURSO }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
+        if (inside) throw new AppError(`${p.plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
+      } else {
+        // Un contacto de mostrador anterior con el mismo teléfono se reutiliza (phone es único); si es un usuario con cuenta, también.
+        const client = await em.findOne(User, { phone: p.phone })
+          ?? em.create(User, { name: p.name, last_name: '-', phone: p.phone, guest: true, type: UserType.CLIENTE, status: 'ACTIVO' });
+        vehicle = em.create(Vehicle, { plate: p.plate, brand: p.model.brand, model: p.model, vehicleType: p.model.vehicleType, client, isActive: true, createdAt: new Date(), updatedAt: new Date() });
+      }
+      await this.validateVehicleOverlap(em, vehicle, p.start, p.end);
+
+      const [space] = await findFreeSpaces(em, p.parking, vehicle.vehicleType?.name, p.start, p.end);
+      if (!space) throw new AppError("No hay plazas disponibles para este tipo de vehículo en el horario seleccionado", 409);
+      space.state = SpaceState.OCUPADO;
+
+      let id = crypto.randomUUID();
+      while (await em.count(Reservation, { code: reservationCode(id) })) id = crypto.randomUUID();
+      const employee = em.getReference(User, p.employeeId);
+      const reservation = em.create(Reservation, {
+        id, code: reservationCode(id), startTime: p.start, endTime: p.end, vehicle, parkingSpace: space,
+        status: ReservationStatus.EN_CURSO, checkedInBy: employee, attendedBy: employee, contactName: p.name, contactPhone: p.phone,
+      });
+      if (p.serviceIds?.length) await this.attachServices(em, reservation, p.serviceIds, p.parking);
+      return reservation;
     });
   }
 

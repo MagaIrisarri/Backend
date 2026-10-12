@@ -5,7 +5,7 @@ import { orm } from '../Shared/db/orm.js';
 import { ReservationController } from './Reservation.Controller.js';
 import { ReservationRepository } from './Reservation.Repository.js';
 import { ReservationService } from './Reservation.Service.js';
-import { createReservationSchema, updateReservationSchema, reservationIdSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema } from './Reservation.Schema.js';
+import { createReservationSchema, updateReservationSchema, reservationIdSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema, walkInSchema } from './Reservation.Schema.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
@@ -28,6 +28,7 @@ reservationRouter.get('/parking/:parkingId', reservationController.findByParking
 reservationRouter.get('/owner/:ownerId', reservationController.findByOwnerId);
 reservationRouter.get('/:id', validateSchema(reservationIdSchema), reservationController.findOne);
 reservationRouter.post('/', validateSchema(createReservationSchema), reservationController.create);
+reservationRouter.post('/walk-in', validateSchema(walkInSchema), reservationController.walkIn);
 reservationRouter.patch('/:id/confirm', validateSchema(reservationIdSchema), reservationController.confirm);
 reservationRouter.patch('/:id/space', validateSchema(changeSpaceSchema), reservationController.changeSpace);
 reservationRouter.patch('/:id/end', validateSchema(extendReservationSchema), reservationController.extend);

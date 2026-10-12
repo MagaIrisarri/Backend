@@ -33,6 +33,13 @@ export class Invoice {
   @Property({ type: 'decimal', nullable: true })
   servicesAmount?: number | null;
 
+  // Cobro en efectivo: lo que entregó el cliente (el vuelto se calcula). Comprobante de posnet o app, opcional.
+  @Property({ type: 'decimal', nullable: true })
+  amountReceived?: number | null;
+
+  @Property({ type: 'string', nullable: true })
+  receiptNumber?: string | null;
+
   @Property({ type: 'string', default: 'PENDIENTE' })
   status?: string = 'PENDIENTE'; 
 

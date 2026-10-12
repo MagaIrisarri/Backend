@@ -129,7 +129,7 @@ export class UserService {
     const user = await this.userRepository.findOne({ id });
     if (!user) return false;
 
-    const isValid = await argon2.verify(user.password, currentPass);
+    const isValid = !!user.password && await argon2.verify(user.password, currentPass);
     if (!isValid) return false;
 
     const hashedNew = await argon2.hash(newPass);
@@ -157,7 +157,7 @@ export class UserService {
   // Un solo 401 para email inexistente, contraseña incorrecta o usuario dado de baja: la respuesta no dice qué emails existen.
   async login(email: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOneForEmail(email);
-    const ok = user?.status === UserStatus.ACTIVO && (await argon2.verify(user.password, password));
+    const ok = user?.status === UserStatus.ACTIVO && !!user.password && (await argon2.verify(user.password, password));
     if (!ok) throw new AppError('Email o contraseña incorrectos', 401);
     return this.excludePassword(user);
   }

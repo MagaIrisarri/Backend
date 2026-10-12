@@ -36,6 +36,24 @@ export class Reservation {
   @ManyToOne(() => User, { nullable: true, eager: true })
   attendedBy?: Rel<User> | null;
 
+  // Quién registró el ingreso y quién la salida: pueden ser empleados de turnos distintos.
+  @ManyToOne(() => User, { nullable: true, eager: true })
+  checkedInBy?: Rel<User> | null;
+
+  @ManyToOne(() => User, { nullable: true, eager: true })
+  checkedOutBy?: Rel<User> | null;
+
+  // Hora real de la salida; endTime se pisa con ella al registrarla, así que acá queda también para el resumen.
+  @Property({ type: 'datetime', nullable: true })
+  checkedOutAt?: Date | null;
+
+  // Cliente de mostrador: a quién avisar si no es el titular del vehículo.
+  @Property({ type: 'string', nullable: true })
+  contactName?: string | null;
+
+  @Property({ type: 'string', nullable: true })
+  contactPhone?: string | null;
+
   // R-27: valoración opcional (1 a 5) que el cliente deja en una reserva finalizada (valoracion_servicio del DER).
   @Property({ type: 'integer', nullable: true })
   rating?: number | null;

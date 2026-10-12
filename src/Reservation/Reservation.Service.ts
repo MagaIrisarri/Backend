@@ -1,11 +1,11 @@
 import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
-import { CreateReservationInput } from './Reservation.Schema.js';
+import { CreateReservationInput, WalkInInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, NotificationType, ReservationStatus, UserType } from '../Shared/constants/status.js';
-import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
+import { formatTimeHHMM, isoDate } from '../Shared/utils/dateUtils.js';
 import { sendMail, type SendMail } from '../Shared/utils/mailer.js';
-import { REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
+import { CHECKOUT_GRACE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
@@ -16,6 +16,8 @@ import type { Parking } from '../Parking/Parking.Entity.js';
 import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 import { NotificationService } from '../Notification/Notification.Service.js';
 import { wrap } from '@mikro-orm/core';
+
+const MS_PER_HOUR = 1000 * 60 * 60;
 
 export class ReservationService {
   constructor(
@@ -54,7 +56,8 @@ export class ReservationService {
     }
     const openTime = parking.openingTime.slice(0, 5);
     const closeTime = parking.closingTime.slice(0, 5);
-    if (formatTimeHHMM(startTime) < openTime || formatTimeHHMM(endTime) > closeTime) {
+    // Comparar solo HH:MM deja pasar un fin después de medianoche ("00:30" < "23:59"): tiene que terminar el mismo día.
+    if (formatTimeHHMM(startTime) < openTime || formatTimeHHMM(endTime) > closeTime || isoDate(endTime) !== isoDate(startTime)) {
       throw new AppError(`El horario de reserva está fuera del horario de atención (${openTime} a ${closeTime})`, 400);
     }
     await this.scheduleService.assertCovered(parking, startTime, endTime); // R-01
@@ -71,6 +74,9 @@ export class ReservationService {
     }
     if (endTime.getTime() <= Math.max(reservation.endTime.getTime(), Date.now())) {
       throw new AppError(`El nuevo fin tiene que ser posterior al actual (${formatTimeHHMM(reservation.endTime)}) y a la hora actual`, 400);
+    }
+    if ((endTime.getTime() - reservation.startTime.getTime()) % MS_PER_HOUR !== 0) {
+      throw new AppError("La reserva se extiende en horas completas desde su inicio", 400);
     }
     await this.assertSchedule(reservation.parkingSpace.parking, reservation.startTime, endTime);
     const clash = await this.repo.findConflictingVehicleReservation(reservation.vehicle.id, reservation.endTime, endTime);
@@ -140,6 +146,34 @@ export class ReservationService {
   });
   return reservation;
 }
+
+  // Un vehículo que sigue EN CURSO (aunque pasado de hora) no entra de nuevo, ni acá ni en otra sucursal.
+  private async assertNotInsideElsewhere(plate: string, vehicleId: string, exceptReservationId: string): Promise<void> {
+    const inside = await this.repo.findVehicleInside(vehicleId, exceptReservationId);
+    if (inside) {
+      throw new AppError(`${plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
+    }
+  }
+
+  // Cliente de mostrador: el inicio es ahora sin segundos y el fin, inicio + horas completas; nace EN CURSO con la plaza ocupada.
+  async walkIn(data: WalkInInput, userId: string): Promise<Reservation> {
+    const { parking } = await this.repo.getDependencies(data.parkingId, userId); // el vehículo no existe: solo interesa la sucursal
+    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
+    const user = await this.repo.findActiveUser(userId);
+    const isEmployee = user?.type === UserType.EMPLEADO && user.parkingId === parking.id;
+    const isOwner = user?.type === UserType.DUENO && parking.owner?.id === user.id;
+    if (!isEmployee && !isOwner) throw new AppError("Solo el personal de esta sucursal puede registrar el ingreso", 403);
+
+    const model = await this.repo.findModel(data.brandId, data.modelId);
+    if (!model) throw new AppError("Marca y modelo no coinciden o no existen", 404);
+
+    const start = new Date();
+    start.setSeconds(0, 0);
+    const end = new Date(start.getTime() + data.hours * MS_PER_HOUR);
+    await this.assertSchedule(parking, start, end);
+    const reservation = await this.repo.createWalkIn({ parking, plate: data.plate, model, name: data.name, phone: data.phone, start, end, employeeId: userId, serviceIds: data.serviceIds });
+    return (await this.repo.findOne({ id: reservation.id }))!;
+  }
 
   // R-07: el personal de la sucursal cambia el empleado asignado mientras la reserva está activa; tiene que ser de esa sucursal.
   async assignEmployee(id: string, employeeId: string, userId: string): Promise<Reservation> {
@@ -351,6 +385,7 @@ export class ReservationService {
     if (reservation.startTime.getTime() > Date.now()) {
       throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde ese horario`, 400);
     }
+    await this.assertNotInsideElsewhere(reservation.vehicle.plate, reservation.vehicle.id, id);
     // R-21: si el cliente anterior de la plaza se quedó de más, su vehículo sigue adentro: la reserva pasa a la primera
     // plaza libre del mismo tipo (misma regla que al reservar) y el ingreso se registra ahí. Si no hay ninguna, no entra.
     const originalSpaceId = reservation.parkingSpace.id;
@@ -364,7 +399,7 @@ export class ReservationService {
       reservation.parkingSpace = to; // se guarda con el cambio de estado
     }
 
-    const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId });
+    const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId, checkedInById: employeeId });
     if (updated?.parkingSpace) {
       await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.OCUPADO });
     }
@@ -386,9 +421,9 @@ export class ReservationService {
     // Se cobran las horas reservadas aunque se retire antes; si se queda más, se suman las horas extra
     // (cada hora empezada cuenta entera).
     const endTime = new Date();
-    const MS_PER_HOUR = 1000 * 60 * 60;
     const reservedHours = Math.ceil((reservation.endTime.getTime() - reservation.startTime.getTime()) / MS_PER_HOUR);
-    const stayedHours = Math.ceil((endTime.getTime() - reservation.startTime.getTime()) / MS_PER_HOUR);
+    const graceMs = CHECKOUT_GRACE_MINUTES * 60 * 1000;
+    const stayedHours = Math.ceil((endTime.getTime() - graceMs - reservation.startTime.getTime()) / MS_PER_HOUR);
     const durationHours = Math.max(1, reservedHours, stayedHours);
     const extraHours = Math.max(0, durationHours - Math.max(1, reservedHours));
 

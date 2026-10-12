@@ -7,8 +7,9 @@ export class User {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 
-  @Property({ type: 'string', unique: true })
-  dni!: string;
+  // dni, email, date_of_birth y password son nulos solo en el cliente de mostrador (guest).
+  @Property({ type: 'string', unique: true, nullable: true })
+  dni?: string | null;
 
   @Property({ type: 'string' })
   name!: string;
@@ -16,18 +17,22 @@ export class User {
   @Property({ type: 'string' })
   last_name!: string;
 
-  @Property({ type: 'string', unique: true })
-  email!: string;
+  @Property({ type: 'string', unique: true, nullable: true })
+  email?: string | null;
 
-  @Property({ type: 'date' })
-  date_of_birth!: Date;
+  @Property({ type: 'date', nullable: true })
+  date_of_birth?: Date | null;
 
   @Property({ type: 'string', unique: true })
   phone!: string;
   
   // hidden: nunca se serializa a JSON (tampoco anidado en reservas, vehículos o sucursales); el login la sigue leyendo.
-  @Property({ type: 'string', hidden: true })
-  password!: string;
+  @Property({ type: 'string', hidden: true, nullable: true })
+  password?: string | null;
+
+  // Cliente que dejó sus datos en el mostrador sin crear cuenta.
+  @Property({ type: 'boolean', default: false })
+  guest?: boolean = false;
 
   @Property({ type: 'string', default: 'CLIENTE' })
   type!: string; // 'CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMIN'

@@ -9,15 +9,22 @@ export class InvoiceService {
     return await this.repo.findByClientId(clientId);
   }
 
-  async pay(id: string, paymentMethod: string): Promise<Invoice | null> {
+  // amountReceived solo aplica al efectivo y tiene que cubrir el total; receiptNumber es el comprobante del posnet o la app (nunca datos de tarjeta).
+  async pay(id: string, data: { paymentMethod: string; amountReceived?: number; receiptNumber?: string }): Promise<Invoice | null> {
     const invoice = await this.repo.findOne({ id });
     if (!invoice) throw new AppError('Factura no encontrada', 404);
     if (invoice.status === 'PAGADA') throw new AppError('La factura ya está pagada', 400);
+    const cash = data.paymentMethod === 'EFECTIVO';
+    if (cash && data.amountReceived != null && data.amountReceived < Number(invoice.totalAmount)) {
+      throw new AppError(`Faltan $${Number(invoice.totalAmount) - data.amountReceived} para cubrir $${Number(invoice.totalAmount)}`, 400);
+    }
 
     return await this.repo.update(id, {
       status: 'PAGADA',
-      paymentMethod,
-      paymentDate: new Date()
+      paymentMethod: data.paymentMethod,
+      paymentDate: new Date(),
+      amountReceived: cash ? data.amountReceived ?? null : null,
+      receiptNumber: cash ? null : data.receiptNumber ?? null,
     });
   }
 }

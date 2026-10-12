@@ -14,7 +14,7 @@ export class InvoiceController {
   });
 
   public pay = catchAsync(async (req: Request, res: Response) => {
-    const invoice = await this.service.pay(req.params.id as string, req.body.paymentMethod);
+    const invoice = await this.service.pay(req.params.id as string, req.body);
     res.status(200).json({ message: 'Factura pagada exitosamente', data: invoice });
   });
 }

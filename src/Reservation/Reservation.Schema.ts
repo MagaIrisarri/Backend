@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PLATE_REGEX } from "../Vehicle/Vehicle.Schema.js";
 
 export const createReservationSchema = z.object({
   body: z.object({
@@ -53,15 +54,27 @@ export type CreateReservationInput = z.infer<typeof createReservationSchema>['bo
 export type UpdateReservationInput = z.infer<typeof updateReservationSchema>['body'];
 const reservationId = z.object({ id: z.string().uuid("El ID de la reserva debe ser un UUID válido") });
 
-// El empleado extiende el fin de una reserva (R-23): en horas enteras, como al reservar.
+// El empleado extiende el fin de una reserva (R-23). Que sean horas completas respecto del inicio lo valida el servicio:
+// una reserva de mostrador empieza a cualquier minuto.
 export const extendReservationSchema = z.object({
   params: reservationId,
-  body: z.object({ endTime: z.coerce.date() })
-    .refine(data => data.endTime.getMinutes() === 0 && data.endTime.getSeconds() === 0, {
-      message: "El fin de la reserva debe ser en horas enteras",
-      path: ["endTime"],
-    }),
+  body: z.object({ endTime: z.coerce.date() }),
 });
+
+// Alta de mostrador: el inicio lo fija el servidor (ahora, sin segundos) y el fin es inicio + horas completas.
+export const walkInSchema = z.object({
+  body: z.object({
+    parkingId: z.string().uuid("El ID de estacionamiento debe ser un UUID válido"),
+    plate: z.string().transform(v => v.toUpperCase().replace(/[\s-]/g, '')).refine(v => PLATE_REGEX.test(v), "La patente no tiene un formato argentino válido"),
+    brandId: z.string().uuid("ID de marca inválido"),
+    modelId: z.string().uuid("ID de modelo inválido"),
+    hours: z.number().int("Las horas son un número entero").min(1, "Mínimo 1 hora"),
+    serviceIds: z.array(z.string().uuid()).optional(),
+    name: z.string().trim().min(1, "Falta el nombre").max(100),
+    phone: z.string().trim().min(6, "Teléfono inválido").max(20),
+  }),
+});
+export type WalkInInput = z.infer<typeof walkInSchema>['body'];
 
 // Servicios de la reserva que deja el empleado (R-24): tarifas de servicio de la cochera (ServicePrice.id).
 export const rateReservationSchema = z.object({
