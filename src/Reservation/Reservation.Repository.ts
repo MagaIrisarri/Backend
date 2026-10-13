@@ -340,9 +340,10 @@ export class ReservationRepository implements Repository<Reservation> {
   async createWalkIn(p: {
     parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[];
     client: { name: string; last_name: string; dni: string; email: string; phone?: string; passwordHash: string };
-  }): Promise<Reservation> {
+  }): Promise<{ reservation: Reservation; accountCreated: boolean }> {
     const c = p.client;
-    return await this.entityManager.transactional(async (em) => {
+    let accountCreated = false;
+    const reservation = await this.entityManager.transactional(async (em) => {
       await lockParking(em, p.parking.id);
       let vehicle = await em.findOne(Vehicle, { plate: p.plate, isActive: true }, { populate: ['vehicleType'] as any });
       if (vehicle) {
@@ -363,6 +364,7 @@ export class ReservationRepository implements Repository<Reservation> {
             name: c.name, last_name: c.last_name, dni: c.dni, email: c.email, phone: c.phone ?? null, password: c.passwordHash, mustChangePassword: true,
             type: UserType.CLIENTE, status: 'ACTIVO',
           });
+          accountCreated = true;
         }
         vehicle = em.create(Vehicle, { plate: p.plate, brand: p.model.brand, model: p.model, vehicleType: p.model.vehicleType, client, isActive: true, createdAt: new Date(), updatedAt: new Date() });
       }
@@ -382,6 +384,7 @@ export class ReservationRepository implements Repository<Reservation> {
       if (p.serviceIds?.length) await this.attachServices(em, reservation, p.serviceIds, p.parking);
       return reservation;
     });
+    return { reservation, accountCreated };
   }
 
   async findConflictingVehicleReservation(vehicleId: string, startTime: Date, endTime: Date): Promise<Reservation | null> {

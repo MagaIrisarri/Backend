@@ -159,7 +159,7 @@ export class ReservationService {
   }
 
   // Cliente de mostrador: el inicio es ahora sin segundos y el fin, inicio + horas completas; nace EN CURSO con la plaza ocupada.
-  async walkIn(data: WalkInInput, userId: string): Promise<Reservation> {
+  async walkIn(data: WalkInInput, userId: string): Promise<{ reservation: Reservation; accountCreated: boolean }> {
     const { parking } = await this.repo.getDependencies(data.parkingId, userId); // el vehículo no existe: solo interesa la sucursal
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
     const user = await this.repo.findActiveUser(userId);
@@ -175,11 +175,12 @@ export class ReservationService {
     const end = new Date(start.getTime() + data.hours * MS_PER_HOUR);
     await this.assertSchedule(parking, start, end);
     const { parkingId, plate, brandId, modelId, hours, serviceIds, ...client } = data;
-    const reservation = await this.repo.createWalkIn({
+    const { reservation, accountCreated } = await this.repo.createWalkIn({
       parking, plate, model, start, end, employeeId: userId, serviceIds,
       client: { ...client, passwordHash: await argon2.hash(client.dni) }, // R-29: el DNI es la contraseña inicial
     });
-    return (await this.repo.findOne({ id: reservation.id }))!;
+    // accountCreated: el front avisa al empleado que la contraseña inicial es el DNI, para que se lo diga al cliente
+    return { reservation: (await this.repo.findOne({ id: reservation.id }))!, accountCreated };
   }
 
   // R-07: el personal de la sucursal cambia el empleado asignado mientras la reserva está activa; tiene que ser de esa sucursal.

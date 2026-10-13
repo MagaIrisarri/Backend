@@ -28,8 +28,8 @@ export class ReservationController {
   });
 
   public walkIn = catchAsync(async (req: Request, res: Response) => {
-    const reservation = await this.service.walkIn(req.body, actorId(req, 'registrar el ingreso de mostrador'));
-    return res.status(201).json({ message: 'Ingreso de mostrador registrado', data: reservation });
+    const { reservation, accountCreated } = await this.service.walkIn(req.body, actorId(req, 'registrar el ingreso de mostrador'));
+    return res.status(201).json({ message: 'Ingreso de mostrador registrado', data: reservation, accountCreated });
   });
 
   public assignEmployee = catchAsync(async (req: Request, res: Response) => {
