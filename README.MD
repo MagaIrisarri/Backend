@@ -1,3 +1,106 @@
+# Estacionamiento COM 301 — Backend
+
+API REST del sistema de reservas de cocheras. Express 5 + TypeScript + MikroORM 7 sobre MySQL, con validación en zod.
+El frontend está en [MagaIrisarri/Frontend](https://github.com/MagaIrisarri/Frontend).
+
+📄 Documentación del proyecto: [docs/README.md](docs/README.md)
+
+## Requisitos
+
+- Node.js 22 o superior
+- pnpm 10 (`npm install -g pnpm`)
+- MySQL 8 corriendo en local o accesible por red
+
+## Instalación
+
+```bash
+git clone https://github.com/MagaIrisarri/Backend.git
+cd Backend
+pnpm install
+```
+
+Crear la base de datos vacía (las tablas se crean solas al arrancar):
+
+```sql
+CREATE DATABASE parkingdb;
+```
+
+## Configuración
+
+El servidor toma la configuración de variables de entorno. Todas tienen un valor por defecto, así que con un MySQL local con usuario `root` y contraseña `pass` no hace falta configurar nada.
+
+| Variable | Por defecto | Para qué |
+|---|---|---|
+| `DB_HOST` | `localhost` | Host de MySQL |
+| `DB_PORT` | `3306` | Puerto de MySQL |
+| `DB_USER` | `root` | Usuario de MySQL |
+| `DB_PASSWORD` | `pass` | Contraseña de MySQL |
+| `DB_NAME` | `parkingdb` | Nombre de la base |
+| `PORT` | `3000` | Puerto de la API |
+| `NODE_ENV` | — | Fuera de `production` se muestran las consultas SQL en consola; con `development` los errores 500 devuelven el detalle |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Envío de mails (recordatorio de reserva). Sin `SMTP_HOST` el mail se escribe en la consola |
+
+Ejemplo en bash:
+
+```bash
+DB_PASSWORD=miclave pnpm start:dev
+```
+
+Ejemplo en PowerShell:
+
+```powershell
+$env:DB_PASSWORD="miclave"; pnpm start:dev
+```
+
+## Ejecución
+
+```bash
+pnpm start:dev
+```
+
+Compila con TypeScript, levanta la API en `http://localhost:3000` y se reinicia ante cada cambio. Al arrancar:
+
+1. Sincroniza el esquema de la base (crea tablas y columnas que falten; nunca borra).
+2. Carga los datos de prueba si no están (es seguro reiniciar: no duplica nada).
+3. Inicia los procesos automáticos (cancelación de reservas vencidas y recordatorios por mail).
+
+Otros scripts:
+
+| Script | Qué hace |
+|---|---|
+| `pnpm build` | Compila a `dist/` (sirve también como chequeo de tipos) |
+
+> El frontend tiene que correr en `http://localhost:5173`, que es el origen habilitado por CORS.
+
+## Usuarios de prueba
+
+Todos con contraseña `password123`:
+
+| Rol | Email |
+|---|---|
+| Administrador | `admin@cocheras.com` |
+| Dueño | `dueno1@cocheras.com` … `dueno5@cocheras.com` |
+| Empleado | `empleado1@cocheras.com` … `empleado8@cocheras.com` (el 8 está dado de baja) |
+| Cliente | `cliente1@cocheras.com` … `cliente10@cocheras.com` (el 10 está dado de baja) |
+
+## Estructura
+
+Un módulo por entidad en `src/`, separado en capas:
+
+```
+src/<Modulo>/
+  X.Entity.ts       entidad de MikroORM
+  X.Schema.ts       validación de entrada (zod)
+  X.Repository.ts   acceso a datos
+  X.Service.ts      reglas de negocio
+  X.Controller.ts   request/response
+  X.Route.ts        rutas de Express
+src/Shared/         base de datos, middlewares (validación, errores), utilidades y constantes
+```
+
+Los errores se informan siempre con el mismo formato `{ status: 'error', message, details? }` y el código HTTP correspondiente (400 validación, 403 permisos, 404, 409 conflicto).
+
+## Arquitectura y reglas de negocio
 Cada petición HTTP pasa por el middleware de `RequestContext` de MikroORM (`RequestContext.create(orm.em, next)`), asegurando que cada request opere sobre una sesión aislada del `EntityManager` y previniendo fugas de contexto o colisiones entre transacciones concurrentes.
 
 ---
