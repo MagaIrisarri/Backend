@@ -127,8 +127,8 @@ El sistema soporta 4 roles: `CLIENTE`, `DUEÑO`, `EMPLEADO` y `ADMIN`:
 
 ### 3. Asignación y Disponibilidad de Plazas (`ParkingSpace`)
 
-- **Generación en lote**: Al registrar un estacionamiento, el dueño define capacidades (`cant_total_auto`, `cant_total_moto`), lo que permite generar masivamente las plazas iniciales.
-- **Búsqueda por solapamiento temporal (`checkAvailability`)**: Determina plazas libres cruzando el rango horario solicitado (`startTime` a `endTime`) contra las reservas activas en ese intervalo, filtrando por tipo de vehículo y asegurando que no haya sobreventa de lugares.
+- **Plazas y tarifas por tipo de vehículo (R-30)**: cada plaza y cada tarifa apuntan a un tipo del catálogo del administrador (AUTO, MOTO, CAMIONETA o los que agregue). Al registrar un estacionamiento, el dueño indica cuántas plazas quiere de cada tipo y se generan con código correlativo (A-01, M-01, UTI-01…). La capacidad de cada tipo es la cantidad de plazas activas.
+- **Búsqueda por solapamiento temporal (`checkAvailability`)**: Determina plazas libres cruzando el rango horario solicitado (`startTime` a `endTime`) contra las reservas activas en ese intervalo, filtrando por el tipo del vehículo (solo sus plazas) y asegurando que no haya sobreventa de lugares.
 
 ### 4. Versionado e Historial de Precios (`ParkingPrice` y `ServicePrice`)
 

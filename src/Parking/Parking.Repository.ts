@@ -4,6 +4,7 @@ import { User } from '../User/User.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ParkingPrice } from '../ParkingPrice/ParkingPrice.Entity.js';
+import { VehicleType } from '../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
 import { likeWords } from '../Shared/utils/pagination.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
@@ -18,7 +19,7 @@ export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Parking[]> {
-    return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
   }
 
   // Una página de cocheras con búsqueda (nombre, dirección, barrio o dueño), localidad y estado. `counts` ignora el estado para rotular sus filtros.
@@ -32,7 +33,7 @@ export class ParkingRepository implements Repository<Parking> {
     const where: any = filters.length ? { $and: filters } : {};
     const [[items, total], on, off] = await Promise.all([
       this.em.findAndCount(Parking, { ...where, ...(o.status && { isActive: o.status === 'on' }) }, {
-        populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' }, limit: o.limit, offset: (o.page - 1) * o.limit,
+        populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any, orderBy: { name: 'ASC' }, limit: o.limit, offset: (o.page - 1) * o.limit,
       }),
       this.em.count(Parking, { ...where, isActive: true }),
       this.em.count(Parking, { ...where, isActive: false }),
@@ -45,15 +46,15 @@ export class ParkingRepository implements Repository<Parking> {
   }
 
   async findActive(): Promise<Parking[]> {
-    return await this.em.find(Parking, { isActive: true }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.find(Parking, { isActive: true }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
   }
 
   async findOne(item: { id: string }): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
   }
 
   async findByOwnerId(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' } });
+    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any, orderBy: { name: 'ASC' } });
   }
 
 
@@ -79,6 +80,11 @@ export class ParkingRepository implements Repository<Parking> {
     parking.isActive = false;
     await this.em.flush();
     return true;
+  }
+
+  // Tipos de vehículo activos entre los pedidos (alta de cochera con plazas por tipo, R-30).
+  async findVehicleTypes(ids: string[]): Promise<VehicleType[]> {
+    return ids.length ? await this.em.find(VehicleType, { id: { $in: ids }, isActive: true }) : [];
   }
 
   async getUserById(userId: string): Promise<User | null> {

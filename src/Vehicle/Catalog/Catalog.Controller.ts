@@ -7,8 +7,8 @@ export class CatalogController {
   constructor(private catalogService: CatalogService) {}
 
   public import = catchAsync(async (req: Request, res: Response) => {
-    const { items, dryRun } = req.body;
-    const result = await this.catalogService.importItems(actorId(req, 'actualizar el catálogo'), items, dryRun);
+    const { items, dryRun, typeMap } = req.body;
+    const result = await this.catalogService.importItems(actorId(req, 'actualizar el catálogo'), items, dryRun, typeMap);
     res.status(200).json({ data: result });
   });
 }

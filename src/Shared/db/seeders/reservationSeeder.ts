@@ -13,7 +13,7 @@ import { ServicePrice } from '../../../ServicePrice/ServicePrice.Entity.js';
 import { EmployeeShift } from '../../../EmployeeShift/EmployeeShift.Entity.js';
 import { covers, toMin, union, type Range } from '../../../EmployeeShift/Schedule.js';
 import { ReservationStatus } from '../../constants/status.js';
-import { categorizeVehicleType, type VehicleCategory } from '../../utils/vehicleTypes.js';
+import { type VehicleCategory } from '../../utils/vehicleTypes.js';
 import { isoDate } from '../../utils/dateUtils.js';
 import { CLIENT1_EMAIL } from './userSeeder.js';
 
@@ -237,7 +237,7 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
     for (const b of c.bookings) {
       const parking = parkings.get(b.parking), vehicle = vehicles.get(b.plate);
       if (!parking || !vehicle) { skipped++; continue; }
-      const type = categorizeVehicleType(vehicle.vehicleType.name);
+      const typeId = vehicle.vehicleType.id; // R-30: plazas y tarifas del mismo tipo
 
       // El día pedido o el más cercano que cumpla las reglas, alejándose de hoy (en curso: hoy, con la hora actual).
       let start: Date | undefined;
@@ -258,11 +258,11 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
       // Plaza: para las activas, la regla de la API (ve las reservas que ya había en la base); además, sin choque con lo sembrado.
       const active = b.status === PEN || b.status === NOW;
       const pool = active
-        ? await findFreeSpaces(em, parking, type, start, end)
-        : parking.parkingSpaces.getItems().filter(s => s.isActive && s.state !== SpaceState.MANTENIMIENTO && categorizeVehicleType(s.vehicleType) === type)
+        ? await findFreeSpaces(em, parking, typeId, start, end)
+        : parking.parkingSpaces.getItems().filter(s => s.isActive && s.state !== SpaceState.MANTENIMIENTO && s.vehicleType.id === typeId)
           .sort((x, y) => x.spaceCode.localeCompare(y.spaceCode));
       const space = pool.find(s => !busy(s.id, start!.getTime() - margin, end.getTime() + margin)) as ParkingSpace | undefined;
-      const rate = parking.parkingpriceHistory.getItems().find(p => !p.expirationDate && categorizeVehicleType(p.vehicleType) === type);
+      const rate = parking.parkingpriceHistory.getItems().find(p => !p.expirationDate && p.vehicleType.id === typeId);
       if (!space || (b.status === FIN && !rate)) { skipped++; continue; }
 
       // Atiende el empleado de turno al inicio; las online quedan sin asignar hasta el ingreso (R-07).

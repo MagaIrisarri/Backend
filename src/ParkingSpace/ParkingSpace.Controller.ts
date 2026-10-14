@@ -77,11 +77,11 @@ export class ParkingSpaceController {
 
   checkAvailability = catchAsync(async (req: Request, res: Response) => {
     const parkingId = req.params.parkingId as string;
-    const vehicleType = req.query.vehicleType as string;
+    const vehicleTypeId = req.query.vehicleTypeId as string;
     const startTime = req.query.startTime as unknown as Date;
     const endTime = req.query.endTime as unknown as Date;
 
-    const spaces = await this.parkingSpaceService.checkAvailability(parkingId, vehicleType, startTime, endTime);
+    const spaces = await this.parkingSpaceService.checkAvailability(parkingId, vehicleTypeId, startTime, endTime);
 
     return res.status(200).json({
       message: 'Plazas disponibles encontradas',

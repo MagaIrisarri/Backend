@@ -1,8 +1,9 @@
 import { AppError } from '../Shared/utils/AppError.js';
-import { categorizeVehicleType, matchesVehicleType } from '../Shared/utils/vehicleTypes.js';
-import { ParkingSpaceRepository, capacityField, type Relocation } from "./ParkingSpace.Repository.js";
+import { spacePrefix } from '../Shared/utils/vehicleTypes.js';
+import { ParkingSpaceRepository, type Relocation } from "./ParkingSpace.Repository.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
+import { VehicleType } from "../Vehicle/VehicleType/VehicleType.Entity.js";
 
 export class ParkingSpaceService {
   constructor(
@@ -18,29 +19,37 @@ export class ParkingSpaceService {
     return await this.spaceRepo.findOne({ id });
   }
 
-  async create(parkingId: string, data: { spaceCode: string; vehicleType: string }): Promise<ParkingSpace> {
+  // R-30: una plaza admite un tipo de vehículo activo del catálogo del administrador.
+  private async vehicleType(id: string): Promise<VehicleType> {
+    const type = await this.spaceRepo.findVehicleType(id);
+    if (!type) throw new AppError("Tipo de vehículo no encontrado o dado de baja", 404);
+    return type;
+  }
+
+  async create(parkingId: string, data: { spaceCode: string; vehicleTypeId: string }): Promise<ParkingSpace> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
-    const space = await this.spaceRepo.add({
-      ...data,
+    return await this.spaceRepo.add({
+      spaceCode: data.spaceCode,
+      vehicleType: await this.vehicleType(data.vehicleTypeId),
       state: SpaceState.LIBRE,
       parking,
     });
-    await this.adjustCapacity(parkingId, data.vehicleType, 1);
-    return space;
   }
 
+  // Plazas en lote con código correlativo por tipo (A-01, M-01, UTI-01…), a continuación del último usado.
+  // La capacidad del tipo es la cantidad de plazas activas (R-30), así que no hay nada más que ajustar.
   async createBulkManual(
-    parkingId: string, 
-    data: { vehicleType: string; count: number }
+    parkingId: string,
+    data: { vehicleTypeId: string; count: number }
   ): Promise<void> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
+    const vehicleType = await this.vehicleType(data.vehicleTypeId);
 
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
-    const category = categorizeVehicleType(data.vehicleType);
-    const prefix = category.charAt(0);
+    const prefix = spacePrefix(vehicleType.name);
 
     let maxNumber = 0;
     for (const s of existingSpaces) {
@@ -57,22 +66,13 @@ export class ParkingSpaceService {
     for (let i = 0; i < data.count; i++) {
       spacesToCreate.push({
         spaceCode: `${prefix}-${String(startNumber + i).padStart(2, '0')}`,
-        vehicleType: data.vehicleType,
+        vehicleType,
         state: SpaceState.LIBRE,
         parking,
       });
     }
 
     await this.spaceRepo.createBulk(spacesToCreate);
-    await this.adjustCapacity(parkingId, data.vehicleType, data.count);
-  }
-
-  // La capacidad de la sucursal (carCapacity, etc.) acompaña a la cantidad de plazas al agregar o dar de baja.
-  private async adjustCapacity(parkingId: string, vehicleType: string, delta: number): Promise<void> {
-    const parking = await this.parkingRepo.findOne({ id: parkingId });
-    if (!parking) return;
-    const field = capacityField(vehicleType);
-    await this.parkingRepo.update(parkingId, { [field]: Math.max(0, Number(parking[field] ?? 0) + delta) });
   }
 
   // Pasar a mantenimiento saca la plaza de servicio (R-18/R-19: reubica sus reservas futuras si se confirma).
@@ -89,12 +89,12 @@ export class ParkingSpaceService {
     return { moved };
   }
 
-  async checkAvailability(parkingId: string, vehicleType: string, startTime: Date, endTime: Date): Promise<(Omit<ParkingSpace, 'normalizeVehicleType'> & { available: boolean })[]> {
+  async checkAvailability(parkingId: string, vehicleTypeId: string, startTime: Date, endTime: Date): Promise<(ParkingSpace & { available: boolean })[]> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
     // Misma regla que al reservar: una plaza ocupada ahora puede estar libre en el horario pedido.
-    const free = new Set((await this.spaceRepo.freeSpaces(parking, vehicleType, startTime, endTime)).map((s) => s.id));
-    const spacesOfSameType = (await this.spaceRepo.findByParking(parkingId)).filter((s) => matchesVehicleType(s.vehicleType, vehicleType));
+    const free = new Set((await this.spaceRepo.freeSpaces(parking, vehicleTypeId, startTime, endTime)).map((s) => s.id));
+    const spacesOfSameType = (await this.spaceRepo.findByParking(parkingId)).filter((s) => s.vehicleType.id === vehicleTypeId);
     return spacesOfSameType.map((space) => ({ ...space, available: free.has(space.id) }));
   }
 

@@ -4,11 +4,7 @@ import { Reservation, reservationCode } from "../Reservation/Reservation.Entity.
 import { Repository } from "../Shared/base.Repository.js";
 import { AppError } from "../Shared/utils/AppError.js";
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from "../Shared/constants/status.js";
-import { categorizeVehicleType, matchesVehicleType } from "../Shared/utils/vehicleTypes.js";
-
-// Campo de capacidad de la sucursal que corresponde a cada categoría de plaza.
-export const capacityField = (vehicleType: string) =>
-  ({ AUTO: 'carCapacity', MOTO: 'motorcycleCapacity', CAMIONETA: 'truckCapacity' } as const)[categorizeVehicleType(vehicleType)];
+import { VehicleType } from "../Vehicle/VehicleType/VehicleType.Entity.js";
 
 // Reserva que se mueve de plaza al sacar la suya de servicio (va en details.conflicts del 409).
 export interface Relocation {
@@ -35,11 +31,12 @@ async function busyIntervals(em: EntityManager, spaceIds: string[], exceptReserv
   return busy;
 }
 
-// Plazas que pueden recibir reservas: activas, fuera de mantenimiento y del tipo del vehículo.
-const candidates = async (em: EntityManager, parkingId: string, vehicleType: string | undefined, exceptSpaceId?: string) =>
-  (await em.find(ParkingSpace, {
-    parking: parkingId, isActive: true, state: { $ne: SpaceState.MANTENIMIENTO }, ...(exceptSpaceId ? { id: { $ne: exceptSpaceId } } : {}),
-  }, { orderBy: { spaceCode: 'ASC' } })).filter((s) => matchesVehicleType(s.vehicleType, vehicleType));
+// Plazas que pueden recibir reservas: activas, fuera de mantenimiento y del tipo del vehículo (R-30: el mismo tipo, por id).
+const candidates = async (em: EntityManager, parkingId: string, vehicleTypeId: string, exceptSpaceId?: string) =>
+  await em.find(ParkingSpace, {
+    parking: parkingId, vehicleType: vehicleTypeId, isActive: true, state: { $ne: SpaceState.MANTENIMIENTO },
+    ...(exceptSpaceId ? { id: { $ne: exceptSpaceId } } : {}),
+  }, { orderBy: { spaceCode: 'ASC' } });
 
 // Libre para [from, to]: sin choque con otra reserva y, si el horario ya empezó, libre ahora (sin un vehículo marcado adentro).
 // Que hoy esté ocupada no importa para más tarde: una cochera llena ahora acepta reservas para otro horario.
@@ -52,12 +49,12 @@ const isFree = (s: ParkingSpace, busy: Map<string, Interval[]>, from: number, to
  * [inicio − margen, fin + margen] de la sucursal; ordenadas por código.
  */
 export async function findFreeSpaces(
-  em: EntityManager, parking: { id: string; reservationMargin: number }, vehicleType: string | undefined,
+  em: EntityManager, parking: { id: string; reservationMargin: number }, vehicleTypeId: string,
   start: Date, end: Date, exceptReservationId?: string,
 ): Promise<ParkingSpace[]> {
   const margin = Number(parking.reservationMargin ?? 0) * HOUR_MS;
   const from = start.getTime() - margin, to = end.getTime() + margin;
-  const spaces = await candidates(em, parking.id, vehicleType);
+  const spaces = await candidates(em, parking.id, vehicleTypeId);
   const busy = await busyIntervals(em, spaces.map((s) => s.id), exceptReservationId);
   return spaces.filter((s) => isFree(s, busy, from, to));
 }
@@ -65,8 +62,12 @@ export async function findFreeSpaces(
 export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   constructor(private em: EntityManager) {}
 
-  freeSpaces(parking: { id: string; reservationMargin: number }, vehicleType: string, start: Date, end: Date): Promise<ParkingSpace[]> {
-    return findFreeSpaces(this.em, parking, vehicleType, start, end);
+  freeSpaces(parking: { id: string; reservationMargin: number }, vehicleTypeId: string, start: Date, end: Date): Promise<ParkingSpace[]> {
+    return findFreeSpaces(this.em, parking, vehicleTypeId, start, end);
+  }
+
+  findVehicleType(id: string): Promise<VehicleType | null> {
+    return this.em.findOne(VehicleType, { id, isActive: true });
   }
 
   /**
@@ -100,11 +101,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
 
       plan.forEach(({ reservation, target }) => { reservation.parkingSpace = target!; });
       if (action === 'MANTENIMIENTO') space.state = SpaceState.MANTENIMIENTO;
-      else {
-        space.isActive = false;
-        const field = capacityField(space.vehicleType);
-        space.parking[field] = Math.max(0, Number(space.parking[field] ?? 0) - 1);
-      }
+      else space.isActive = false; // la capacidad del tipo baja sola: es la cantidad de plazas activas (R-30)
       return { space, moved: conflicts };
     });
   }
@@ -118,7 +115,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
     }, { populate: ['vehicle'] as any, orderBy: { startTime: 'ASC' } });
     if (!reservations.length) return [];
 
-    const spaces = await candidates(tx, space.parking.id, space.vehicleType, space.id);
+    const spaces = await candidates(tx, space.parking.id, space.vehicleType.id, space.id);
     const margin = Number(space.parking.reservationMargin ?? 0) * HOUR_MS;
     const busy = await busyIntervals(tx, spaces.map(c => c.id));
 
@@ -169,22 +166,6 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
       { parking: { id: parkingId }, isActive: true },
       { orderBy: { spaceCode: 'ASC' } }
     );
-  }
-
-  // Pasa a la categoría ('AUTO', 'MOTO', 'CAMIONETA') las plazas guardadas antes del hook de la entidad
-  // ('MOTOCICLETA', 'Camioneta'…). Corre al arrancar; si ya está todo unificado, no cambia nada.
-  async normalizeVehicleTypes(): Promise<number> {
-    const em = this.em.fork();
-    const rows: { vehicle_type: string }[] = await em.getConnection().execute('SELECT DISTINCT BINARY vehicle_type AS vehicle_type FROM parking_space');
-    let changed = 0;
-    for (const { vehicle_type } of rows) {
-      const raw = String(vehicle_type);
-      const category = categorizeVehicleType(raw);
-      if (raw === category) continue;
-      // BINARY: compara el texto exacto (la columna no distingue mayúsculas y 'Camioneta' coincidiría con 'CAMIONETA').
-      changed += (await em.getConnection().execute('UPDATE parking_space SET vehicle_type = ? WHERE BINARY vehicle_type = ?', [category, raw], 'run')).affectedRows ?? 0;
-    }
-    return changed;
   }
 
   async createBulk(spaces: Partial<ParkingSpace>[]): Promise<void> {

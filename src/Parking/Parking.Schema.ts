@@ -17,18 +17,12 @@ const parkingBodyBaseSchema = z.object({
     .string()
     .min(5, "La dirección debe tener al menos 5 caracteres")
     .max(100, "La dirección no puede superar los 100 caracteres"),
-  carCapacity: z.union([
-    z.number().int().min(0, "La capacidad de autos no puede ser negativa"),
-    z.string().regex(/^\d+$/).transform(Number),
-  ]),
-  motorcycleCapacity: z.union([
-    z.number().int().min(0, "La capacidad de motos no puede ser negativa"),
-    z.string().regex(/^\d+$/).transform(Number),
-  ]),
-  truckCapacity: z.union([
-    z.number().int().min(0),
-    z.string().regex(/^\d+$/).transform(Number),
-  ]).optional(),
+  // R-30: plazas iniciales por tipo de vehículo; después se gestionan desde Plazas (R-18).
+  spaces: z.array(z.object({
+    vehicleTypeId: z.string().uuid("Elegí el tipo de vehículo de las plazas"),
+    quantity: z.number().int().min(1, "Cada tipo lleva al menos 1 plaza").max(500, "Hasta 500 plazas por tipo"),
+  })).default([])
+    .refine((list) => new Set(list.map((s) => s.vehicleTypeId)).size === list.length, "Cada tipo de vehículo va una sola vez"),
   openingTime: z.string().regex(TIME_REGEX, "Formato de hora de apertura inválido (HH:mm)"),
   closingTime: z.string().regex(TIME_REGEX, "Formato de hora de cierre inválido (HH:mm)"),
   minReservationHours: z.number().int().min(1).default(1),
@@ -51,11 +45,11 @@ export const createParkingSchema = z.object({
   ),
 });
 
-// Sin capacidades: después del alta, la capacidad sigue a las plazas que se agregan o dan de baja (R-18).
+// Sin plazas: después del alta, la capacidad sigue a las plazas que se agregan o dan de baja (R-18).
 // Si llegan, zod las descarta.
 export const updateParkingSchema = z.object({
   body: parkingBodyBaseSchema
-    .omit({ carCapacity: true, motorcycleCapacity: true, truckCapacity: true })
+    .omit({ spaces: true })
     .partial()
     .refine(
       (data) => {
