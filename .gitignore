@@ -30,7 +30,6 @@ pnpm-debug.log*
 .DS_Store
 
 # Claude: las skills 
-.claude/settings.local.json
 
 # Postman
 .postman/
@@ -41,12 +40,14 @@ postmanfolder/
 *.postman_collection.json
 
 # Ralph
-scripts/ralph/prd.json
-scripts/ralph/progress.txt
-scripts/ralph/archive/
-scripts/ralph/.last-branch
 
 # graphify: solo se versionan el grafo y su reporte
 graphify-out/*
 !graphify-out/graph.json
 !graphify-out/GRAPH_REPORT.md
+
+# Herramientas de IA (agentes, skills, scripts autónomos): locales de cada integrante, no son parte del producto
+.claude/
+.agents/
+skills-lock.json
+scripts/ralph/
