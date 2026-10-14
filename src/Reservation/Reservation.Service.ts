@@ -72,7 +72,7 @@ export class ReservationService {
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
     await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede modificar la reserva");
     if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
-      throw new AppError("Solo se extiende una reserva pendiente, confirmada o en curso", 400);
+      throw new AppError("Solo se extiende una reserva pendiente o en curso", 400);
     }
     if (endTime.getTime() <= Math.max(reservation.endTime.getTime(), Date.now())) {
       throw new AppError(`El nuevo fin tiene que ser posterior al actual (${formatTimeHHMM(reservation.endTime)}) y a la hora actual`, 400);
@@ -97,7 +97,7 @@ export class ReservationService {
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
     await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede modificar la reserva");
     if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
-      throw new AppError("Los servicios se cambian solo en una reserva pendiente, confirmada o en curso", 400);
+      throw new AppError("Los servicios se cambian solo en una reserva pendiente o en curso", 400);
     }
     await this.repo.setServices(reservation, serviceIds);
     return reservation;
@@ -198,7 +198,7 @@ export class ReservationService {
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
     await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede asignar el empleado de la reserva");
     if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
-      throw new AppError("Solo se asigna el empleado de una reserva pendiente, confirmada o en curso", 400);
+      throw new AppError("Solo se asigna el empleado de una reserva pendiente o en curso", 400);
     }
     const employee = await this.repo.findActiveUser(employeeId);
     if (employee?.type !== UserType.EMPLEADO || employee.parkingId !== reservation.parkingSpace?.parking?.id) {
@@ -288,7 +288,7 @@ export class ReservationService {
     await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede cambiar la plaza de la reserva");
 
     if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
-      throw new AppError("Solo se cambia la plaza de una reserva pendiente, confirmada o en curso", 400);
+      throw new AppError("Solo se cambia la plaza de una reserva pendiente o en curso", 400);
     }
     // Una reserva sin ingreso cuyo horario terminó se cancela sola (R-17); hasta que corra esa tarea, no se mueve.
     if (reservation.status !== ReservationStatus.EN_CURSO && reservation.endTime.getTime() <= Date.now()) {
@@ -335,6 +335,10 @@ export class ReservationService {
     return await this.repo.fillMissingCodes();
   }
 
+  async clearConfirmed(): Promise<number> {
+    return await this.repo.clearConfirmed();
+  }
+
   async cancelExpired(): Promise<number> {
     const expired = await this.repo.cancelExpired(new Date());
     for (const r of expired) {
@@ -343,7 +347,7 @@ export class ReservationService {
     return expired.length;
   }
 
-  // Confirmación, ingreso, salida y cambio de plaza los hace un empleado activo de la sucursal de la reserva, o el dueño de esa sucursal.
+  // Ingreso, salida y cambio de plaza los hace un empleado activo de la sucursal de la reserva, o el dueño de esa sucursal.
   private async assertStaffOf(
     reservation: Reservation,
     userId: string,
@@ -353,26 +357,12 @@ export class ReservationService {
     if (!isStaffOf(user, reservation.parkingSpace?.parking)) throw new AppError(message, 403);
   }
 
-  async confirm(id: string, userId: string): Promise<Reservation> {
-    const reservation = await this.repo.findOne({ id });
-    if (!reservation) throw new AppError("Reserva no encontrada", 404);
-    await this.assertStaffOf(reservation, userId, "Solo el personal de esta sucursal puede confirmar la reserva");
-
-    if (reservation.status !== ReservationStatus.PENDIENTE) {
-      throw new AppError("La reserva no se encuentra en estado PENDIENTE", 400);
-    }
-
-    const updated = (await this.repo.update(id, { status: ReservationStatus.CONFIRMADA }))!;
-    await this.notifyClient(updated, NotificationType.RESERVA_CONFIRMADA, 'Reserva confirmada', `Te esperamos el ${updated.startTime.toLocaleDateString('es-AR')} a las ${formatTimeHHMM(updated.startTime)}`);
-    return updated;
-  }
-
   async checkIn(id: string, employeeId: string): Promise<Reservation> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) throw new AppError("Reserva no encontrada", 404);
     await this.assertStaffOf(reservation, employeeId);
 
-    if (reservation.status !== ReservationStatus.PENDIENTE && reservation.status !== ReservationStatus.CONFIRMADA) {
+    if (reservation.status !== ReservationStatus.PENDIENTE) {
       throw new AppError("La reserva no se encuentra en estado válido para Check-in", 400);
     }
 

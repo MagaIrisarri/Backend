@@ -29,7 +29,7 @@ export const createReservationSchema = z.object({
   }),
 });
 
-// R-07: solo se cambia el empleado asignado. Horario y estado tienen sus propias acciones con reglas (extender, confirmar, ingreso, salida, cancelar).
+// R-07: solo se cambia el empleado asignado. Horario y estado tienen sus propias acciones con reglas (extender, ingreso, salida, cancelar).
 export const updateReservationSchema = z.object({
   body: z.object({
     attendedById: z.string().uuid("ID de empleado inválido"),

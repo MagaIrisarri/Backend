@@ -35,7 +35,7 @@ type Client = { email: string; cars: Car[]; bookings: Booking[] };
 // Sale del id para que sea estable entre arranques y no repita el orden de inicio.
 const bookedAt = (r: Reservation) => new Date(Math.min(r.startTime.getTime(), Date.now()) - (1 + parseInt(r.id.slice(0, 4), 16) % 2880) * 60_000);
 
-const { FINALIZADA: FIN, CANCELADA: CAN, PENDIENTE: PEN, CONFIRMADA: CON, EN_CURSO: NOW } = ReservationStatus;
+const { FINALIZADA: FIN, CANCELADA: CAN, PENDIENTE: PEN, EN_CURSO: NOW } = ReservationStatus;
 const CENTRAL = 'Estacionamiento Central Plaza', CORDOBA = 'Cochera Peatonal Córdoba', MONUMENTO = 'Parking Monumento';
 
 const CLIENTS: Client[] = [
@@ -52,7 +52,7 @@ const CLIENTS: Client[] = [
       { plate: 'AE123CD', parking: CORDOBA, status: FIN, day: -20, start: 10, hours: 3, paid: 'TARJETA_DEBITO' },
       { plate: 'AE123CD', parking: CENTRAL, status: FIN, day: -45, start: 16, hours: 4, paid: 'TRANSFERENCIA' },
       { plate: 'AF456GH', parking: MONUMENTO, status: FIN, day: -5, start: 18, hours: 3, paid: 'TARJETA_CREDITO', rating: 4 },
-      { plate: 'AF456GH', parking: CENTRAL, status: CON, day: 2, start: 10, hours: 3, assigned: true },
+      { plate: 'AF456GH', parking: CENTRAL, status: PEN, day: 2, start: 10, hours: 3, assigned: true },
       { plate: 'A123BCD', parking: 'Estacionamiento Paseo del Siglo', status: FIN, day: -12, start: 10, hours: 2, paid: 'EFECTIVO' },
       { plate: 'A123BCD', parking: MONUMENTO, status: PEN, day: 4, start: 15, hours: 2 },
       { plate: 'AE123CD', parking: CORDOBA, status: CAN, day: 1, start: 12, hours: 2 },
@@ -69,7 +69,7 @@ const CLIENTS: Client[] = [
       { plate: 'AD789JK', parking: 'Estacionamiento Paseo del Siglo', status: FIN, day: -33, start: 15, hours: 2, paid: 'TRANSFERENCIA', rating: 3 },
       { plate: 'AD789JK', parking: CENTRAL, status: NOW, ago: 1, hours: 3 },
       { plate: 'AG321LM', parking: CENTRAL, status: FIN, day: -15, start: 10, hours: 4, paid: 'EFECTIVO', services: ['Lavado completo'], rating: 5 },
-      { plate: 'AG321LM', parking: CENTRAL, status: CON, day: 6, start: 9, hours: 4 },
+      { plate: 'AG321LM', parking: CENTRAL, status: PEN, day: 6, start: 9, hours: 4 },
     ],
   },
   {
@@ -95,7 +95,7 @@ const CLIENTS: Client[] = [
     ],
     bookings: [
       { plate: 'AC987QR', parking: 'Estacionamiento Peatonal San Martín', status: FIN, day: -6, start: 9, hours: 3, extra: 2, paid: 'TRANSFERENCIA' },
-      { plate: 'AC987QR', parking: 'Estacionamiento Peatonal San Martín', status: CON, day: 5, start: 10, hours: 4 },
+      { plate: 'AC987QR', parking: 'Estacionamiento Peatonal San Martín', status: PEN, day: 5, start: 10, hours: 4 },
       { plate: 'AB246ST', parking: 'Cochera Bulevar', status: FIN, day: -22, start: 14, hours: 2, paid: 'EFECTIVO', rating: 4 },
       { plate: 'AB246ST', parking: 'Parking Plaza 1° de Mayo', status: FIN, day: -40, start: 11, hours: 3, paid: 'MERCADO_PAGO' },
       { plate: 'AB246ST', parking: 'Cochera Bulevar', status: PEN, day: 1, start: 17, hours: 2 },
@@ -110,7 +110,7 @@ const CLIENTS: Client[] = [
     bookings: [
       { plate: 'AF135UV', parking: 'Cochera Peatonal Sarmiento', status: FIN, day: -1, start: 10, hours: 2, services: ['Carga de batería'] },
       { plate: 'AF135UV', parking: 'Estacionamiento Parque Central', status: FIN, day: -25, start: 13, hours: 3, paid: 'TARJETA_CREDITO', rating: 5 },
-      { plate: 'AF135UV', parking: 'Cochera Peatonal Sarmiento', status: CON, day: 2, start: 16, hours: 3 },
+      { plate: 'AF135UV', parking: 'Cochera Peatonal Sarmiento', status: PEN, day: 2, start: 16, hours: 3 },
       { plate: 'A789HIJ', parking: 'Estacionamiento Parque Central', status: FIN, day: -8, start: 9, hours: 2, paid: 'EFECTIVO' },
       { plate: 'A789HIJ', parking: 'Cochera Peatonal Sarmiento', status: NOW, ago: 3, hours: 2 },
     ],
@@ -125,7 +125,7 @@ const CLIENTS: Client[] = [
     bookings: [
       { plate: 'AE864WX', parking: 'Cochera Barrio Lourdes', status: FIN, day: -2, start: 15, hours: 2, paid: 'EFECTIVO' },
       { plate: 'AE864WX', parking: MONUMENTO, status: FIN, day: -28, start: 20, hours: 3, paid: 'TARJETA_DEBITO' },
-      { plate: 'AE864WX', parking: 'Cochera Barrio Lourdes', status: CON, day: 3, start: 9, hours: 2 },
+      { plate: 'AE864WX', parking: 'Cochera Barrio Lourdes', status: PEN, day: 3, start: 9, hours: 2 },
       { plate: 'AD975YZ', parking: CENTRAL, status: FIN, day: -50, start: 9, hours: 5, paid: 'TRANSFERENCIA' },
       { plate: 'AD975YZ', parking: MONUMENTO, status: PEN, day: 8, start: 12, hours: 4 },
       { plate: 'A321KLM', parking: CORDOBA, status: FIN, day: -11, start: 17, hours: 2, paid: 'MERCADO_PAGO' },
@@ -151,7 +151,7 @@ const CLIENTS: Client[] = [
     bookings: [
       { plate: 'AC223DE', parking: 'Parking Avenida Savio', status: FIN, day: -6, start: 10, hours: 3, paid: 'EFECTIVO' },
       { plate: 'AC223DE', parking: 'Estacionamiento Costanera San Nicolás', status: FIN, day: -19, start: 15, hours: 2 },
-      { plate: 'AC223DE', parking: 'Parking Avenida Savio', status: CON, day: 1, start: 9, hours: 2 },
+      { plate: 'AC223DE', parking: 'Parking Avenida Savio', status: PEN, day: 1, start: 9, hours: 2 },
       { plate: 'AB334FG', parking: 'Cochera Costanera Carlos Paz', status: FIN, day: -14, start: 10, hours: 4, paid: 'TARJETA_DEBITO' },
     ],
   },
@@ -164,7 +164,7 @@ const CLIENTS: Client[] = [
     bookings: [
       { plate: 'AH445HI', parking: 'Cochera Costanera Carlos Paz', status: FIN, day: -3, start: 11, hours: 3, paid: 'MERCADO_PAGO', services: ['Control de neumáticos'], rating: 5 },
       { plate: 'AH445HI', parking: 'Cochera Costanera Carlos Paz', status: FIN, day: -31, start: 18, hours: 4, paid: 'EFECTIVO' },
-      { plate: 'AH445HI', parking: 'Cochera Costanera Carlos Paz', status: CON, day: 7, start: 10, hours: 3 },
+      { plate: 'AH445HI', parking: 'Cochera Costanera Carlos Paz', status: PEN, day: 7, start: 10, hours: 3 },
       { plate: 'A654NOP', parking: 'Cochera Nueva Córdoba', status: FIN, day: -16, start: 9, hours: 2, paid: 'TRANSFERENCIA' },
       { plate: 'A654NOP', parking: 'Estacionamiento Plaza San Martín', status: PEN, day: 2, start: 14, hours: 2 },
     ],
@@ -259,7 +259,7 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
       if (busy(vehicle.id, start.getTime(), end.getTime())) { skipped++; continue; }
 
       // Plaza: para las activas, la regla de la API (ve las reservas que ya había en la base); además, sin choque con lo sembrado.
-      const active = b.status === PEN || b.status === CON || b.status === NOW;
+      const active = b.status === PEN || b.status === NOW;
       const pool = active
         ? await findFreeSpaces(em, parking, type, start, end)
         : parking.parkingSpaces.getItems().filter(s => s.isActive && s.state !== SpaceState.MANTENIMIENTO && categorizeVehicleType(s.vehicleType) === type)

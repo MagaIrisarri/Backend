@@ -19,7 +19,7 @@ export class ParkingService {
   ) {}
 
   // Disponibilidad "en vivo": vehículos adentro ahora (reservas EN CURSO) o plazas marcadas OCUPADO a mano, sin contar dos veces
-  // la misma plaza. Las pendientes y confirmadas todavía no ocupan nada; las de mantenimiento no están libres ni ocupadas.
+  // la misma plaza. Las pendientes todavía no ocupan nada; las de mantenimiento no están libres ni ocupadas.
   private formatParkingResponse(parking: Parking, inProgress: Reservation[]) {
     const spaces = activeSpaces(parking);
     const grouped = groupSpacesByVehicleType(spaces);
@@ -249,7 +249,7 @@ export class ParkingService {
     ]);
 
     // Ocupación = vehículos adentro ahora sobre todas las plazas (misma regla que Stats.Repository.spaces):
-    // las confirmadas de otros días no ocupan nada todavía.
+    // las pendientes de otros días no ocupan nada todavía.
     const activeReservationsCount = counts[ReservationStatus.EN_CURSO] || 0;
 
     const totalCapacity = (parking.carCapacity || 0) + (parking.motorcycleCapacity || 0) + (parking.truckCapacity || 0);

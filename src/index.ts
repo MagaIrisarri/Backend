@@ -80,7 +80,10 @@ app.use(errorHandler);
 // ==========================================
 async function startServer() {
   try {
-    await syncSchema(); 
+    await syncSchema();
+    // Antes de la siembra, que ve las reservas activas para elegir plazas libres.
+    const unconfirmed = await reservationService.clearConfirmed();
+    if (unconfirmed) console.log(`Reservas confirmadas pasadas a pendientes: ${unconfirmed}`);
     await seedDatabase(orm.em.fork());
 
     // Unifica el tipo de las plazas viejas ('MOTOCICLETA' → 'MOTO', 'Camioneta' → 'CAMIONETA'); las nuevas ya se guardan así.

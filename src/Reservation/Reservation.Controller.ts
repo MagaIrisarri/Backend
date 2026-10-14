@@ -90,13 +90,6 @@ export class ReservationController {
     return res.status(200).json({ message: 'Gracias por tu valoración', data: reservation });
   });
 
-  public confirm = catchAsync(async (req: Request, res: Response) => {
-    const userId = actorId(req, 'confirmar la reserva');
-
-    const reservation = await this.service.confirm(req.params.id as string, userId);
-    return res.status(200).json({ message: 'Reserva confirmada con éxito', data: reservation });
-  });
-
   public checkIn = catchAsync(async (req: Request, res: Response) => {
     const employeeId = actorId(req, 'registrar el ingreso o la salida');
 

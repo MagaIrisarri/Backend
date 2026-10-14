@@ -1,7 +1,6 @@
 
 export enum ReservationStatus {
   PENDIENTE = 'PENDIENTE',
-  CONFIRMADA = 'CONFIRMADA',
   EN_CURSO = 'EN CURSO',
   FINALIZADA = 'FINALIZADA',
   CANCELADA = 'CANCELADA',
@@ -10,14 +9,12 @@ export enum ReservationStatus {
 
 export const ACTIVE_RESERVATION_STATUSES = [
   ReservationStatus.PENDIENTE,
-  ReservationStatus.CONFIRMADA,
   ReservationStatus.EN_CURSO,
 ] as const;
 
 
 export enum NotificationType {
   RESERVA_NUEVA = 'RESERVA_NUEVA',
-  RESERVA_CONFIRMADA = 'RESERVA_CONFIRMADA',
   RESERVA_CANCELADA = 'RESERVA_CANCELADA',
   RESERVA_VENCIDA = 'RESERVA_VENCIDA',
   RESERVA_EXTENDIDA = 'RESERVA_EXTENDIDA',

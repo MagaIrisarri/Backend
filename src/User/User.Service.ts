@@ -147,7 +147,7 @@ export class UserService {
 
     if (user.type === UserType.CLIENTE) {
       const n = await this.userRepository.countActiveReservationsOfClient(user.id);
-      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} reserva(s) pendiente(s), confirmada(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
+      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} reserva(s) pendiente(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
     }
     if (user.type === UserType.EMPLEADO) await this.assertNoPendingWork(user);
     if (user.type === UserType.DUENO) {

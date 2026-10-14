@@ -31,7 +31,6 @@ reservationRouter.get('/owner/:ownerId', auth(UserType.DUENO), self('ownerId'), 
 reservationRouter.get('/:id', auth(), ownReservation, validateSchema(reservationIdSchema), reservationController.findOne);
 reservationRouter.post('/', auth(UserType.CLIENTE), ownVehicle((req) => req.body?.vehicleId), validateSchema(createReservationSchema), reservationController.create);
 reservationRouter.post('/walk-in', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(walkInSchema), reservationController.walkIn);
-reservationRouter.patch('/:id/confirm', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(reservationIdSchema), reservationController.confirm);
 reservationRouter.patch('/:id/space', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(changeSpaceSchema), reservationController.changeSpace);
 reservationRouter.patch('/:id/end', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(extendReservationSchema), reservationController.extend);
 reservationRouter.patch('/:id/rating', auth(UserType.CLIENTE), validateSchema(rateReservationSchema), reservationController.rate);

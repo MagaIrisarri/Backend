@@ -70,7 +70,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   }
 
   /**
-   * R-18/R-19: pasa la plaza a mantenimiento o la da de baja. Si tiene reservas futuras (pendientes o confirmadas),
+   * R-18/R-19: pasa la plaza a mantenimiento o la da de baja. Si tiene reservas futuras (pendientes),
    * propone para cada una otra plaza libre del mismo tipo sin choque de horario (con el margen de la sucursal).
    * Sin `relocate`, o si alguna no tiene lugar, responde 409 con la propuesta en details.conflicts y no cambia nada.
    * Con `relocate`, mueve las reservas y saca la plaza de servicio en la misma transacción.
@@ -113,7 +113,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
   private async planRelocation(tx: EntityManager, space: ParkingSpace) {
     const reservations = await tx.find(Reservation, {
       parkingSpace: space,
-      status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] },
+      status: ReservationStatus.PENDIENTE,
       endTime: { $gt: new Date() },
     }, { populate: ['vehicle'] as any, orderBy: { startTime: 'ASC' } });
     if (!reservations.length) return [];

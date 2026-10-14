@@ -32,7 +32,7 @@ export class ScheduleRepository {
     return this.em.findOne(HolidayAdhesion, { holiday: { id: holidayId }, parking: { id: parkingId } });
   }
 
-  // Reservas activas (pendientes, confirmadas o en curso) de una sucursal que tocan el día.
+  // Reservas activas (pendientes o en curso) de una sucursal que tocan el día.
   activeReservations(parkingId: string, dayStart: Date, dayEnd: Date) {
     return this.em.find(Reservation, {
       parkingSpace: { parking: { id: parkingId } },

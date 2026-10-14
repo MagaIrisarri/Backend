@@ -96,7 +96,6 @@ export class ParkingRepository implements Repository<Parking> {
   async getReservationStatusCounts(parkingId: string): Promise<Record<string, number>> {
     const counts: Record<string, number> = {
       PENDIENTE: 0,
-      CONFIRMADA: 0,
       'EN CURSO': 0,
       FINALIZADA: 0,
       CANCELADA: 0,

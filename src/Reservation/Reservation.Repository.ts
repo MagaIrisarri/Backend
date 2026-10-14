@@ -100,12 +100,12 @@ export class ReservationRepository implements Repository<Reservation> {
     return reservation;
   }
 
-  // R-17: pendientes o confirmadas cuyo horario terminó sin ingreso. No tienen factura ni ocupan la plaza
+  // R-17: pendientes cuyo horario terminó sin ingreso. No tienen factura ni ocupan la plaza
   // (eso pasa recién en el check-in), así que alcanza con cambiar el estado.
   // Devuelve las canceladas (con su cliente y sucursal) para avisarles.
   async cancelExpired(now: Date): Promise<Reservation[]> {
     const em = this.entityManager.fork();
-    const status = { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] };
+    const status = ReservationStatus.PENDIENTE;
     const expired = await em.find(Reservation, { status, endTime: { $lte: now } },
       { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
     if (expired.length) await em.nativeUpdate(Reservation, { id: { $in: expired.map((r) => r.id) }, status }, { status: ReservationStatus.CANCELADA });
@@ -174,10 +174,10 @@ export class ReservationRepository implements Repository<Reservation> {
     });
   }
 
-  // R-28: pendientes o confirmadas que empiezan dentro de la ventana y todavía no tuvieron recordatorio.
+  // R-28: pendientes que empiezan dentro de la ventana y todavía no tuvieron recordatorio.
   async findDueReminders(now: Date, until: Date): Promise<Reservation[]> {
     return await this.entityManager.fork().find(Reservation, {
-      status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.CONFIRMADA] },
+      status: ReservationStatus.PENDIENTE,
       startTime: { $gt: now, $lte: until },
       reminderSentAt: null,
     }, { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
@@ -197,6 +197,13 @@ export class ReservationRepository implements Repository<Reservation> {
   async fillMissingCodes(): Promise<number> {
     const result = await this.entityManager.getConnection().execute(
       "UPDATE reservation SET code = CONCAT('R-', UPPER(LEFT(id, 6))) WHERE code IS NULL", [], 'run');
+    return result.affectedRows ?? 0;
+  }
+
+  // Ya no existe la confirmación: las reservas que quedaron CONFIRMADA vuelven a PENDIENTE, el único estado previo al ingreso.
+  async clearConfirmed(): Promise<number> {
+    const result = await this.entityManager.getConnection().execute(
+      "UPDATE reservation SET status = ? WHERE status = 'CONFIRMADA'", [ReservationStatus.PENDIENTE], 'run');
     return result.affectedRows ?? 0;
   }
 

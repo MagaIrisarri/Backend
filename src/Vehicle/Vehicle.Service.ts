@@ -69,7 +69,7 @@ export class VehicleService {
       const model = await this.resolveModel(brandId ?? vehicle.brand.id, modelId ?? vehicle.model.id);
       // R-25: la plaza de una reserva activa es del tipo del vehículo; cambiarlo la dejaría en una plaza incompatible.
       if (model.vehicleType.id !== vehicle.vehicleType.id && await this.vehicleRepository.countActiveReservations(id)) {
-        throw new AppError("No se puede cambiar el tipo de un vehículo con reservas pendientes, confirmadas o en curso", 400);
+        throw new AppError("No se puede cambiar el tipo de un vehículo con reservas pendientes o en curso", 400);
       }
       Object.assign(changes, { brand: model.brand, model, vehicleType: model.vehicleType });
     }
@@ -78,10 +78,10 @@ export class VehicleService {
     return await this.vehicleRepository.update(id, changes);
   }
 
-  // Como R-20: un vehículo con reservas pendientes, confirmadas o en curso no se da de baja.
+  // Como R-20: un vehículo con reservas pendientes o en curso no se da de baja.
   async remove(id: string): Promise<boolean> {
     const n = await this.vehicleRepository.countActiveReservations(id);
-    if (n) throw new AppError(`No se puede dar de baja: el vehículo tiene ${n} reserva(s) pendiente(s), confirmada(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
+    if (n) throw new AppError(`No se puede dar de baja: el vehículo tiene ${n} reserva(s) pendiente(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
     return await this.vehicleRepository.remove({ id });
   }
 
