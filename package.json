@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
+    "seed:demo": "node ./dist/Shared/db/resetDemo.js",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/index.js\""
   },
   "keywords": [],

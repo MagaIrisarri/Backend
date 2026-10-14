@@ -4,8 +4,7 @@ import { ParkingPrice } from '../../../ParkingPrice/ParkingPrice.Entity.js';
 import { ParkingSpace, SpaceState } from '../../../ParkingSpace/ParkingSpace.Entity.js';
 import { User } from '../../../User/User.Entity.js';
 import { OWNER1_EMAIL, OWNER2_EMAIL } from './userSeeder.js';
-import { capacityField } from '../../../ParkingSpace/ParkingSpace.Repository.js';
-import { VEHICLE_CATEGORIES, categorizeVehicleType, type VehicleCategory } from '../../utils/vehicleTypes.js';
+import { type VehicleCategory } from '../../utils/vehicleTypes.js';
 
 interface ParkingData {
   name:                string;
@@ -676,27 +675,12 @@ const addSpaces = (em: EntityManager, parking: Parking, type: VehicleCategory, a
   }
 };
 
-// Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan y completa el barrio y la provincia de las que no los tienen.
+// Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan, sin tocar las existentes.
 // La capacidad de cada tipo es la cantidad de plazas activas (R-18), igual que al dar de alta una sucursal desde la API.
 export const seedParkings = async (em: EntityManager, users: Map<string, User>): Promise<void> => {
-  const existing = new Map((await em.find(Parking, {}, { populate: ['parkingSpaces', 'parkingpriceHistory'] })).map((p) => [p.name, p]));
+  const existing = new Set((await em.find(Parking, {}, { fields: ['name'] })).map((p) => p.name));
   for (const pData of PARKINGS_DATA) {
-    const found = existing.get(pData.name);
-    if (found) {
-      // Cocheras sembradas antes de que existiera el barrio: se completa solo si está vacío (no pisa lo que cargó el dueño).
-      if (!found.neighborhood) found.neighborhood = pData.neighborhood;
-      if (!found.province) found.province = pData.province;
-      // El seeder anterior creaba menos plazas que la capacidad: se completan las que faltan (las dadas de baja ya descontaron capacidad).
-      for (const type of VEHICLE_CATEGORIES) {
-        const ofType = found.parkingSpaces.getItems().filter((s) => categorizeVehicleType(s.vehicleType) === type);
-        const missing = Number(found[capacityField(type)] ?? 0) - ofType.filter((s) => s.isActive !== false).length;
-        const last = Math.max(0, ...ofType.map((s) => parseInt(s.spaceCode.slice(2), 10) || 0));
-        if (missing > 0) addSpaces(em, found, type, last, missing);
-      }
-      // Tarifas en $0 que sembraba la versión anterior para tipos sin plazas: la API no las admite (precio > 0).
-      em.remove(found.parkingpriceHistory.getItems().filter((p) => Number(p.price) <= 0));
-      continue;
-    }
+    if (existing.has(pData.name)) continue;
     const parking = em.create(Parking, {
       name:                pData.name,
       address:             pData.address,

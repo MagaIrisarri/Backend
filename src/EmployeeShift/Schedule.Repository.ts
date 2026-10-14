@@ -21,7 +21,6 @@ export class ScheduleRepository {
   templateClosures(parkingId: string, dayOfWeek: DayOfWeek) {
     return this.em.find(ShiftClosure, { parking: { id: parkingId }, dayOfWeek });
   }
-  countTemplateShifts(parkingId: string) { return this.em.count(EmployeeShift, { parking: { id: parkingId }, isActive: true }); }
 
   findException(parkingId: string, date: string) { return this.em.findOne(DayException, { parking: { id: parkingId }, date }); }
   // El feriado de la fecha que ve la sucursal: el nacional o uno propio de su dueño (hay a lo sumo uno, R-10).

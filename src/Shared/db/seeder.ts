@@ -6,6 +6,7 @@ import { seedHolidays } from './seeders/holidaySeeder.js';
 import { seedStaff } from './seeders/staffSeeder.js';
 import { seedServices } from './seeders/serviceSeeder.js';
 import { seedReservations } from './seeders/reservationSeeder.js';
+import { seedDemo } from './seeders/demoSeeder.js';
 
 // Cada paso es idempotente (por email, nombre, patente o "si todavía no tiene"): corre igual en una base vacía o ya sembrada
 // y solo agrega lo que falta. Va en una transacción: si un paso falla, no queda una siembra a medias.
@@ -20,6 +21,8 @@ export const seedDatabase = async (em: EntityManager) => {
     await seedServices(tx);
     await tx.flush();
     await seedReservations(tx);
+    await tx.flush();
+    await seedDemo(tx);
   });
   console.log('✅ Datos de prueba al día.');
 };
