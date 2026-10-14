@@ -21,7 +21,11 @@
 |---|---|---|---|
 
 ## Seguimiento de features, bugs e issues
-- Metodología: Seguimiento por checklist de alcance en Notion, con desarrollo en ramas por feature integradas mediante Pull Requests.
+- **Metodología ágil: Kanban**, con flujo continuo y sin sprints de duración fija.
+  - **Tablero visible:** cada ítem del alcance (CRUD, listado, CUU) es una tarjeta en Notion, agrupada por capa (backend y frontend), y pasa por pendiente, en curso y hecho.
+  - **Trabajo en curso acotado:** cada integrante toma un ítem a la vez y lo cierra antes de empezar otro.
+  - **Una rama por feature:** cada cambio se desarrolla en su rama y se integra con un Pull Request; el hash del commit queda anotado en la tarjeta.
+  - **Mejora continua:** los bugs encontrados se registran con su commit en el tablero y se revisan en las reuniones (ver las minutas más abajo).
 - Tablero: [Notion – TP alcance regularidad](https://app.notion.com/p/TP-alcance-regularidad-3ba3ff992fda8019ae50eb40bd1503de) (avance por capa, PRs asociados a cada ítem y registro de bugs resueltos)
 - Issues: No se utilizaron issues de GitHub. Los bugs encontrados y resueltos, con sus commits, están registrados en el tablero de Notion (sección "Bugs encontrados y resueltos"). Pull requests: [Backend](https://github.com/MagaIrisarri/Backend/pulls?q=is%3Apr+state%3Aclosed) · [Frontend](https://github.com/MagaIrisarri/Frontend/pulls?q=is%3Apr+state%3Aclosed)
 
