@@ -7,7 +7,7 @@ import { orm } from '../../Shared/db/orm.js';
 import { VehicleTypeController } from './VehicleType.Controller.js';
 import { VehicleTypeRepository } from './VehicleType.Repository.js';
 import { VehicleTypeService } from './VehicleType.Service.js';
-import { createVehicleTypeSchema, updateVehicleTypeSchema, vehicleTypeIdSchema } from './VehicleType.Schema.js';
+import { createVehicleTypeSchema, updateVehicleTypeSchema, vehicleTypeDescriptionsSchema, vehicleTypeIdSchema } from './VehicleType.Schema.js';
 
 export const vehicleTypeRouter = Router();
 
@@ -20,6 +20,9 @@ vehicleTypeRouter.get('/:id', validateSchema(vehicleTypeIdSchema), vehicleTypeCo
 vehicleTypeRouter.post('/', auth(UserType.ADMINISTRADOR), validateSchema(createVehicleTypeSchema), vehicleTypeController.create);
 vehicleTypeRouter.put('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
 vehicleTypeRouter.patch('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
+// RA-26: qué descripciones del DNRPA van a este tipo (reasigna modelos y vehículos; 409 con reservas activas).
+vehicleTypeRouter.get('/:id/descriptions', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), vehicleTypeController.descriptions);
+vehicleTypeRouter.put('/:id/descriptions', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeDescriptionsSchema), vehicleTypeController.setDescriptions);
 vehicleTypeRouter.delete('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), vehicleTypeController.remove);
 
 export default vehicleTypeRouter;

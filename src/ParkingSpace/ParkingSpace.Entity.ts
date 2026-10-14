@@ -1,8 +1,8 @@
-import { Entity, PrimaryKey, Property, ManyToOne, Enum, BeforeCreate, BeforeUpdate } from "@mikro-orm/decorators/legacy";
+import { Entity, PrimaryKey, Property, ManyToOne, Enum } from "@mikro-orm/decorators/legacy";
 import { Rel } from "@mikro-orm/core";
 import crypto from "node:crypto";
 import { Parking } from "../Parking/Parking.Entity.js";
-import { categorizeVehicleType } from "../Shared/utils/vehicleTypes.js";
+import { VehicleType } from "../Vehicle/VehicleType/VehicleType.Entity.js";
 
 export enum SpaceState {
   LIBRE = "LIBRE",
@@ -16,10 +16,11 @@ export class ParkingSpace {
   id: string = crypto.randomUUID();
 
   @Property({ type: 'string' })
-  spaceCode!: string; // Ej: "A-01", "M-05"
+  spaceCode!: string; // Ej: "A-01", "M-05", "UTI-02" (spacePrefix)
 
-  @Property({ type: 'string' })
-  vehicleType!: string; // siempre la categoría: 'AUTO', 'MOTO' o 'CAMIONETA' (ver normalizeVehicleType)
+  // R-30: la plaza admite un tipo de vehículo; un vehículo solo usa las plazas de su tipo.
+  @ManyToOne(() => VehicleType, { eager: true })
+  vehicleType!: Rel<VehicleType>;
 
   @Enum({ items: () => SpaceState, default: SpaceState.LIBRE })
   state: SpaceState = SpaceState.LIBRE;
@@ -29,11 +30,4 @@ export class ParkingSpace {
 
   @ManyToOne(() => Parking)
   parking!: Rel<Parking>;
-
-  // Llegue "Moto", "MOTOCICLETA" o "Camioneta", se guarda la categoría: así todas las plazas usan el mismo texto.
-  @BeforeCreate()
-  @BeforeUpdate()
-  normalizeVehicleType() {
-    this.vehicleType = categorizeVehicleType(this.vehicleType);
-  }
 }

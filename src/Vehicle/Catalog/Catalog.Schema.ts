@@ -11,5 +11,7 @@ export const importCatalogSchema = z.object({
       model: z.string().max(100),
       type: z.string().max(100).default(''),
     })).max(MAX_CATALOG_IMPORT_ITEMS, `Se pueden importar hasta ${MAX_CATALOG_IMPORT_ITEMS} modelos por vez`),
+    // RA-26: tipo elegido en la vista previa para cada descripción nueva del DNRPA (descripción → id del tipo).
+    typeMap: z.record(z.string().max(100), z.string().uuid('Tipo de vehículo inválido')).default({}),
   }),
 });

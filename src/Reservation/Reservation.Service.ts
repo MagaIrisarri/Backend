@@ -104,8 +104,8 @@ export class ReservationService {
   }
 
   // Sin tarifa vigente para el tipo de vehículo no se reserva: no habría con qué cobrar la salida.
-  private async assertRate(parkingId: string, vehicleType: string) {
-    if (!await this.parkingPriceRepo.findActive(parkingId, vehicleType)) {
+  private async assertRate(parkingId: string, vehicleTypeId: string) {
+    if (!await this.parkingPriceRepo.findActive(parkingId, vehicleTypeId)) {
       throw new AppError("La cochera no tiene tarifa para este tipo de vehículo", 409);
     }
   }
@@ -119,7 +119,7 @@ export class ReservationService {
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
   if (vehicle.client.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
-  await this.assertRate(parking.id, vehicle.vehicleType.name);
+  await this.assertRate(parking.id, vehicle.vehicleType.id);
 
   await this.assertSchedule(parking, startTime, endTime);
 
@@ -177,7 +177,7 @@ export class ReservationService {
 
     const model = await this.repo.findModel(data.brandId, data.modelId);
     if (!model) throw new AppError("Marca y modelo no coinciden o no existen", 404);
-    await this.assertRate(parking.id, model.vehicleType.name);
+    await this.assertRate(parking.id, model.vehicleType.id);
 
     const start = new Date();
     start.setSeconds(0, 0);
@@ -418,7 +418,7 @@ export class ReservationService {
 
     const priceRecord = await this.parkingPriceRepo.findForCheckout(
       reservation.parkingSpace.parking.id,
-      reservation.vehicle.vehicleType.name
+      reservation.vehicle.vehicleType.id
     );
 
     if (!priceRecord) {

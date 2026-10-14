@@ -28,14 +28,8 @@ export class Parking {
   @Property({ type: 'string', nullable: false })
   address!: string;
 
-  @Property({ type: 'number', nullable: true })
-  carCapacity?: number;
-
-  @Property({ type: 'number', nullable: true })
-  motorcycleCapacity?: number;
-  
-  @Property({ type: 'number', nullable: true })
-  truckCapacity?: number;
+  // La capacidad de cada tipo es la cantidad de plazas activas de ese tipo (R-30): no se guarda aparte.
+  // shortcut: L-39, las columnas car_capacity, motorcycle_capacity y truck_capacity quedan en la base sin uso, borrarlas con SQL a mano
 
   @Property({ type: 'time' })
   openingTime!: string;

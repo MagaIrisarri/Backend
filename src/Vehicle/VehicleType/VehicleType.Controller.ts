@@ -32,6 +32,19 @@ export class VehicleTypeController {
     res.status(200).json({ message: 'Tipo de vehículo actualizado exitosamente', data: vehicleType });
   });
 
+  descriptions = catchAsync(async (req: Request, res: Response) => {
+    const list = await this.vehicleTypeService.descriptions(req.params.id as string);
+    if (!list) throw new AppError('Tipo de vehículo no encontrado', 404);
+    res.status(200).json({ data: list });
+  });
+
+  // Con dryRun, solo lo que cambiaría (modelos, vehículos y reservas activas que lo impiden).
+  setDescriptions = catchAsync(async (req: Request, res: Response) => {
+    const result = await this.vehicleTypeService.setDescriptions(req.params.id as string, req.body.descriptions, req.body.dryRun);
+    if (!result) throw new AppError('Tipo de vehículo no encontrado', 404);
+    res.status(200).json({ message: req.body.dryRun ? 'Vista previa del cambio' : 'Descripciones asignadas', data: result });
+  });
+
   remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const isDeleted = await this.vehicleTypeService.remove(id);

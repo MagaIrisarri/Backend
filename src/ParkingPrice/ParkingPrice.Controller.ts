@@ -34,9 +34,9 @@ export class ParkingPriceController {
 
   public findActive = catchAsync(async (req: Request, res: Response) => {
     const parkingId = req.params.id as string;
-    const vehicleType = req.params.vehicleType as string;
+    const vehicleTypeId = req.params.vehicleTypeId as string;
 
-    const price = await this.service.findActive(parkingId, vehicleType);
+    const price = await this.service.findActive(parkingId, vehicleTypeId);
 
     if (!price) throw new AppError('No hay tarifa activa vigente para este tipo de vehículo', 404);
     return res.status(200).json({ message: 'Tarifa activa encontrada', data: price });

@@ -19,7 +19,7 @@ const parkingPriceController = new ParkingPriceController(parkingPriceService);
 //  ESTACIONAMIENTO
 ParkingPriceRouter.post('/:id/prices', auth(UserType.DUENO), ownParking((req) => req.params.id), validateSchema(createParkingPriceSchema), parkingPriceController.create);
 ParkingPriceRouter.get('/:id/prices', validateSchema(parkingIdParamSchema), parkingPriceController.findByParking);
-ParkingPriceRouter.get('/:id/prices/active/:vehicleType', validateSchema(activeParkingPriceSchema), parkingPriceController.findActive);
+ParkingPriceRouter.get('/:id/prices/active/:vehicleTypeId', validateSchema(activeParkingPriceSchema), parkingPriceController.findActive);
 
 // TARIFA
 ParkingPriceRouter.get('/prices/:id', validateSchema(parkingPriceIdSchema), parkingPriceController.findOne);

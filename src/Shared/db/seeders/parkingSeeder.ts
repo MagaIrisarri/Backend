@@ -4,8 +4,8 @@ import { ParkingPrice } from '../../../ParkingPrice/ParkingPrice.Entity.js';
 import { ParkingSpace, SpaceState } from '../../../ParkingSpace/ParkingSpace.Entity.js';
 import { User } from '../../../User/User.Entity.js';
 import { OWNER1_EMAIL, OWNER2_EMAIL } from './userSeeder.js';
-import { capacityField } from '../../../ParkingSpace/ParkingSpace.Repository.js';
-import { VEHICLE_CATEGORIES, categorizeVehicleType, type VehicleCategory } from '../../utils/vehicleTypes.js';
+import { VehicleType } from '../../../Vehicle/VehicleType/VehicleType.Entity.js';
+import { VEHICLE_CATEGORIES, spacePrefix, type VehicleCategory } from '../../utils/vehicleTypes.js';
 
 interface ParkingData {
   name:                string;
@@ -21,9 +21,9 @@ interface ParkingData {
   minReservationHours: number;
   maxReservationHours: number;
   reservationMargin:   number;
-  carCapacity:         number;
-  motorcycleCapacity:  number;
-  truckCapacity:       number;
+  carCapacity:         number; // plazas AUTO que se siembran
+  motorcycleCapacity:  number; // plazas MOTO
+  truckCapacity:       number; // plazas CAMIONETA
   owner:               string; // email del dueño (userSeeder)
   imageUrl:            string;
   priceAuto:           number;
@@ -669,30 +669,26 @@ const PARKINGS_DATA: ParkingData[] = [
   },
 ];
 
-// Plazas libres con código correlativo por tipo (A-01, M-01, C-01…), a continuación del último código usado.
-const addSpaces = (em: EntityManager, parking: Parking, type: VehicleCategory, after: number, count: number) => {
-  for (let i = after + 1; i <= after + count; i++) {
-    em.create(ParkingSpace, { parking, spaceCode: `${type[0]}-${String(i).padStart(2, '0')}`, vehicleType: type, state: SpaceState.LIBRE, isActive: true });
+// Plazas libres con código correlativo por tipo (A-01, M-01, C-01…).
+const addSpaces = (em: EntityManager, parking: Parking, type: VehicleType, count: number) => {
+  for (let i = 1; i <= count; i++) {
+    em.create(ParkingSpace, { parking, spaceCode: `${spacePrefix(type.name)}-${String(i).padStart(2, '0')}`, vehicleType: type, state: SpaceState.LIBRE, isActive: true });
   }
 };
 
 // Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan y completa el barrio y la provincia de las que no los tienen.
-// La capacidad de cada tipo es la cantidad de plazas activas (R-18), igual que al dar de alta una sucursal desde la API.
+// Las plazas y tarifas van a los tipos base (R-30), que crea antes seedVehicles. carCapacity, motorcycleCapacity y truckCapacity
+// son solo la cantidad de plazas que se siembran de cada tipo: la capacidad es la cantidad de plazas activas.
 export const seedParkings = async (em: EntityManager, users: Map<string, User>): Promise<void> => {
-  const existing = new Map((await em.find(Parking, {}, { populate: ['parkingSpaces', 'parkingpriceHistory'] })).map((p) => [p.name, p]));
+  const types = new Map((await em.find(VehicleType, { name: [...VEHICLE_CATEGORIES] })).map((t) => [t.name as VehicleCategory, t]));
+  const typeOf = (c: VehicleCategory) => types.get(c)!;
+  const existing = new Map((await em.find(Parking, {}, { populate: ['parkingpriceHistory'] })).map((p) => [p.name, p]));
   for (const pData of PARKINGS_DATA) {
     const found = existing.get(pData.name);
     if (found) {
       // Cocheras sembradas antes de que existiera el barrio: se completa solo si está vacío (no pisa lo que cargó el dueño).
       if (!found.neighborhood) found.neighborhood = pData.neighborhood;
       if (!found.province) found.province = pData.province;
-      // El seeder anterior creaba menos plazas que la capacidad: se completan las que faltan (las dadas de baja ya descontaron capacidad).
-      for (const type of VEHICLE_CATEGORIES) {
-        const ofType = found.parkingSpaces.getItems().filter((s) => categorizeVehicleType(s.vehicleType) === type);
-        const missing = Number(found[capacityField(type)] ?? 0) - ofType.filter((s) => s.isActive !== false).length;
-        const last = Math.max(0, ...ofType.map((s) => parseInt(s.spaceCode.slice(2), 10) || 0));
-        if (missing > 0) addSpaces(em, found, type, last, missing);
-      }
       // Tarifas en $0 que sembraba la versión anterior para tipos sin plazas: la API no las admite (precio > 0).
       em.remove(found.parkingpriceHistory.getItems().filter((p) => Number(p.price) <= 0));
       continue;
@@ -711,9 +707,6 @@ export const seedParkings = async (em: EntityManager, users: Map<string, User>):
       minReservationHours: pData.minReservationHours,
       maxReservationHours: pData.maxReservationHours,
       reservationMargin:   pData.reservationMargin,
-      carCapacity:         pData.carCapacity,
-      motorcycleCapacity:  pData.motorcycleCapacity,
-      truckCapacity:       pData.truckCapacity,
       owner:               users.get(pData.owner)!,
       imageUrl:            pData.imageUrl,
       isActive:            pData.isActive ?? true,
@@ -721,10 +714,10 @@ export const seedParkings = async (em: EntityManager, users: Map<string, User>):
 
     // Una tarifa tiene que ser mayor a 0 (ParkingPrice.Schema): el tipo sin precio queda "Sin tarifa".
     const prices: [VehicleCategory, number][] = [['AUTO', pData.priceAuto], ['MOTO', pData.priceMoto], ['CAMIONETA', pData.priceCamioneta]];
-    for (const [vehicleType, price] of prices) if (price > 0) em.create(ParkingPrice, { parking, vehicleType, price });
+    for (const [category, price] of prices) if (price > 0) em.create(ParkingPrice, { parking, vehicleType: typeOf(category), price });
 
-    addSpaces(em, parking, 'AUTO', 0, pData.carCapacity);
-    addSpaces(em, parking, 'MOTO', 0, pData.motorcycleCapacity);
-    addSpaces(em, parking, 'CAMIONETA', 0, pData.truckCapacity);
+    addSpaces(em, parking, typeOf('AUTO'), pData.carCapacity);
+    addSpaces(em, parking, typeOf('MOTO'), pData.motorcycleCapacity);
+    addSpaces(em, parking, typeOf('CAMIONETA'), pData.truckCapacity);
   }
 };

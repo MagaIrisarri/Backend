@@ -1,8 +1,8 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Model } from './Model.Entity.js';
-import { Repository } from '../../Shared/base.Repository.js';
 
-export class ModelRepository implements Repository<Model> {
+// Solo lectura: los modelos se agregan y reactivan con la importación del catálogo (Catalog.Repository).
+export class ModelRepository {
   constructor(private em: EntityManager) {}
 
   async findAll(brandId?: string): Promise<Model[]> {
@@ -19,32 +19,5 @@ export class ModelRepository implements Repository<Model> {
     return await this.em.findOne(Model, { id: item.id, isActive: true }, {
       populate: ['brand', 'vehicleType'] as any
     });
-  }
-
-  async add(data: any): Promise<Model> {
-    const model = this.em.create(Model, data);
-    await this.em.flush();
-    return model;
-  }
-
-  async update(id: string, data: any): Promise<Model | null> {
-    const model = await this.em.findOne(Model, { id, isActive: true });
-    if (!model) return null;
-
-    if (data.name) model.name = data.name;
-    if (data.brandId) model.brand = data.brandId;
-    if (data.vehicleTypeId) model.vehicleType = data.vehicleTypeId;
-
-    await this.em.flush();
-    return model;
-  }
-
-  async remove(item: { id: string }): Promise<boolean> {
-    const model = await this.em.findOne(Model, { id: item.id, isActive: true });
-    if (!model) return false;
-
-    model.isActive = false;
-    await this.em.flush();
-    return true;
   }
 }

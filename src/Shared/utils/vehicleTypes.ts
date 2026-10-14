@@ -1,14 +1,17 @@
+import { nameKey } from './names.js';
 
 export type VehicleCategory = 'AUTO' | 'MOTO' | 'CAMIONETA';
 
+// Los tipos base: el catálogo del DNRPA les asigna los modelos por nombre (Catalog.Repository).
 export const VEHICLE_CATEGORIES: readonly VehicleCategory[] = ['AUTO', 'MOTO', 'CAMIONETA'] as const;
 
+export const isBaseVehicleType = (name: string) => (VEHICLE_CATEGORIES as readonly string[]).includes(name);
 
 /**
- * Única regla para saber de qué categoría es un tipo de vehículo o de plaza, escrito como sea:
+ * Tipo base que corresponde a una descripción escrita como sea:
  * "Moto", "MOTOCICLETA", "motos" → MOTO; "Camioneta", "Utilitario", "SUV" → CAMIONETA; el resto → AUTO.
- * Las plazas se guardan ya con la categoría (hook de ParkingSpace), pero los tipos de vehículo los carga
- * el administrador con el nombre que quiera, así que para comparar se usa siempre esta función.
+ * Plazas y tarifas ya no la usan (R-30: van por el id del tipo). Queda para dos cosas: asignar un tipo base
+ * a los modelos del CSV del DNRPA y del vehiculos.json, y pasar al tipo los datos guardados como texto (vehicleTypeRefs).
  */
 export function categorizeVehicleType(raw?: string): VehicleCategory {
   const upper = (raw ?? '').trim().toUpperCase();
@@ -17,18 +20,8 @@ export function categorizeVehicleType(raw?: string): VehicleCategory {
   return 'AUTO';
 }
 
-/**
- * Compara dos tipos de vehículo y retorna `true` si pertenecen a la misma categoría.
- */
-export function matchesVehicleType(typeA?: string, typeB?: string): boolean {
-  return categorizeVehicleType(typeA) === categorizeVehicleType(typeB);
-}
-
-export function groupSpacesByVehicleType<T extends { vehicleType?: string, isActive?: boolean }>(spaces: T[]) {
-  const active = spaces.filter((s) => s.isActive);
-  return {
-    auto: active.filter((s) => categorizeVehicleType(s.vehicleType) === 'AUTO'),
-    moto: active.filter((s) => categorizeVehicleType(s.vehicleType) === 'MOTO'),
-    camioneta: active.filter((s) => categorizeVehicleType(s.vehicleType) === 'CAMIONETA'),
-  };
+// Prefijo del código de plaza: A, M y C para los tipos base (A-01, M-01, C-01); los demás, sus tres primeras letras (UTI-01).
+export function spacePrefix(typeName: string): string {
+  if (isBaseVehicleType(typeName)) return typeName[0];
+  return nameKey(typeName).replace(/[^A-Z0-9]/g, '').slice(0, 3) || 'P';
 }

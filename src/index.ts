@@ -3,6 +3,7 @@ import cors from 'cors';
 import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
 import { seedDatabase } from './Shared/db/seeder.js';
+import { migrateVehicleTypeRefs } from './Shared/db/vehicleTypeRefs.js';
 import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
@@ -25,7 +26,6 @@ import servicePriceRouter from './ServicePrice/ServicePrice.Route.js';
 
 import reservationRouter, { reservationService } from './Reservation/Reservation.Route.js';
 import { EXPIRED_RESERVATIONS_CHECK_MINUTES, REMINDER_CHECK_MINUTES } from './Shared/constants/schedule.js';
-import { ParkingSpaceRepository } from './ParkingSpace/ParkingSpace.Repository.js';
 import invoiceRouter from './Invoice/Invoice.Route.js';
 import statsRouter from './Stats/Stats.Route.js';
 import notificationRouter from './Notification/Notification.Route.js';
@@ -80,15 +80,15 @@ app.use(errorHandler);
 // ==========================================
 async function startServer() {
   try {
+    // R-30: antes de sincronizar, plazas y tarifas pasan del tipo en texto al id del tipo de vehículo.
+    const typed = await migrateVehicleTypeRefs();
+    if (typed) console.log(`Plazas y tarifas pasadas al tipo de vehículo: ${typed}`);
     await syncSchema();
     // Antes de la siembra, que ve las reservas activas para elegir plazas libres.
     const unconfirmed = await reservationService.clearConfirmed();
     if (unconfirmed) console.log(`Reservas confirmadas pasadas a pendientes: ${unconfirmed}`);
     await seedDatabase(orm.em.fork());
 
-    // Unifica el tipo de las plazas viejas ('MOTOCICLETA' → 'MOTO', 'Camioneta' → 'CAMIONETA'); las nuevas ya se guardan así.
-    const normalized = await new ParkingSpaceRepository(orm.em).normalizeVehicleTypes();
-    if (normalized) console.log(`Plazas con el tipo unificado: ${normalized}`);
     const coded = await reservationService.fillMissingCodes();
     if (coded) console.log(`Reservas con código asignado: ${coded}`);
 
