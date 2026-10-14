@@ -4,6 +4,8 @@ import { UserController } from './User.Controller.js';
 import { UserService } from './User.Service.js';
 import { UserRepository } from './User.Repository.js';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
+import { auth, self } from '../Shared/middlewares/auth.js';
+import { UserType } from '../Shared/constants/status.js';
 import {
   createPublicUserSchema,
   createEmployeeSchema,
@@ -27,17 +29,17 @@ userRouter.post('/', validateSchema(createPublicUserSchema), userController.crea
 userRouter.post('/login', validateSchema(loginSchema), userController.login);
 
 // --- Empleados (bajo un dueño) ---
-userRouter.get('/:ownerId/employee', validateSchema(ownerIdSchema), userController.findEmployeesByOwner);
-userRouter.post('/:ownerId/employee', validateSchema(ownerIdSchema), validateSchema(createEmployeeSchema), userController.createEmployee);
-userRouter.put('/:ownerId/employee/:id', validateSchema(updateEmployeeSchema), userController.updateEmployee);
-userRouter.post('/:ownerId/employee/:id/reactivate', validateSchema(employeeIdSchema), userController.reactivateEmployee);
-userRouter.delete('/:ownerId/employee/:id', validateSchema(employeeIdSchema), userController.deleteEmployee);
+userRouter.get('/:ownerId/employee', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(ownerIdSchema), userController.findEmployeesByOwner);
+userRouter.post('/:ownerId/employee', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(ownerIdSchema), validateSchema(createEmployeeSchema), userController.createEmployee);
+userRouter.put('/:ownerId/employee/:id', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(updateEmployeeSchema), userController.updateEmployee);
+userRouter.post('/:ownerId/employee/:id/reactivate', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(employeeIdSchema), userController.reactivateEmployee);
+userRouter.delete('/:ownerId/employee/:id', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(employeeIdSchema), userController.deleteEmployee);
 
 // --- CRUD general ---
-userRouter.get('/', validateSchema(listUsersQuerySchema), userController.findAll);
-userRouter.get('/:id', validateSchema(userIdSchema), userController.findById);
-userRouter.put('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
-userRouter.patch('/:id', validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
-userRouter.patch('/:id/password', validateSchema(updatePasswordSchema), userController.updatePassword);
-userRouter.post('/:id/reactivate', validateSchema(userIdSchema), userController.reactivate);
-userRouter.delete('/:id', validateSchema(userIdSchema), userController.delete);
+userRouter.get('/', auth(UserType.ADMINISTRADOR), validateSchema(listUsersQuerySchema), userController.findAll);
+userRouter.get('/:id', auth(), self('id'), validateSchema(userIdSchema), userController.findById);
+userRouter.put('/:id', auth(), self('id'), validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
+userRouter.patch('/:id', auth(), self('id'), validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
+userRouter.patch('/:id/password', auth(), self('id'), validateSchema(updatePasswordSchema), userController.updatePassword);
+userRouter.post('/:id/reactivate', auth(UserType.ADMINISTRADOR), validateSchema(userIdSchema), userController.reactivate);
+userRouter.delete('/:id', auth(), self('id'), validateSchema(userIdSchema), userController.delete);

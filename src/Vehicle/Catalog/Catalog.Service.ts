@@ -2,6 +2,7 @@ import { CatalogRepository, CatalogPlan } from './Catalog.Repository.js';
 import { AppError } from '../../Shared/utils/AppError.js';
 import { UserStatus, UserType } from '../../Shared/constants/status.js';
 import { categorizeVehicleType } from '../../Shared/utils/vehicleTypes.js';
+import { cleanName as clean, nameKey as key } from '../../Shared/utils/names.js';
 
 export interface CatalogItem { brand: string; model: string; type: string }
 
@@ -10,9 +11,6 @@ const MIN_NAME = 2;
 
 // shortcut: L-33, lista fija de palabras de tipos que no son de pasajeros; revisarla si el DNRPA cambia sus descripciones.
 const NOT_PASSENGER = /ACOPLADO|SEMIRREMOLQUE|TRACTOR|CHASIS|OMNIBUS|MIDIBUS|MINIBUS|TRANS\.? ?DE PASAJEROS/;
-
-const clean = (s: string) => s.replace(/\s+/g, ' ').trim();
-const key = (s: string) => clean(s).normalize('NFD').replace(/\p{M}/gu, '').toUpperCase();
 
 export class CatalogService {
   constructor(private repository: CatalogRepository) {}

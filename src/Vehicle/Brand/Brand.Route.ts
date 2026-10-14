@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { validateSchema } from '../../Shared/middlewares/ValidateSchemas.js';
+import { auth } from '../../Shared/middlewares/auth.js';
+import { UserType } from '../../Shared/constants/status.js';
 import { orm } from '../../Shared/db/orm.js'; 
 
 import { BrandController } from './Brand.Controller.js';
@@ -15,9 +17,9 @@ const brandController = new BrandController(brandService);
 
 brandRouter.get('/', brandController.findAll);
 brandRouter.get('/:id', validateSchema(brandIdSchema), brandController.findOne);
-brandRouter.post('/', validateSchema(createBrandSchema), brandController.create);
-brandRouter.put('/:id', validateSchema(brandIdSchema), validateSchema(updateBrandSchema), brandController.update);
-brandRouter.patch('/:id', validateSchema(brandIdSchema), validateSchema(updateBrandSchema), brandController.update);
-brandRouter.delete('/:id', validateSchema(brandIdSchema), brandController.remove);
+brandRouter.post('/', auth(UserType.ADMINISTRADOR), validateSchema(createBrandSchema), brandController.create);
+brandRouter.put('/:id', auth(UserType.ADMINISTRADOR), validateSchema(brandIdSchema), validateSchema(updateBrandSchema), brandController.update);
+brandRouter.patch('/:id', auth(UserType.ADMINISTRADOR), validateSchema(brandIdSchema), validateSchema(updateBrandSchema), brandController.update);
+brandRouter.delete('/:id', auth(UserType.ADMINISTRADOR), validateSchema(brandIdSchema), brandController.remove);
 
 export default brandRouter;

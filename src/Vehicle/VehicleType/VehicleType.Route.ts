@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { validateSchema } from '../../Shared/middlewares/ValidateSchemas.js';
+import { auth } from '../../Shared/middlewares/auth.js';
+import { UserType } from '../../Shared/constants/status.js';
 import { orm } from '../../Shared/db/orm.js'; 
 
 import { VehicleTypeController } from './VehicleType.Controller.js';
@@ -15,9 +17,9 @@ const vehicleTypeController = new VehicleTypeController(vehicleTypeService);
 
 vehicleTypeRouter.get('/', vehicleTypeController.findAll);
 vehicleTypeRouter.get('/:id', validateSchema(vehicleTypeIdSchema), vehicleTypeController.findOne);
-vehicleTypeRouter.post('/', validateSchema(createVehicleTypeSchema), vehicleTypeController.create);
-vehicleTypeRouter.put('/:id', validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
-vehicleTypeRouter.patch('/:id', validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
-vehicleTypeRouter.delete('/:id', validateSchema(vehicleTypeIdSchema), vehicleTypeController.remove);
+vehicleTypeRouter.post('/', auth(UserType.ADMINISTRADOR), validateSchema(createVehicleTypeSchema), vehicleTypeController.create);
+vehicleTypeRouter.put('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
+vehicleTypeRouter.patch('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);
+vehicleTypeRouter.delete('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), vehicleTypeController.remove);
 
 export default vehicleTypeRouter;

@@ -8,6 +8,6 @@ export const EXPIRED_RESERVATIONS_CHECK_MINUTES = 5;
 // Pasada la gracia, la hora extra se cuenta desde el fin reservado, igual que sin gracia.
 export const CHECKOUT_GRACE_MINUTES = 10;
 
-// R-28: con cuántas horas de anticipación se manda el recordatorio por email, y cada cuánto se buscan reservas para recordar.
+// R-28: con cuántas horas de anticipación se manda el recordatorio, y cada cuánto se buscan reservas para recordar.
 export const REMINDER_HOURS_BEFORE = 2;
 export const REMINDER_CHECK_MINUTES = 5;

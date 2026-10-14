@@ -97,7 +97,7 @@ async function startServer() {
     await cancelExpired();
     setInterval(cancelExpired, EXPIRED_RESERVATIONS_CHECK_MINUTES * 60 * 1000);
 
-    // R-28: recordatorio por email antes del inicio de cada reserva.
+    // R-28: recordatorio en la app antes del inicio de cada reserva.
     // shortcut: L-27, tarea en memoria del proceso, pasar a un job o una cola si el backend corre en varias instancias
     const sendReminders = () => reservationService.sendReminders()
       .then(n => { if (n) console.log(`Recordatorios de reserva enviados: ${n}`); })

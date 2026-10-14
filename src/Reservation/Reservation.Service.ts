@@ -2,9 +2,9 @@ import { ReservationRepository } from './Reservation.Repository.js';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { CreateReservationInput, WalkInInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { isStaffOf } from '../Shared/utils/staff.js';
 import { ACTIVE_RESERVATION_STATUSES, NotificationType, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM, isoDate } from '../Shared/utils/dateUtils.js';
-import { sendMail, type SendMail } from '../Shared/utils/mailer.js';
 import { CHECKOUT_GRACE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
@@ -103,6 +103,13 @@ export class ReservationService {
     return reservation;
   }
 
+  // Sin tarifa vigente para el tipo de vehículo no se reserva: no habría con qué cobrar la salida.
+  private async assertRate(parkingId: string, vehicleType: string) {
+    if (!await this.parkingPriceRepo.findActive(parkingId, vehicleType)) {
+      throw new AppError("La cochera no tiene tarifa para este tipo de vehículo", 409);
+    }
+  }
+
   async create(data: CreateReservationInput): Promise<Reservation> {
   const startTime = new Date(data.startTime);
   const endTime = new Date(data.endTime);
@@ -112,6 +119,7 @@ export class ReservationService {
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
   if (vehicle.client.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
+  await this.assertRate(parking.id, vehicle.vehicleType.name);
 
   await this.assertSchedule(parking, startTime, endTime);
 
@@ -169,6 +177,7 @@ export class ReservationService {
 
     const model = await this.repo.findModel(data.brandId, data.modelId);
     if (!model) throw new AppError("Marca y modelo no coinciden o no existen", 404);
+    await this.assertRate(parking.id, model.vehicleType.name);
 
     const start = new Date();
     start.setSeconds(0, 0);
@@ -233,15 +242,12 @@ export class ReservationService {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) return false;
 
-    // Cancela el cliente de la reserva, el administrador o el personal de esa sucursal (misma regla que assertStaffOf).
+    // Cancela el cliente de la reserva, el administrador o el personal de esa sucursal (isStaffOf, como assertStaffOf).
     const user = await this.repo.findActiveUser(userId);
     const parking = reservation.parkingSpace?.parking;
     const isClient = reservation.vehicle?.client?.id === userId;
-    const isOwner = user?.type === UserType.DUENO && parking?.owner?.id === userId;
-    const isAdminOrStaff = user?.type === UserType.ADMINISTRADOR || (user?.type === UserType.EMPLEADO && user.parkingId === parking?.id);
-
-    const canCancelReservation = isClient || isOwner || isAdminOrStaff;
-    if (!canCancelReservation) {
+    const isAdminOrStaff = user?.type === UserType.ADMINISTRADOR || isStaffOf(user, parking);
+    if (!isClient && !isAdminOrStaff) {
       throw new AppError("No tienes permiso para dar de baja esta reserva", 403);
     }
 
@@ -249,7 +255,7 @@ export class ReservationService {
       throw new AppError("No puedes dar de baja una reserva que ya está cancelada o finalizada", 400);
     }
 
-    if (isClient && !isOwner && !isAdminOrStaff) {
+    if (isClient && !isAdminOrStaff) {
       if (reservation.status === ReservationStatus.EN_CURSO) {
         throw new AppError("No puedes dar de baja una reserva que ya está en curso", 400);
       }
@@ -308,27 +314,14 @@ export class ReservationService {
     return await this.repo.setRating(reservation, rating);
   }
 
-  // R-28: recordatorio por email antes del inicio. Si el envío falla queda sin marcar y se reintenta en la próxima vuelta.
-  async sendReminders(now = new Date(), send: SendMail = sendMail): Promise<number> {
+  // R-28: aviso en la app antes del inicio. Si falla queda sin marcar y se reintenta en la próxima vuelta.
+  async sendReminders(now = new Date()): Promise<number> {
     const due = await this.repo.findDueReminders(now, new Date(now.getTime() + REMINDER_HOURS_BEFORE * 60 * 60 * 1000));
     let sent = 0;
     for (const r of due) {
-      const client = r.vehicle?.client, parking = r.parkingSpace?.parking;
-      if (!client?.email || !parking) continue;
+      if (!r.parkingSpace?.parking) continue;
       try {
-        await send({
-          to: client.email,
-          subject: `Recordatorio de tu reserva ${r.code} en ${parking.name}`,
-          text: [
-            `Hola ${client.name}:`,
-            `Te recordamos tu reserva ${r.code} en ${parking.name} (${[parking.address, parking.locality].filter(Boolean).join(', ')}).`,
-            `Día: ${r.startTime.toLocaleDateString('es-AR')}, de ${formatTimeHHMM(r.startTime)} a ${formatTimeHHMM(r.endTime)}.`,
-            `Plaza ${r.parkingSpace.spaceCode} · Vehículo ${r.vehicle.plate}.`,
-            'Si no vas a usarla, cancelala desde Mis reservas.',
-          ].join('\n'),
-        });
         await this.repo.markReminderSent(r.id, now);
-        // shortcut: L-32, el aviso en la app sale con el mail: sin email o con el envío fallando no hay aviso, separarlos si hace falta
         await this.notifyClient(r, NotificationType.RECORDATORIO, 'Recordatorio de tu reserva', `Empieza a las ${formatTimeHHMM(r.startTime)} en la plaza ${r.parkingSpace.spaceCode}`);
         sent++;
       } catch (err) {
@@ -357,10 +350,7 @@ export class ReservationService {
     message = "Solo el personal de esta sucursal puede registrar el ingreso o la salida",
   ): Promise<void> {
     const user = await this.repo.findActiveUser(userId);
-    const parking = reservation.parkingSpace?.parking;
-    const isEmployee = user?.type === UserType.EMPLEADO && user.parkingId === parking?.id;
-    const isOwner = user?.type === UserType.DUENO && parking?.owner?.id === user.id;
-    if (!isEmployee && !isOwner) throw new AppError(message, 403);
+    if (!isStaffOf(user, reservation.parkingSpace?.parking)) throw new AppError(message, 403);
   }
 
   async confirm(id: string, userId: string): Promise<Reservation> {

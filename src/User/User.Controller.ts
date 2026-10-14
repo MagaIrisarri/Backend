@@ -3,6 +3,7 @@ import { UserService } from './User.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { UserStatus } from '../Shared/constants/status.js';
+import { signToken } from '../Shared/middlewares/auth.js';
 
 export class UserController {
   constructor(private userService: UserService) {}
@@ -79,6 +80,6 @@ export class UserController {
   public login = catchAsync(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await this.userService.login(email, password);
-    res.status(200).json({ data: user });
+    res.status(200).json({ data: user, token: signToken(user.id) });
   });
 }

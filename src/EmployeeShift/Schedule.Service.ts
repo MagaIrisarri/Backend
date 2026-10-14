@@ -6,7 +6,7 @@ import { Parking } from '../Parking/Parking.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Holiday } from '../Holiday/Holiday.Entity.js';
-import { HolidayParking } from '../Holiday/HolidayParking.Entity.js';
+import { HolidayAdhesion } from '../Holiday/HolidayAdhesion.Entity.js';
 import { SaveDayInput } from './Schedule.Schema.js';
 import {
   DaySchedule, Range, covers, diffDay, employeeRanges, hhmm, normalizeDay, overlaps, sameDay, toMin, union,
@@ -74,11 +74,11 @@ export class ScheduleService {
     });
   }
 
-  // Orden de lectura: excepción de la fecha, feriado cerrado, semana tipo.
+  // Orden de lectura: excepción de la fecha, feriado adherido (cerrado), semana tipo.
   async resolveDay(parking: Parking, date: string): Promise<ResolvedDay> {
     const base = { parkingId: parking.id, date, editable: this.isEditable(date) };
-    const holiday = await this.repo.findHolidayByDate(date);
-    const open = holiday ? !!(await this.repo.findHolidayParking(holiday.id, parking.id)) : true;
+    const holiday = await this.repo.findHolidayFor(parking, date);
+    const open = holiday ? !(await this.repo.findAdhesion(holiday.id, parking.id)) : true;
     const holidayInfo = holiday ? { id: holiday.id, name: holiday.name, open } : null;
 
     const exception = await this.repo.findException(parking.id, date);
@@ -174,38 +174,29 @@ export class ScheduleService {
     return this.resolveDay(parking, date);
   }
 
-  // R-10: cada sucursal cierra el feriado por defecto; cerrarlo con reservas activas o pendientes se rechaza.
+  // R-10: cada sucursal trabaja el feriado por defecto; se adhiere (cierra) si su dueño lo elige, y no con reservas activas o pendientes.
   async setHolidayOpen(holidayId: string, parkingId: string, open: boolean): Promise<ResolvedDay> {
     const parking = await this.mustParking(parkingId);
     const em = this.repo.em;
-    const holiday = await em.findOne(Holiday, { id: holidayId });
-    if (!holiday) throw new AppError('Feriado no encontrado', 404);
+    const holiday = await em.findOne(Holiday, { id: holidayId, $or: [{ owner: null }, { owner: parking.owner.id }] });
+    if (!holiday) throw new AppError('Feriado no encontrado', 404); // tampoco el propio de otro dueño
     this.assertEditable(holiday.date);
 
-    const link = await this.repo.findHolidayParking(holiday.id, parking.id);
-    if (open && !link) {
-      em.create(HolidayParking, { holiday, parking });
-      await em.flush();
-    } else if (!open && link) {
+    const adhesion = await this.repo.findAdhesion(holiday.id, parking.id);
+    if (!open && !adhesion) {
       const reservations = await this.reservationsOn(parking.id, holiday.date);
       if (reservations.length) {
         throw new AppError('No se puede cerrar el feriado: hay reservas activas o pendientes', 409, this.conflicts(reservations, holiday.date, 'cierre'));
       }
       const exception = await this.repo.findException(parking.id, holiday.date);
       if (exception) em.remove(exception);
-      em.remove(link);
+      em.create(HolidayAdhesion, { holiday, parking });
+      await em.flush();
+    } else if (open && adhesion) {
+      em.remove(adhesion);
       await em.flush();
     }
     return this.resolveDay(parking, holiday.date);
-  }
-
-  // R-10: un feriado nuevo cierra todas las sucursales, así que no se carga si alguna tiene reservas activas o pendientes ese día.
-  async assertNoReservationsOn(date: string): Promise<void> {
-    const start = dayStart(date);
-    const reservations = await this.repo.activeReservations(null, start, new Date(start.getTime() + 24 * 3600_000));
-    if (reservations.length) {
-      throw new AppError('No se puede cargar el feriado: hay reservas activas o pendientes ese día', 409, this.conflicts(reservations, date, 'feriado'));
-    }
   }
 
   // R-01: las horas sin cobertura no admiten reservas. Solo se exige si la sucursal ya tiene turnos cargados.

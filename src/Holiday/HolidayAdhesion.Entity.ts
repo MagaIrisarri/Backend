@@ -5,10 +5,11 @@ import crypto from "node:crypto";
 import { Parking } from '../Parking/Parking.Entity.js';
 import { Holiday } from './Holiday.Entity.js';
 
-// Existe solo si la sucursal abre ese feriado: por defecto cierra (R-10, D-01).
+// Existe solo si la sucursal se adhiere al feriado y cierra ese día: por defecto trabaja (R-10, D-09).
+// Reemplaza a HolidayParking ("abre"), que tenía la semántica invertida; su tabla vieja queda sin uso.
 @Entity()
 @Unique({ properties: ['holiday', 'parking'] })
-export class HolidayParking {
+export class HolidayAdhesion {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 

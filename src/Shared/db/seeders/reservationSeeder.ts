@@ -31,6 +31,10 @@ type Booking = {
 };
 type Client = { email: string; cars: Car[]; bookings: Booking[] };
 
+// Alta de una reserva sembrada: entre 1 minuto y 2 días antes del inicio (o de ahora, si todavía no empezó).
+// Sale del id para que sea estable entre arranques y no repita el orden de inicio.
+const bookedAt = (r: Reservation) => new Date(Math.min(r.startTime.getTime(), Date.now()) - (1 + parseInt(r.id.slice(0, 4), 16) % 2880) * 60_000);
+
 const { FINALIZADA: FIN, CANCELADA: CAN, PENDIENTE: PEN, CONFIRMADA: CON, EN_CURSO: NOW } = ReservationStatus;
 const CENTRAL = 'Estacionamiento Central Plaza', CORDOBA = 'Cochera Peatonal Córdoba', MONUMENTO = 'Parking Monumento';
 
@@ -200,6 +204,9 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
   }
   await em.flush();
 
+  // Reservas sembradas antes de que existiera la columna createdAt.
+  for (const r of await em.find(Reservation, { createdAt: null })) r.createdAt = bookedAt(r);
+
   const pending = CLIENTS.filter(c => clients.has(c.email));
   const withReservations = new Set((await em.find(Reservation, { vehicle: { client: { email: pending.map(c => c.email) } } }, { populate: ['vehicle.client'] }))
     .map(r => r.vehicle.client.email));
@@ -270,6 +277,7 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
         attendedBy: b.status === FIN || b.status === NOW || b.assigned ? attendant : null,
         rating: b.rating ?? null,
       });
+      reservation.createdAt = bookedAt(reservation);
       reservation.services.set(chosen);
       if (b.status === NOW) space.state = SpaceState.OCUPADO;
       if (b.status === FIN) {

@@ -9,14 +9,14 @@ export class HolidayController {
 
   public list = catchAsync(async (req: Request, res: Response) => {
     const { year, parkingId } = req.query as { year?: number; parkingId?: string };
-    return res.status(200).json({ data: await this.service.list(year, parkingId) });
+    return res.status(200).json({ data: await this.service.list(req.user!, year, parkingId) });
   });
 
   public create = catchAsync(async (req: Request, res: Response) =>
-    res.status(201).json({ message: 'Feriado creado', data: await this.service.create(req.body) }));
+    res.status(201).json({ message: 'Feriado creado', data: await this.service.create(req.body, req.user!) }));
 
   public remove = catchAsync(async (req: Request, res: Response) => {
-    if (!(await this.service.remove(req.params.id as string))) throw new AppError('Feriado no encontrado', 404);
+    if (!(await this.service.remove(req.params.id as string, req.user!))) throw new AppError('Feriado no encontrado', 404);
     return res.status(200).json({ message: 'Feriado eliminado' });
   });
 

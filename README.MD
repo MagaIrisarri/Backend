@@ -38,7 +38,6 @@ El servidor toma la configuración de variables de entorno. Todas tienen un valo
 | `DB_NAME` | `parkingdb` | Nombre de la base |
 | `PORT` | `3000` | Puerto de la API |
 | `NODE_ENV` | — | Fuera de `production` se muestran las consultas SQL en consola; con `development` los errores 500 devuelven el detalle |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Envío de mails (recordatorio de reserva). Sin `SMTP_HOST` el mail se escribe en la consola |
 
 Ejemplo en bash:
 
@@ -62,7 +61,7 @@ Compila con TypeScript, levanta la API en `http://localhost:3000` y se reinicia 
 
 1. Sincroniza el esquema de la base (crea tablas y columnas que falten; nunca borra).
 2. Carga los datos de prueba si no están (es seguro reiniciar: no duplica nada).
-3. Inicia los procesos automáticos (cancelación de reservas vencidas y recordatorios por mail).
+3. Inicia los procesos automáticos (cancelación de reservas vencidas y avisos de recordatorio en la app).
 
 Otros scripts:
 
@@ -144,3 +143,9 @@ El sistema soporta 4 roles: `CLIENTE`, `DUEÑO`, `EMPLEADO` y `ADMIN`:
 ### 6. Consistencia de Fechas y Zona Horaria
 
 - El proceso fija la zona horaria en `America/Argentina/Buenos_Aires` (`process.env.TZ`, en `src/Shared/db/orm.ts`) para los cálculos de reservas, precios y turnos. MikroORM guarda y lee los `DATETIME` en UTC. Las columnas `date` del sistema usan `LocalDateType` para guardar el día local; si no, una fecha asignada después de las 21 h quedaría con el día siguiente.
+
+### 7. Autenticación (JWT)
+
+- `POST /api/users/login` devuelve un token firmado con la variable de entorno `JWT_SECRET`, vigente 8 horas. **`JWT_SECRET` es obligatoria con `NODE_ENV=production`**: sin ella el servidor no arranca. Fuera de producción tiene un valor por defecto.
+- El frontend manda el token en `Authorization: Bearer`. Cada ruta protegida exige la sesión y el rol (`auth`), que el id propio en la ruta o el body sea el del token (`self`) y que el recurso sea del usuario (`ownParking`, `ownVehicle`, `ownReservation`, `staffOfInvoice`). Todo está en `src/Shared/middlewares/auth.ts`.
+- Son públicos el registro, el login y lo que muestra el mapa sin sesión (cocheras activas, plazas, disponibilidad, tarifas, servicios y catálogos de vehículos).

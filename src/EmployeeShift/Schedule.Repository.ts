@@ -3,7 +3,7 @@ import { EmployeeShift, DayOfWeek } from './EmployeeShift.Entity.js';
 import { ShiftClosure } from './ShiftClosure.Entity.js';
 import { DayException } from './DayException.Entity.js';
 import { Holiday } from '../Holiday/Holiday.Entity.js';
-import { HolidayParking } from '../Holiday/HolidayParking.Entity.js';
+import { HolidayAdhesion } from '../Holiday/HolidayAdhesion.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { User } from '../User/User.Entity.js';
@@ -24,15 +24,18 @@ export class ScheduleRepository {
   countTemplateShifts(parkingId: string) { return this.em.count(EmployeeShift, { parking: { id: parkingId }, isActive: true }); }
 
   findException(parkingId: string, date: string) { return this.em.findOne(DayException, { parking: { id: parkingId }, date }); }
-  findHolidayByDate(date: string) { return this.em.findOne(Holiday, { date }); }
-  findHolidayParking(holidayId: string, parkingId: string) {
-    return this.em.findOne(HolidayParking, { holiday: { id: holidayId }, parking: { id: parkingId } });
+  // El feriado de la fecha que ve la sucursal: el nacional o uno propio de su dueño (hay a lo sumo uno, R-10).
+  findHolidayFor(parking: Parking, date: string) {
+    return this.em.findOne(Holiday, { date, $or: [{ owner: null }, { owner: parking.owner.id }] });
+  }
+  findAdhesion(holidayId: string, parkingId: string) {
+    return this.em.findOne(HolidayAdhesion, { holiday: { id: holidayId }, parking: { id: parkingId } });
   }
 
-  // Reservas activas (pendientes, confirmadas o en curso) que tocan el día: de una sucursal o, con null, de todas.
-  activeReservations(parkingId: string | null, dayStart: Date, dayEnd: Date) {
+  // Reservas activas (pendientes, confirmadas o en curso) de una sucursal que tocan el día.
+  activeReservations(parkingId: string, dayStart: Date, dayEnd: Date) {
     return this.em.find(Reservation, {
-      ...(parkingId ? { parkingSpace: { parking: { id: parkingId } } } : {}),
+      parkingSpace: { parking: { id: parkingId } },
       status: { $in: [...ACTIVE_RESERVATION_STATUSES] },
       startTime: { $lt: dayEnd },
       endTime: { $gt: dayStart },

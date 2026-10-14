@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
+import { auth } from '../Shared/middlewares/auth.js';
 import { orm } from '../Shared/db/orm.js';
 
 import { NotificationController } from './Notification.Controller.js';
@@ -14,8 +15,8 @@ const notificationRepository = new NotificationRepository(orm.em);
 export const notificationService = new NotificationService(notificationRepository);
 const notificationController = new NotificationController(notificationService);
 
-notificationRouter.get('/', notificationController.list);
-notificationRouter.post('/read-all', notificationController.markAllRead);
-notificationRouter.patch('/:id/read', validateSchema(notificationIdSchema), notificationController.markRead);
+notificationRouter.get('/', auth(), notificationController.list);
+notificationRouter.post('/read-all', auth(), notificationController.markAllRead);
+notificationRouter.patch('/:id/read', auth(), validateSchema(notificationIdSchema), notificationController.markRead);
 
 export default notificationRouter;

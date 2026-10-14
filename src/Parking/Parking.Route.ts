@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { orm } from '../Shared/db/orm.js';
 import { validateSchema } from '../Shared/middlewares/ValidateSchemas.js';
+import { auth, self, ownParking } from '../Shared/middlewares/auth.js';
+import { UserType } from '../Shared/constants/status.js';
 
 import { ParkingController } from './Parking.Controller.js';
 import { ParkingRepository } from './Parking.Repository.js';
@@ -15,15 +17,15 @@ const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
 const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
 const parkingController = new ParkingController(parkingService);
 
-parkingRouter.get('/', validateSchema(listParkingsQuerySchema), parkingController.findAll);
+parkingRouter.get('/', auth(UserType.ADMINISTRADOR), validateSchema(listParkingsQuerySchema), parkingController.findAll);
 parkingRouter.get('/active', parkingController.findActive);
-parkingRouter.get('/:id/metrics', validateSchema(parkingIdSchema), parkingController.getMetrics);
-parkingRouter.post('/:id/reactivate', validateSchema(parkingIdSchema), parkingController.reactivate);
-parkingRouter.get('/owner/:ownerId', validateSchema(parkingIdOwnerSchema), parkingController.findByOwnerId);
+parkingRouter.get('/:id/metrics', auth(UserType.DUENO, UserType.ADMINISTRADOR), ownParking((req) => req.params.id), validateSchema(parkingIdSchema), parkingController.getMetrics);
+parkingRouter.post('/:id/reactivate', auth(UserType.DUENO), ownParking((req) => req.params.id), validateSchema(parkingIdSchema), parkingController.reactivate);
+parkingRouter.get('/owner/:ownerId', auth(UserType.DUENO, UserType.ADMINISTRADOR), self('ownerId'), validateSchema(parkingIdOwnerSchema), parkingController.findByOwnerId);
 parkingRouter.get('/:id', validateSchema(parkingIdSchema), parkingController.findOne);
-parkingRouter.post('/', validateSchema(createParkingSchema), parkingController.create);
-parkingRouter.put('/:id', validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);
-parkingRouter.delete('/:id', validateSchema(parkingIdSchema), parkingController.remove);
+parkingRouter.post('/', auth(UserType.DUENO), self('ownerId'), validateSchema(createParkingSchema), parkingController.create);
+parkingRouter.put('/:id', auth(UserType.DUENO), ownParking((req) => req.params.id), validateSchema(parkingIdSchema), validateSchema(updateParkingSchema), parkingController.update);
+parkingRouter.delete('/:id', auth(UserType.DUENO), ownParking((req) => req.params.id), validateSchema(parkingIdSchema), parkingController.remove);
 
 
 export default parkingRouter;

@@ -1,5 +1,7 @@
 import { EntityManager } from '@mikro-orm/core';
 import { VehicleType } from './VehicleType.Entity.js';
+import { Model } from '../Model/Model.Entity.js';
+import { Vehicle } from '../Vehicle.Entity.js';
 import { Repository } from '../../Shared/base.Repository.js';
 
 export class VehicleTypeRepository implements Repository<VehicleType> {
@@ -35,5 +37,12 @@ export class VehicleTypeRepository implements Repository<VehicleType> {
     vehicleType.isActive = false;
     await this.em.flush();
     return true;
+  }
+
+  // Modelos y vehículos activos de ese tipo: con alguno, el tipo no se da de baja ni cambia de categoría.
+  async usage(id: string): Promise<{ models: number; vehicles: number }> {
+    const models = await this.em.count(Model, { vehicleType: id, isActive: true });
+    const vehicles = await this.em.count(Vehicle, { vehicleType: id, isActive: true });
+    return { models, vehicles };
   }
 }

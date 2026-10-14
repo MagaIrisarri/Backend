@@ -27,7 +27,7 @@ const HOLIDAYS_2026: [string, string][] = [
 // Idempotente: no depende de que la base esté vacía.
 export const seedHolidays = async (em: EntityManager) => {
   for (const [date, name] of HOLIDAYS_2026) {
-    if (!(await em.findOne(Holiday, { date }))) em.create(Holiday, { date, name, origin: 'oficial' });
+    if (!(await em.findOne(Holiday, { date, owner: null }))) em.create(Holiday, { date, name, origin: 'oficial' }); // nacional
   }
   await em.flush();
 };

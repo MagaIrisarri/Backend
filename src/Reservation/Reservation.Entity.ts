@@ -25,7 +25,11 @@ export class Reservation {
   endTime!: Date;
 
   @Property({ type: 'string', default: 'PENDIENTE' })
-  status?: string = 'PENDIENTE'; 
+  status?: string = 'PENDIENTE';
+
+  // Cuándo se hizo la reserva (orden de "Mis reservas"). Nulo solo en las anteriores a la columna, hasta que la siembra las completa.
+  @Property({ type: 'datetime', nullable: true })
+  createdAt?: Date | null = new Date();
 
   @ManyToOne(() => Vehicle, { eager: true })
   vehicle!: Rel<Vehicle>;
@@ -58,7 +62,7 @@ export class Reservation {
   @Property({ type: 'integer', nullable: true })
   rating?: number | null;
 
-  // R-28: cuándo se mandó el recordatorio por email; vacío mientras no se mandó.
+  // R-28: cuándo se mandó el recordatorio; vacío mientras no se mandó.
   @Property({ type: 'datetime', nullable: true })
   reminderSentAt?: Date | null;
 

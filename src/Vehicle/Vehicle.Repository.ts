@@ -45,7 +45,7 @@ export class VehicleRepository implements Repository<Vehicle> {
 
   async findActiveByUserId(userId: string): Promise<Vehicle[]> {
     return await this.em.find(Vehicle, { client: userId as any, isActive: true },
-    { populate: ['brand', 'model', 'vehicleType', 'insurance', 'client']}
+    { populate: ['brand', 'model', 'vehicleType', 'insurance', 'client'], orderBy: { createdAt: 'ASC', plate: 'ASC' } } // en el orden en que se registraron
     );
   }
 
