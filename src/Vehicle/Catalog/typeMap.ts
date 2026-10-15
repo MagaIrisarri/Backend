@@ -3,7 +3,7 @@ import { DnrpaTypeMap } from './DnrpaTypeMap.Entity.js';
 import { Model } from '../Model/Model.Entity.js';
 import { VehicleType } from '../VehicleType/VehicleType.Entity.js';
 import { descKey } from '../../Shared/utils/names.js';
-import { categorizeVehicleType, isBaseVehicleType } from '../../Shared/utils/vehicleTypes.js';
+import { categorizeVehicleType, findBaseType, isBaseVehicleType } from '../../Shared/utils/vehicleTypes.js';
 
 // Tipo sugerido para una descripción del DNRPA que todavía no está en la tabla (RA-26): el tipo creado por el administrador
 // cuyo nombre aparece en la descripción ("Pick-up" en "PICK-UP CABINA DOBLE"; si coinciden varios, el más largo) y,
@@ -13,7 +13,7 @@ export function suggestType(description: string, types: VehicleType[], exceptId?
   const own = types
     .filter((t) => t.isActive !== false && t.id !== exceptId && !isBaseVehicleType(t.name) && descKey(t.name).length >= 3 && key.includes(descKey(t.name)))
     .sort((a, b) => descKey(b.name).length - descKey(a.name).length)[0];
-  return own ?? types.find((t) => t.isActive !== false && t.name === categorizeVehicleType(description));
+  return own ?? findBaseType(types.filter((t) => t.isActive !== false), categorizeVehicleType(description));
 }
 
 // Crea la fila de cada descripción que ya tiene modelos y todavía no está en la tabla, con el tipo que ya tienen

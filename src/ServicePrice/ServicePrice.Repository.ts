@@ -3,9 +3,23 @@ import { ServicePrice } from './ServicePrice.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { ServiceCatalog } from '../ServiceCatalog/ServiceCatalog.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { Reservation } from '../Reservation/Reservation.Entity.js';
+import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+
+// Reservas pendientes o en curso que tienen el servicio: el precio de una sucursal o, con `catalogId`, el servicio en cualquiera.
+// La usan las dos bajas (precio y catálogo) para rechazarlas con 409.
+export function activeReservationsUsing(em: EntityManager, by: { priceId: string } | { catalogId: string }): Promise<Reservation[]> {
+  const services = 'priceId' in by ? { id: by.priceId } : { serviceCatalog: { id: by.catalogId } };
+  return em.find(Reservation, { services, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } },
+    { populate: ['parkingSpace.parking'] as any, orderBy: { startTime: 'ASC' } });
+}
 
 export class ServicePriceRepository implements Repository<ServicePrice> {
   constructor(private em: EntityManager) {}
+
+  activeReservationsUsing(priceId: string): Promise<Reservation[]> {
+    return activeReservationsUsing(this.em, { priceId });
+  }
 
   async findAll(): Promise<ServicePrice[]> {
     return await this.em.find( ServicePrice, {},

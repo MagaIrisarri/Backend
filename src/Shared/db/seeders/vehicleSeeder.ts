@@ -5,7 +5,7 @@ import { VehicleType } from '../../../Vehicle/VehicleType/VehicleType.Entity.js'
 import { Insurance } from '../../../Vehicle/Insurance/Insurance.Entity.js';
 import { Brand } from '../../../Vehicle/Brand/Brand.Entity.js';
 import { Model } from '../../../Vehicle/Model/Model.Entity.js';
-import { VEHICLE_CATEGORIES, categorizeVehicleType, VehicleCategory } from '../../utils/vehicleTypes.js';
+import { VEHICLE_CATEGORIES, categorizeVehicleType, findBaseType, VehicleCategory } from '../../utils/vehicleTypes.js';
 import { nameKey } from '../../utils/names.js';
 import { fillMissingRows } from '../../../Vehicle/Catalog/typeMap.js';
 
@@ -15,7 +15,7 @@ interface VehiculoMarca  { marca: string; modelos: VehiculoModelo[]; }
 export const INSURANCES = ['La Caja Seguros', 'San Cristóbal', 'Sancor Seguros', 'Federación Patronal', 'Zurich Seguros'];
 
 // vehiculos.json no trae motos: sin estos modelos ningún cliente podía cargar una y las plazas de moto no se usaban.
-const MOTOS: [string, string[]][] = [
+export const MOTOS: [string, string[]][] = [
   ['HONDA', ['WAVE 110 S', 'CG 150 TITAN', 'XR 150 L']],
   ['YAMAHA', ['YBR 125', 'FZ 2.0', 'XTZ 125']],
   ['MOTOMEL', ['BLITZ 110', 'SKUA 150']],
@@ -26,8 +26,8 @@ const MOTOS: [string, string[]][] = [
 // Cada modelo guarda su descripción del DNRPA (`tipoOriginal`; las motos, MOTOCICLETA) y la tabla descripción → tipo
 // se completa con el tipo que ya tienen (RA-26). En una base ya sembrada, completa la descripción de los modelos del JSON que no la tienen.
 export const seedVehicles = async (em: EntityManager): Promise<void> => {
-  const types = new Map((await em.find(VehicleType, {})).map(t => [t.name, t]));
-  for (const c of VEHICLE_CATEGORIES) if (!types.has(c)) types.set(c, em.create(VehicleType, { name: c }));
+  const existing = await em.find(VehicleType, {});
+  const types = new Map(VEHICLE_CATEGORIES.map(c => [c, findBaseType(existing, c) ?? em.create(VehicleType, { name: c })]));
   const typeOf = (c: VehicleCategory) => types.get(c)!;
 
   const insurances = new Set((await em.find(Insurance, {})).map(i => i.name));
@@ -59,7 +59,7 @@ export const seedVehicles = async (em: EntityManager): Promise<void> => {
     if (described) console.log(`  → ${described} modelos con la descripción del DNRPA completada.`);
   }
 
-  if (!(await em.count(Model, { vehicleType: { name: 'MOTO' } }))) {
+  if (!(await em.count(Model, { vehicleType: typeOf('MOTO') }))) {
     for (const [b, models] of MOTOS) for (const name of models) em.create(Model, { name, brand: brand(b), vehicleType: typeOf('MOTO'), dnrpaDescription: 'MOTOCICLETA' });
     console.log(`  → ${MOTOS.reduce((a, [, m]) => a + m.length, 0)} modelos de moto.`);
   }

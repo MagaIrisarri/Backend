@@ -3,7 +3,7 @@ import { Brand } from '../Brand/Brand.Entity.js';
 import { Model } from '../Model/Model.Entity.js';
 import { VehicleType } from '../VehicleType/VehicleType.Entity.js';
 import { User } from '../../User/User.Entity.js';
-import { VehicleCategory } from '../../Shared/utils/vehicleTypes.js';
+import { VehicleCategory, findBaseType } from '../../Shared/utils/vehicleTypes.js';
 import { DnrpaTypeMap } from './DnrpaTypeMap.Entity.js';
 import { fillMissingRows } from './typeMap.js';
 
@@ -39,8 +39,9 @@ export class CatalogRepository {
 
   async apply(plan: CatalogPlan): Promise<void> {
     await this.em.transactional(async (em) => {
-      const types = new Map((await em.find(VehicleType, {})).map((t) => [t.name, t]));
-      const base = (c: VehicleCategory) => types.get(c) ?? types.set(c, em.create(VehicleType, { name: c })).get(c)!;
+      const existing = await em.find(VehicleType, {});
+      const types = new Map<VehicleCategory, VehicleType>();
+      const base = (c: VehicleCategory) => types.get(c) ?? types.set(c, findBaseType(existing, c) ?? em.create(VehicleType, { name: c })).get(c)!;
       const typeOf = ({ typeId, category }: TypeChoice) => (typeId ? em.getReference(VehicleType, typeId) : base(category));
 
       for (const r of plan.rowsToCreate) em.create(DnrpaTypeMap, { descriptionKey: r.key, description: r.description, vehicleType: typeOf(r) });

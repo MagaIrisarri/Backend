@@ -2,9 +2,15 @@ import { EntityManager } from '@mikro-orm/core';
 import { Repository } from '../Shared/base.Repository.js';
 import { ServiceCatalog } from './ServiceCatalog.Entity.js';
 import { ServicePrice } from '../ServicePrice/ServicePrice.Entity.js';
+import { activeReservationsUsing } from '../ServicePrice/ServicePrice.Repository.js';
+import { Reservation } from '../Reservation/Reservation.Entity.js';
 
 export class ServiceCatalogRepository implements Repository<ServiceCatalog> {
   constructor(private em: EntityManager) {}
+
+  activeReservationsUsing(catalogId: string): Promise<Reservation[]> {
+    return activeReservationsUsing(this.em, { catalogId });
+  }
 
   async findAll(): Promise<ServiceCatalog[]> {
     return await this.em.find(ServiceCatalog, { isActive: true });

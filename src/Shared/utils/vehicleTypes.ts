@@ -5,7 +5,12 @@ export type VehicleCategory = 'AUTO' | 'MOTO' | 'CAMIONETA';
 // Los tipos base: el catálogo del DNRPA les asigna los modelos por nombre (Catalog.Repository).
 export const VEHICLE_CATEGORIES: readonly VehicleCategory[] = ['AUTO', 'MOTO', 'CAMIONETA'] as const;
 
-export const isBaseVehicleType = (name: string) => (VEHICLE_CATEGORIES as readonly string[]).includes(name);
+// Se comparan con nameKey, como el ABM: "Auto" y "AUTO" son el mismo tipo.
+export const isBaseVehicleType = (name: string) => (VEHICLE_CATEGORIES as readonly string[]).includes(nameKey(name));
+
+// El tipo base ya guardado, escrito como sea. Quien lo busca para asignarlo usa este y no crea otro si existe "Auto" en vez de "AUTO".
+export const findBaseType = <T extends { name: string }>(types: T[], category: VehicleCategory): T | undefined =>
+  types.find((t) => nameKey(t.name) === category);
 
 /**
  * Tipo base que corresponde a una descripción escrita como sea:

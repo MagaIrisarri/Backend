@@ -71,16 +71,32 @@ Otros scripts:
 
 > El frontend tiene que correr en `http://localhost:5173`, que es el origen habilitado por CORS.
 
-## Usuarios de prueba
+## Datos de demostración
 
-Todos con contraseña `password123`:
+Al arrancar, el backend solo carga el catálogo (feriados, tipos de vehículo, seguros, marcas y modelos) y el administrador.
+Los datos de uso salen de la demo, que se carga una vez en la base de siempre (borra los datos que no son de catálogo):
+
+```bash
+pnpm build
+pnpm demo:load --yes
+```
+
+El día de la exposición, poco antes de presentar, se recargan solo las reservas, para que su estado corresponda a esa hora:
+
+```bash
+pnpm demo:reservations --yes
+```
+
+Son 20 dueños, 45 sucursales, 150 empleados, 200 clientes, 250 vehículos y unas 15.000 reservas, de un mes antes a un mes
+después del 23/10/2026. Para regenerar los JSON (`demo/data/`): `pnpm demo:generate`, y después
+volver a cargar todo. Usuarios para mostrar, todos con contraseña `password123`:
 
 | Rol | Email |
 |---|---|
 | Administrador | `admin@cocheras.com` |
-| Dueño | `dueno1@cocheras.com` … `dueno5@cocheras.com` |
-| Empleado | `empleado1@cocheras.com` … `empleado8@cocheras.com` (el 8 está dado de baja) |
-| Cliente | `cliente1@cocheras.com` … `cliente10@cocheras.com` (el 10 está dado de baja) |
+| Dueño | `dueno@cocheras.com` (Laura Benítez: Estacionamiento Central Plaza y Parking Alberdi, en Rosario) |
+| Empleado | `empleado@cocheras.com` (Lucas Ferreyra, Central Plaza, lunes a viernes de 7 a 13) |
+| Cliente | `cliente@cocheras.com` (Sofía Martínez, con auto, moto y camioneta) |
 
 ## Estructura
 

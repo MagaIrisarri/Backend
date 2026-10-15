@@ -1,28 +1,16 @@
 import { EntityManager } from '@mikro-orm/core';
 import { seedUsers } from './seeders/userSeeder.js';
 import { seedVehicles } from './seeders/vehicleSeeder.js';
-import { seedParkings } from './seeders/parkingSeeder.js';
 import { seedHolidays } from './seeders/holidaySeeder.js';
-import { seedStaff } from './seeders/staffSeeder.js';
-import { seedServices } from './seeders/serviceSeeder.js';
-import { seedReservations } from './seeders/reservationSeeder.js';
-import { seedDemo } from './seeders/demoSeeder.js';
 
-// Cada paso es idempotente (por email, nombre, patente o "si todavía no tiene"): corre igual en una base vacía o ya sembrada
-// y solo agrega lo que falta. Va en una transacción: si un paso falla, no queda una siembra a medias.
+// Solo el catálogo, para que una base vacía funcione: feriados nacionales, tipos de vehículo, seguros, marcas, modelos y el
+// administrador. Los datos de uso (dueños, cocheras, reservas…) salen de la demo: pnpm demo:load (src/Shared/db/demo).
+// Cada paso es idempotente y van en una transacción: corre igual en una base vacía o ya cargada y solo agrega lo que falta.
 export const seedDatabase = async (em: EntityManager) => {
   await em.transactional(async (tx) => {
     await seedHolidays(tx);
-    const users = await seedUsers(tx);
+    await seedUsers(tx);
     await seedVehicles(tx);
-    await seedParkings(tx, users);
-    await tx.flush();
-    await seedStaff(tx, users);
-    await seedServices(tx);
-    await tx.flush();
-    await seedReservations(tx);
-    await tx.flush();
-    await seedDemo(tx);
   });
-  console.log('✅ Datos de prueba al día.');
+  console.log('✅ Catálogo al día.');
 };

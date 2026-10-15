@@ -1,0 +1,3267 @@
+[
+  {
+    "name": "Estacionamiento Central Plaza",
+    "owner": "dueno@cocheras.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Centro",
+    "postalCode": "2000",
+    "address": "San Martín 750",
+    "latitude": -32.9472,
+    "longitude": -60.6385,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 30,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [
+      "A-30"
+    ],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1900,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 2150,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2650,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3000,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5300
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10300
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1650
+      }
+    ],
+    "closedOn": [],
+    "exceptions": [
+      {
+        "day": 12,
+        "shifts": [
+          {
+            "employee": "empleado@cocheras.com",
+            "from": "08:00",
+            "to": "20:00"
+          }
+        ],
+        "closures": [
+          {
+            "from": "13:00",
+            "to": "14:00"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Parking Alberdi",
+    "owner": "dueno@cocheras.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Alberdi",
+    "postalCode": "2000",
+    "address": "Tucumán 181",
+    "latitude": -32.904361,
+    "longitude": -60.689602,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 44,
+      "MOTO": 9,
+      "CAMIONETA": 6
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1900,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "AUTO",
+        "price": 2150,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2650,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3000,
+        "from": -17,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Control de neumáticos",
+        "price": 1450
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5250
+      },
+      {
+        "name": "Carga de batería",
+        "price": 3850
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Pichincha",
+    "owner": "gustavo_paz@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Pichincha",
+    "postalCode": "2000",
+    "address": "Bv. Oroño 1180",
+    "latitude": -32.9381,
+    "longitude": -60.6498,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 30,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 2200,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3100,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5000
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10450
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1550
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cocheras Paz",
+    "owner": "gustavo_paz@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Fisherton",
+    "postalCode": "2000",
+    "address": "España 1429",
+    "latitude": -32.925561,
+    "longitude": -60.731499,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 28,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2100,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "AUTO",
+        "price": 2400,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "MOTO",
+        "price": 1100,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2950,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3350,
+        "from": -20,
+        "to": null
+      }
+    ],
+    "services": [],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Mendoza",
+    "owner": "ivanramos65@outlook.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Fisherton",
+    "postalCode": "2000",
+    "address": "Mendoza 1697",
+    "latitude": -32.925918,
+    "longitude": -60.731776,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 22,
+      "MOTO": 4,
+      "CAMIONETA": 3
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 2300,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1050,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2800,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3200,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 2750
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1400
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Corrientes",
+    "owner": "agustin.vera@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Abasto",
+    "postalCode": "2000",
+    "address": "Corrientes 1624",
+    "latitude": -32.95636,
+    "longitude": -60.644719,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 36,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1700,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2400,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5300
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 3050
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1600
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Barrio Martin",
+    "owner": "agustin.vera@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Barrio Martin",
+    "postalCode": "2000",
+    "address": "Corrientes 861",
+    "latitude": -32.953559,
+    "longitude": -60.627293,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 60,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 34,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 2200,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3100,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Control de neumáticos",
+        "price": 1500
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Garage San Lorenzo 2071",
+    "owner": "santiagosanchez@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Centro",
+    "postalCode": "2000",
+    "address": "San Lorenzo 2071",
+    "latitude": -32.943172,
+    "longitude": -60.638588,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 31,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1900,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 2150,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2650,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3000,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 9150
+      }
+    ],
+    "closedOn": [
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Garage Entre Ríos 1640",
+    "owner": "santiagosanchez@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Lourdes",
+    "postalCode": "2000",
+    "address": "Entre Ríos 1640",
+    "latitude": -32.950485,
+    "longitude": -60.668783,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 28,
+      "MOTO": 5,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1850,
+        "from": -150,
+        "to": -16
+      },
+      {
+        "type": "AUTO",
+        "price": 2100,
+        "from": -16,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -16
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -16,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 3050
+      },
+      {
+        "name": "Carga de batería",
+        "price": 4100
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Pellegrini",
+    "owner": "santiagosanchez@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Alberdi",
+    "postalCode": "2000",
+    "address": "Pellegrini 95",
+    "latitude": -32.89983,
+    "longitude": -60.689997,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 36,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -17,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 3100
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5550
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Pichincha",
+    "owner": "santiagosanchez@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Pichincha",
+    "postalCode": "2000",
+    "address": "Rioja 514",
+    "latitude": -32.940364,
+    "longitude": -60.652392,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 30,
+    "isActive": false,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 40,
+      "MOTO": 7,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1850,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "AUTO",
+        "price": 2100,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -20,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 3650
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 2900
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Echesortu",
+    "owner": "pabloferreyra@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Echesortu",
+    "postalCode": "2000",
+    "address": "Av. Alberdi 2230",
+    "latitude": -32.951455,
+    "longitude": -60.669449,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 14,
+      "MOTO": 2,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 2300,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 1050,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5350
+      },
+      {
+        "name": "Carga de batería",
+        "price": 4150
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10300
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Centro",
+    "owner": "pabloferreyra@gmail.com",
+    "province": "Santa Fe",
+    "locality": "Rosario",
+    "neighborhood": "Centro",
+    "postalCode": "2000",
+    "address": "Tucumán 1503",
+    "latitude": -32.950047,
+    "longitude": -60.636797,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 12,
+      "MOTO": 2,
+      "CAMIONETA": 2
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 6050
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10100
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 3000
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Nueva Córdoba",
+    "owner": "mariana_medina@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Nueva Córdoba",
+    "postalCode": "5000",
+    "address": "Obispo Trejo 850",
+    "latitude": -31.4278,
+    "longitude": -64.1868,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 30,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 2200,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3100,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5000
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10700
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1500
+      }
+    ],
+    "closedOn": [
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Alberdi",
+    "owner": "mariana_medina@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Alberdi",
+    "postalCode": "5000",
+    "address": "Belgrano 925",
+    "latitude": -31.412247,
+    "longitude": -64.196127,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 37,
+      "MOTO": 8,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 10800
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1500
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5300
+      }
+    ],
+    "closedOn": [
+      -11,
+      14
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Garage Independencia 2358",
+    "owner": "pablo_perez@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "General Paz",
+    "postalCode": "5004",
+    "address": "Independencia 2358",
+    "latitude": -31.41139,
+    "longitude": -64.165458,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 38,
+      "MOTO": 8,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1700,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2400,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -17,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 3000
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1550
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5750
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Rondeau",
+    "owner": "pablo_perez@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Centro",
+    "postalCode": "5000",
+    "address": "Rondeau 364",
+    "latitude": -31.419394,
+    "longitude": -64.185964,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 28,
+      "MOTO": 5,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 2300,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 1050,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cocheras Pérez",
+    "owner": "pablo_perez@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Alberdi",
+    "postalCode": "5000",
+    "address": "Av. Colón 687",
+    "latitude": -31.411892,
+    "longitude": -64.200474,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 29,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 2200,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3100,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 3750
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Garage Tucumán 2340",
+    "owner": "pablo_perez@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Alberdi",
+    "postalCode": "5000",
+    "address": "Tucumán 2340",
+    "latitude": -31.408697,
+    "longitude": -64.198886,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 26,
+      "MOTO": 5,
+      "CAMIONETA": 3
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5500
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Cerro de las Rosas",
+    "owner": "veronicarojas59@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Cerro de las Rosas",
+    "postalCode": "5009",
+    "address": "Av. Hipólito Yrigoyen 364",
+    "latitude": -31.370033,
+    "longitude": -64.232479,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 45,
+      "MOTO": 8,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1650,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 1900,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 750,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 3150
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5100
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento San Juan",
+    "owner": "veronicarojas59@gmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Barrio Jardín",
+    "postalCode": "5016",
+    "address": "Bv. San Juan 1791",
+    "latitude": -31.449834,
+    "longitude": -64.181519,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 38,
+      "MOTO": 8,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1750,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2450,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2800,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 10300
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 3250
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5050
+      }
+    ],
+    "closedOn": [
+      -11,
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Rafael Núñez",
+    "owner": "celeste.galli5@outlook.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Cerro de las Rosas",
+    "postalCode": "5009",
+    "address": "Av. Rafael Núñez 1503",
+    "latitude": -31.368998,
+    "longitude": -64.233287,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 33,
+      "MOTO": 6,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1600,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 1800,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 700,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5550
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 3200
+      },
+      {
+        "name": "Carga de batería",
+        "price": 3600
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Garage Rafael Núñez 972",
+    "owner": "celeste.galli5@outlook.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Cerro de las Rosas",
+    "postalCode": "5009",
+    "address": "Av. Rafael Núñez 972",
+    "latitude": -31.368851,
+    "longitude": -64.228962,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 37,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -16
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -16,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -16
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -16,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -16
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -16,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 2750
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1450
+      },
+      {
+        "name": "Carga de batería",
+        "price": 4150
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cocheras Galli",
+    "owner": "celeste.galli5@outlook.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Alta Córdoba",
+    "postalCode": "5001",
+    "address": "Bv. San Juan 1696",
+    "latitude": -31.391254,
+    "longitude": -64.184015,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 60,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 22,
+      "MOTO": 5,
+      "CAMIONETA": 3
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3150,
+        "from": -17,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5000
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Ituzaingó",
+    "owner": "victoria.sanchez@hotmail.com",
+    "province": "Córdoba",
+    "locality": "Córdoba",
+    "neighborhood": "Nueva Córdoba",
+    "postalCode": "5000",
+    "address": "Ituzaingó 133",
+    "latitude": -31.428759,
+    "longitude": -64.186021,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 17,
+      "MOTO": 3,
+      "CAMIONETA": 2
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2000,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 2250,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 1000,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5350
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 2950
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Palermo Soho",
+    "owner": "carolina_cardozo@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Palermo",
+    "postalCode": "1425",
+    "address": "Gorriti 4850",
+    "latitude": -34.5875,
+    "longitude": -58.431,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 30,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3300,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 3750,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1500,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 1700,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4600,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 5250,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 8150
+      },
+      {
+        "name": "Lavado completo",
+        "price": 14350
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 2100
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Villa Crespo",
+    "owner": "carolina_cardozo@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Villa Crespo",
+    "postalCode": "1414",
+    "address": "Av. Corrientes 176",
+    "latitude": -34.597562,
+    "longitude": -58.435221,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 60,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 20,
+      "MOTO": 4,
+      "CAMIONETA": 3
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3100,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 3550,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1400,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 1600,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4350,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4950,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 4350
+      },
+      {
+        "name": "Lavado completo",
+        "price": 14050
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Las Heras",
+    "owner": "carolina_cardozo@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "San Telmo",
+    "postalCode": "1103",
+    "address": "Av. Las Heras 1528",
+    "latitude": -34.62488,
+    "longitude": -58.370211,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 27,
+      "MOTO": 5,
+      "CAMIONETA": 4
+    },
+    "maintenance": [
+      "A-27"
+    ],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3150,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 3600,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1400,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 1600,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4450,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 5050,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 5000
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 8050
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 4200
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cocheras Cardozo",
+    "owner": "carolina_cardozo@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Recoleta",
+    "postalCode": "1113",
+    "address": "Av. Callao 2422",
+    "latitude": -34.58784,
+    "longitude": -58.39569,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 29,
+      "MOTO": 5,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3150,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "AUTO",
+        "price": 3600,
+        "from": -17,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1400,
+        "from": -150,
+        "to": -17
+      },
+      {
+        "type": "MOTO",
+        "price": 1600,
+        "from": -17,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 4850
+      },
+      {
+        "name": "Lavado completo",
+        "price": 13950
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Recoleta",
+    "owner": "brunoromano12@outlook.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Recoleta",
+    "postalCode": "1113",
+    "address": "Thames 1842",
+    "latitude": -34.590074,
+    "longitude": -58.400853,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 25,
+      "MOTO": 5,
+      "CAMIONETA": 3
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3100,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 3550,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1400,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1600,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4350,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4950,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Lavalle",
+    "owner": "brunoromano12@outlook.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Recoleta",
+    "postalCode": "1113",
+    "address": "Lavalle 2194",
+    "latitude": -34.586641,
+    "longitude": -58.400792,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 60,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 34,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2750,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 3100,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1250,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 1400,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3850,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4350,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 4850
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 2050
+      },
+      {
+        "name": "Lavado completo",
+        "price": 13450
+      }
+    ],
+    "closedOn": [
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Villa Crespo",
+    "owner": "mateo.rojas36@hotmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Villa Crespo",
+    "postalCode": "1414",
+    "address": "Av. Santa Fe 2055",
+    "latitude": -34.600443,
+    "longitude": -58.434223,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 27,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3050,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 3450,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1350,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 1550,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4250,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4850,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 13200
+      },
+      {
+        "name": "Carga de batería",
+        "price": 4850
+      }
+    ],
+    "closedOn": [
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Parking San Telmo",
+    "owner": "mateo.rojas36@hotmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "San Telmo",
+    "postalCode": "1103",
+    "address": "Av. Pueyrredón 435",
+    "latitude": -34.620449,
+    "longitude": -58.375093,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 33,
+      "MOTO": 7,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2900,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "AUTO",
+        "price": 3300,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1300,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "MOTO",
+        "price": 1500,
+        "from": -15,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4050,
+        "from": -150,
+        "to": -15
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4600,
+        "from": -15,
+        "to": null
+      }
+    ],
+    "services": [],
+    "closedOn": [
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Palermo",
+    "owner": "paula.lombardi@outlook.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Palermo",
+    "postalCode": "1425",
+    "address": "Av. Juramento 414",
+    "latitude": -34.589548,
+    "longitude": -58.430654,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 27,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2950,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 3350,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1300,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 1500,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4150,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4700,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 14050
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 7350
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 2300
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Belgrano",
+    "owner": "paula.lombardi@outlook.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Belgrano",
+    "postalCode": "1428",
+    "address": "Av. Callao 699",
+    "latitude": -34.558823,
+    "longitude": -58.458961,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 10,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 19,
+      "MOTO": 3,
+      "CAMIONETA": 0
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 2800,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 3200,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1300,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 1450,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Control de neumáticos",
+        "price": 2000
+      },
+      {
+        "name": "Lavado completo",
+        "price": 14750
+      },
+      {
+        "name": "Carga de batería",
+        "price": 5450
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Juncal",
+    "owner": "martinmorales4@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Villa Crespo",
+    "postalCode": "1414",
+    "address": "Juncal 1449",
+    "latitude": -34.598719,
+    "longitude": -58.438003,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 60,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 40,
+      "MOTO": 8,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3200,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "AUTO",
+        "price": 3650,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1450,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "MOTO",
+        "price": 1650,
+        "from": -19,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4500,
+        "from": -150,
+        "to": -19
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 5100,
+        "from": -19,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 14100
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Pueyrredón",
+    "owner": "martinmorales4@gmail.com",
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "locality": "Ciudad de Buenos Aires",
+    "neighborhood": "Recoleta",
+    "postalCode": "1113",
+    "address": "Av. Pueyrredón 2215",
+    "latitude": -34.590713,
+    "longitude": -58.399415,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 18,
+      "MOTO": 4,
+      "CAMIONETA": 2
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 3200,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 3650,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 1450,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 1650,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 4500,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 5100,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Control de neumáticos",
+        "price": 2250
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Peatonal Sarmiento",
+    "owner": "ivan_correa62@hotmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Centro",
+    "postalCode": "5500",
+    "address": "Sarmiento 250",
+    "latitude": -32.8895,
+    "longitude": -68.842,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 30,
+      "MOTO": 6,
+      "CAMIONETA": 4
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1900,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 2150,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 950,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2650,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 3000,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5800
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10200
+      },
+      {
+        "name": "Control de neumáticos",
+        "price": 1550
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento 9 de Julio",
+    "owner": "ivan_correa62@hotmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Centro",
+    "postalCode": "5500",
+    "address": "9 de Julio 2007",
+    "latitude": -32.890481,
+    "longitude": -68.848618,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 45,
+    "isActive": false,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 36,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1700,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "AUTO",
+        "price": 1950,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -22,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2400,
+        "from": -150,
+        "to": -22
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2750,
+        "from": -22,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Aspirado interior",
+        "price": 2900
+      },
+      {
+        "name": "Lavado completo",
+        "price": 9600
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Garage Colón 369",
+    "owner": "marcelo.munoz11@outlook.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Centro",
+    "postalCode": "5500",
+    "address": "Av. Colón 369",
+    "latitude": -32.890541,
+    "longitude": -68.845571,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 39,
+      "MOTO": 8,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1500,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 1700,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 650,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 750,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2100,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2400,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 3550
+      },
+      {
+        "name": "Lavado completo",
+        "price": 10050
+      }
+    ],
+    "closedOn": [
+      -11
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Barrio Bombal",
+    "owner": "delfina_gonzalez@gmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Barrio Bombal",
+    "postalCode": "5501",
+    "address": "Necochea 346",
+    "latitude": -32.894759,
+    "longitude": -68.843739,
+    "openingTime": "08:00",
+    "closingTime": "22:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 42,
+      "MOTO": 9,
+      "CAMIONETA": 6
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1550,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "AUTO",
+        "price": 1750,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 700,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2150,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2450,
+        "from": -20,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 10400
+      }
+    ],
+    "closedOn": [
+      -11,
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Parking Cuarta Sección",
+    "owner": "delfina_gonzalez@gmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Cuarta Sección",
+    "postalCode": "5500",
+    "address": "9 de Julio 571",
+    "latitude": -32.879478,
+    "longitude": -68.841208,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 34,
+      "MOTO": 7,
+      "CAMIONETA": 5
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1600,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 1800,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 700,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2200,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2500,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado completo",
+        "price": 9350
+      },
+      {
+        "name": "Lavado exterior",
+        "price": 5850
+      },
+      {
+        "name": "Aspirado interior",
+        "price": 2950
+      }
+    ],
+    "closedOn": [
+      -11,
+      31
+    ],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Centro",
+    "owner": "delfina_gonzalez@gmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Centro",
+    "postalCode": "5500",
+    "address": "Av. Colón 2137",
+    "latitude": -32.887817,
+    "longitude": -68.847086,
+    "openingTime": "07:00",
+    "closingTime": "23:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 12,
+    "reservationMargin": 45,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 24,
+      "MOTO": 5,
+      "CAMIONETA": 3
+    },
+    "maintenance": [
+      "A-24"
+    ],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1650,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "AUTO",
+        "price": 1850,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 750,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "MOTO",
+        "price": 850,
+        "from": -21,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2300,
+        "from": -150,
+        "to": -21
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2600,
+        "from": -21,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Carga de batería",
+        "price": 3850
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Cochera Quinta Sección",
+    "owner": "delfina_gonzalez@gmail.com",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Quinta Sección",
+    "postalCode": "5500",
+    "address": "Belgrano 1568",
+    "latitude": -32.895353,
+    "longitude": -68.85993,
+    "openingTime": "08:00",
+    "closingTime": "20:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 15,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 36,
+      "MOTO": 6,
+      "CAMIONETA": 0
+    },
+    "maintenance": [
+      "A-36"
+    ],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1600,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "AUTO",
+        "price": 1800,
+        "from": -20,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 700,
+        "from": -150,
+        "to": -20
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -20,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5400
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  },
+  {
+    "name": "Estacionamiento Belgrano",
+    "owner": "silvina.silva70@yahoo.com.ar",
+    "province": "Mendoza",
+    "locality": "Mendoza",
+    "neighborhood": "Sexta Sección",
+    "postalCode": "5500",
+    "address": "Belgrano 70",
+    "latitude": -32.886,
+    "longitude": -68.857162,
+    "openingTime": "07:00",
+    "closingTime": "21:00",
+    "minReservationHours": 1,
+    "maxReservationHours": 8,
+    "reservationMargin": 30,
+    "isActive": true,
+    "imageUrl": "https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80",
+    "spaces": {
+      "AUTO": 41,
+      "MOTO": 8,
+      "CAMIONETA": 6
+    },
+    "maintenance": [],
+    "prices": [
+      {
+        "type": "AUTO",
+        "price": 1800,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "AUTO",
+        "price": 2050,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "MOTO",
+        "price": 800,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "MOTO",
+        "price": 900,
+        "from": -18,
+        "to": null
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2500,
+        "from": -150,
+        "to": -18
+      },
+      {
+        "type": "CAMIONETA",
+        "price": 2850,
+        "from": -18,
+        "to": null
+      }
+    ],
+    "services": [
+      {
+        "name": "Lavado exterior",
+        "price": 5300
+      }
+    ],
+    "closedOn": [],
+    "exceptions": []
+  }
+]
