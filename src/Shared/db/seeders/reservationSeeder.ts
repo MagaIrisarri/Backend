@@ -252,7 +252,7 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
       }
       if (!start) { skipped++; continue; }
       const end = new Date(start.getTime() + b.hours * H);
-      const margin = Number(parking.reservationMargin ?? 0) * H;
+      const margin = Number(parking.reservationMargin ?? 0) * 60_000;
       if (busy(vehicle.id, start.getTime(), end.getTime())) { skipped++; continue; }
 
       // Plaza: para las activas, la regla de la API (ve las reservas que ya había en la base); además, sin choque con lo sembrado.

@@ -5,7 +5,7 @@ import { AppError } from '../Shared/utils/AppError.js';
 import { isStaffOf } from '../Shared/utils/staff.js';
 import { ACTIVE_RESERVATION_STATUSES, NotificationType, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM, isoDate } from '../Shared/utils/dateUtils.js';
-import { CHECKOUT_GRACE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
+import { ARRIVAL_TOLERANCE_MINUTES, CHECKOUT_GRACE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
@@ -20,6 +20,9 @@ import argon2 from 'argon2';
 import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
 
 const MS_PER_HOUR = 1000 * 60 * 60;
+const ARRIVAL_TOLERANCE_MS = ARRIVAL_TOLERANCE_MINUTES * 60 * 1000;
+// R-17: una pendiente sin ingreso vence pasada la tolerancia de llegada.
+const arrivalDeadline = (r: Reservation) => r.startTime.getTime() + ARRIVAL_TOLERANCE_MS;
 
 export class ReservationService {
   constructor(
@@ -290,8 +293,8 @@ export class ReservationService {
     if (!(ACTIVE_RESERVATION_STATUSES as readonly string[]).includes(reservation.status ?? '')) {
       throw new AppError("Solo se cambia la plaza de una reserva pendiente o en curso", 400);
     }
-    // Una reserva sin ingreso cuyo horario terminó se cancela sola (R-17); hasta que corra esa tarea, no se mueve.
-    if (reservation.status !== ReservationStatus.EN_CURSO && reservation.endTime.getTime() <= Date.now()) {
+    // Una reserva sin ingreso pasada la tolerancia de llegada se cancela sola (R-17); hasta que corra esa tarea, no se mueve.
+    if (reservation.status !== ReservationStatus.EN_CURSO && arrivalDeadline(reservation) <= Date.now()) {
       throw new AppError("La reserva ya venció: no se puede cambiar la plaza", 400);
     }
     if (reservation.parkingSpace?.id === parkingSpaceId) {
@@ -340,9 +343,9 @@ export class ReservationService {
   }
 
   async cancelExpired(): Promise<number> {
-    const expired = await this.repo.cancelExpired(new Date());
+    const expired = await this.repo.cancelExpired(new Date(Date.now() - ARRIVAL_TOLERANCE_MS));
     for (const r of expired) {
-      await this.notifyClient(r, NotificationType.RESERVA_VENCIDA, 'Reserva vencida', `Se canceló porque pasó su horario (${formatTimeHHMM(r.endTime)}) sin registrar el ingreso`);
+      await this.notifyClient(r, NotificationType.RESERVA_VENCIDA, 'Reserva vencida', `Se canceló porque no se registró el ingreso hasta ${ARRIVAL_TOLERANCE_MINUTES} min después del inicio (${formatTimeHHMM(r.startTime)})`);
     }
     return expired.length;
   }
@@ -366,13 +369,15 @@ export class ReservationService {
       throw new AppError("La reserva no se encuentra en estado válido para Check-in", 400);
     }
 
-    // El ingreso solo se registra dentro del horario reservado (R-13, R-16): después del fin el cobro iría
-    // desde un inicio muy anterior, y antes del inicio la plaza puede seguir asignada a otra reserva.
-    if (reservation.endTime.getTime() <= Date.now()) {
-      throw new AppError("La reserva ya venció: no se puede registrar el ingreso", 400);
+    // El ingreso se registra con la tolerancia de llegada alrededor del inicio (R-13, R-16, R-17). Antes, solo dentro del margen
+    // de la sucursal, que es lo que deja la plaza libre (con margen 0, desde el inicio); el cobro cuenta igual desde el inicio.
+    if (arrivalDeadline(reservation) <= Date.now()) {
+      throw new AppError(`La reserva ya venció: el ingreso se registra hasta ${ARRIVAL_TOLERANCE_MINUTES} min después del inicio`, 400);
     }
-    if (reservation.startTime.getTime() > Date.now()) {
-      throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde ese horario`, 400);
+    const early = Math.min(ARRIVAL_TOLERANCE_MS, Number(reservation.parkingSpace.parking.reservationMargin ?? 0) * 60 * 1000);
+    const opensAt = new Date(reservation.startTime.getTime() - early);
+    if (opensAt.getTime() > Date.now()) {
+      throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde las ${formatTimeHHMM(opensAt)}`, 400);
     }
     await this.assertNotInsideElsewhere(reservation.vehicle.plate, reservation.vehicle.id, id);
     // R-21: si el cliente anterior de la plaza se quedó de más, su vehículo sigue adentro: la reserva pasa a la primera

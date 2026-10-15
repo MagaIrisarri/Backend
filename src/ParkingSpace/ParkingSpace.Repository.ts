@@ -13,7 +13,7 @@ export interface Relocation {
 }
 
 type Interval = [number, number];
-const HOUR_MS = 60 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
 const overlaps = (list: Interval[] = [], from: number, to: number) => list.some(([a, b]) => a < to && b > from);
 
 // Horarios tomados en cada plaza por reservas activas. Un vehículo adentro que se pasó de hora la ocupa al menos hasta ahora (R-21).
@@ -52,7 +52,7 @@ export async function findFreeSpaces(
   em: EntityManager, parking: { id: string; reservationMargin: number }, vehicleTypeId: string,
   start: Date, end: Date, exceptReservationId?: string,
 ): Promise<ParkingSpace[]> {
-  const margin = Number(parking.reservationMargin ?? 0) * HOUR_MS;
+  const margin = Number(parking.reservationMargin ?? 0) * MINUTE_MS;
   const from = start.getTime() - margin, to = end.getTime() + margin;
   const spaces = await candidates(em, parking.id, vehicleTypeId);
   const busy = await busyIntervals(em, spaces.map((s) => s.id), exceptReservationId);
@@ -116,7 +116,7 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
     if (!reservations.length) return [];
 
     const spaces = await candidates(tx, space.parking.id, space.vehicleType.id, space.id);
-    const margin = Number(space.parking.reservationMargin ?? 0) * HOUR_MS;
+    const margin = Number(space.parking.reservationMargin ?? 0) * MINUTE_MS;
     const busy = await busyIntervals(tx, spaces.map(c => c.id));
 
     return reservations.map(reservation => {

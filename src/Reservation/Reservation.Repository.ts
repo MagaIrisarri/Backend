@@ -99,13 +99,13 @@ export class ReservationRepository implements Repository<Reservation> {
     return reservation;
   }
 
-  // R-17: pendientes cuyo horario terminó sin ingreso. No tienen factura ni ocupan la plaza
-  // (eso pasa recién en el check-in), así que alcanza con cambiar el estado.
+  // R-17: pendientes sin ingreso que empezaron antes de `startedBefore` (el inicio más la tolerancia de llegada).
+  // No tienen factura ni ocupan la plaza (eso pasa recién en el check-in), así que alcanza con cambiar el estado.
   // Devuelve las canceladas (con su cliente y sucursal) para avisarles.
-  async cancelExpired(now: Date): Promise<Reservation[]> {
+  async cancelExpired(startedBefore: Date): Promise<Reservation[]> {
     const em = this.entityManager.fork();
     const status = ReservationStatus.PENDIENTE;
-    const expired = await em.find(Reservation, { status, endTime: { $lte: now } },
+    const expired = await em.find(Reservation, { status, startTime: { $lte: startedBefore } },
       { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
     if (expired.length) await em.nativeUpdate(Reservation, { id: { $in: expired.map((r) => r.id) }, status }, { status: ReservationStatus.CANCELADA });
     return expired;
@@ -308,7 +308,7 @@ export class ReservationRepository implements Repository<Reservation> {
     return await this.entityManager.transactional(async (em) => {
       const reservation = await em.findOneOrFail(Reservation, { id }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
       await lockParking(em, reservation.parkingSpace.parking.id);
-      const space = reservation.parkingSpace, margin = Number(space.parking.reservationMargin ?? 0) * 60 * 60 * 1000;
+      const space = reservation.parkingSpace, margin = Number(space.parking.reservationMargin ?? 0) * 60 * 1000;
       const clashes = await em.find(Reservation, {
         id: { $ne: id }, parkingSpace: space, status: { $in: ACTIVE_RESERVATION_STATUSES },
         startTime: { $lt: new Date(endTime.getTime() + margin) }, endTime: { $gt: new Date(reservation.endTime.getTime() - margin) },
