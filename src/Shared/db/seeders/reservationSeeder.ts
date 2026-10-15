@@ -12,7 +12,7 @@ import { Holiday } from '../../../Holiday/Holiday.Entity.js';
 import { ServicePrice } from '../../../ServicePrice/ServicePrice.Entity.js';
 import { EmployeeShift } from '../../../EmployeeShift/EmployeeShift.Entity.js';
 import { covers, toMin, union, type Range } from '../../../EmployeeShift/Schedule.js';
-import { ReservationStatus, UserStatus, UserType } from '../../constants/status.js';
+import { ReservationStatus } from '../../constants/status.js';
 import { type VehicleCategory } from '../../utils/vehicleTypes.js';
 import { isoDate } from '../../utils/dateUtils.js';
 import { CLIENT1_EMAIL } from './userSeeder.js';
@@ -24,7 +24,8 @@ const DOW = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', '
 type Car = { plate: string; brand: string; type: VehicleCategory; color: string; year: number; insurance?: string };
 // Reserva relativa a hoy: `day` en días (negativo: pasado), `start` hora de inicio, `hours` horas reservadas.
 // FINALIZADA lleva factura: `paid` es el medio de pago (sin él queda por cobrar), `extra` horas de más, `services` y `rating` opcionales.
-// EN_CURSO usa la hora actual: `ago` horas desde el ingreso (si `ago` supera `hours`, el vehículo se pasó de hora).
+// Con `ago` la reserva usa la hora actual: EN_CURSO, `ago` horas desde el ingreso (si supera `hours`, el vehículo se pasó de hora);
+// PENDIENTE, `ago` negativo: empieza dentro de -`ago` horas, para que el empleado registre el ingreso hoy.
 type Booking = {
   plate: string; parking: string; status: ReservationStatus; hours: number;
   day?: number; start?: number; ago?: number; extra?: number; paid?: string; services?: string[]; rating?: number; assigned?: boolean;
@@ -53,6 +54,7 @@ const CLIENTS: Client[] = [
       { plate: 'AE123CD', parking: CENTRAL, status: FIN, day: -45, start: 16, hours: 4, paid: 'TRANSFERENCIA' },
       { plate: 'AF456GH', parking: MONUMENTO, status: FIN, day: -5, start: 18, hours: 3, paid: 'TARJETA_CREDITO', rating: 4 },
       { plate: 'AF456GH', parking: CENTRAL, status: PEN, day: 2, start: 10, hours: 3, assigned: true },
+      { plate: 'AF456GH', parking: CENTRAL, status: PEN, ago: -1, hours: 2 }, // hoy: para mostrar el ingreso desde el panel del empleado
       { plate: 'A123BCD', parking: 'Estacionamiento Paseo del Siglo', status: FIN, day: -12, start: 10, hours: 2, paid: 'EFECTIVO' },
       { plate: 'A123BCD', parking: MONUMENTO, status: PEN, day: 4, start: 15, hours: 2 },
       { plate: 'AE123CD', parking: CORDOBA, status: CAN, day: 1, start: 12, hours: 2 },
@@ -99,6 +101,7 @@ const CLIENTS: Client[] = [
       { plate: 'AB246ST', parking: 'Cochera Bulevar', status: FIN, day: -22, start: 14, hours: 2, paid: 'EFECTIVO', rating: 4 },
       { plate: 'AB246ST', parking: 'Parking Plaza 1° de Mayo', status: FIN, day: -40, start: 11, hours: 3, paid: 'MERCADO_PAGO' },
       { plate: 'AB246ST', parking: 'Cochera Bulevar', status: PEN, day: 1, start: 17, hours: 2 },
+      { plate: 'AB246ST', parking: 'Estacionamiento Peatonal San Martín', status: PEN, ago: -1, hours: 1 }, // hoy
     ],
   },
   {
@@ -182,7 +185,7 @@ const CLIENTS: Client[] = [
 
 // Siembra los vehículos que falten (por patente) y las reservas de cada cliente que todavía no tiene ninguna.
 // Las reservas respetan las mismas reglas que la API: horario y duración de la sucursal, sin feriados, con empleado de turno
-// si la sucursal tiene semana tipo (R-01), plaza del tipo sin choque de horario (con el margen) y un vehículo sin dos reservas a la vez.
+// (R-01), plaza del tipo sin choque de horario (con el margen) y un vehículo sin dos reservas a la vez.
 export const seedReservations = async (em: EntityManager): Promise<void> => {
   const clients = new Map((await em.find(User, { email: CLIENTS.map(c => c.email) })).map(u => [u.email, u]));
   const vehicles = new Map((await em.find(Vehicle, { plate: CLIENTS.flatMap(c => c.cars.map(v => v.plate)) })).map(v => [v.plate, v]));
@@ -204,9 +207,6 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
   }
   await em.flush();
 
-  // Reservas sembradas antes de que existiera la columna createdAt.
-  for (const r of await em.find(Reservation, { createdAt: null })) r.createdAt = bookedAt(r);
-
   const pending = CLIENTS.filter(c => clients.has(c.email));
   const withReservations = new Set((await em.find(Reservation, { vehicle: { client: { email: pending.map(c => c.email) } } }, { populate: ['vehicle.client'] }))
     .map(r => r.vehicle.client.email));
@@ -217,17 +217,14 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
     { populate: ['parkingSpaces', 'parkingpriceHistory', 'owner'] })).map(p => [p.name, p]));
   const holidays = new Set((await em.find(Holiday, {})).map(h => h.date));
   const shifts = await em.find(EmployeeShift, { isActive: true, parking: [...parkings.values()] });
-  const staff = await em.find(User, { type: UserType.EMPLEADO, status: UserStatus.ACTIVO, parkingId: [...parkings.values()].map(p => p.id) });
   const services = await em.find(ServicePrice, { parking: [...parkings.values()], expirationDate: null }, { populate: ['serviceCatalog'] });
   const taken = new Map<string, Range[]>(); // horarios ya sembrados por plaza y por vehículo (en ms)
   const busy = (key: string, a: number, b: number) => (taken.get(key) ?? []).some(([x, y]) => x < b && y > a);
   const mark = (key: string, a: number, b: number) => taken.set(key, [...(taken.get(key) ?? []), [a, b]]);
 
-  // R-01: con semana tipo, el horario tiene que quedar cubierto por algún empleado ese día de la semana.
+  // R-01: el horario tiene que quedar cubierto por algún empleado ese día de la semana (sin turnos, no hay reserva).
   const covered = (parking: Parking, start: Date, end: Date) => {
-    const own = shifts.filter(s => s.parking.id === parking.id);
-    if (!own.length) return true;
-    const day = own.filter(s => s.dayOfWeek === DOW[start.getDay()]).map((s): Range => [toMin(s.startTime), toMin(s.endTime)]);
+    const day = shifts.filter(s => s.parking.id === parking.id && s.dayOfWeek === DOW[start.getDay()]).map((s): Range => [toMin(s.startTime), toMin(s.endTime)]);
     return covers(union(day), [start.getHours() * 60, end.getHours() * 60 || 1440]);
   };
   const fits = (p: Parking, start: Date, end: Date, hours: number) =>
@@ -244,8 +241,8 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
 
       // El día pedido o el más cercano que cumpla las reglas, alejándose de hoy (en curso: hoy, con la hora actual).
       let start: Date | undefined;
-      if (b.status === NOW) {
-        const s = new Date(); s.setMinutes(0, 0, 0); s.setHours(s.getHours() - b.ago!);
+      if (b.ago !== undefined) {
+        const s = new Date(); s.setMinutes(0, 0, 0); s.setHours(s.getHours() - b.ago);
         if (fits(parking, s, new Date(s.getTime() + b.hours * H), b.hours)) start = s;
       } else {
         for (let i = 0; i < 14 && !start; i++) {
@@ -255,7 +252,7 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
       }
       if (!start) { skipped++; continue; }
       const end = new Date(start.getTime() + b.hours * H);
-      const margin = Number(parking.reservationMargin ?? 0) * H;
+      const margin = Number(parking.reservationMargin ?? 0) * 60_000;
       if (busy(vehicle.id, start.getTime(), end.getTime())) { skipped++; continue; }
 
       // Plaza: para las activas, la regla de la API (ve las reservas que ya había en la base); además, sin choque con lo sembrado.
@@ -268,8 +265,10 @@ export const seedReservations = async (em: EntityManager): Promise<void> => {
       const rate = parking.parkingpriceHistory.getItems().find(p => !p.expirationDate && p.vehicleType.id === typeId);
       if (!space || (b.status === FIN && !rate)) { skipped++; continue; }
 
-      // Atiende un empleado de la sucursal (o el dueño si no tiene); las online quedan sin asignar hasta el ingreso (R-07).
-      const attendant = staff.find(e => e.parkingId === parking.id) ?? parking.owner;
+      // Atiende el empleado de turno al inicio; las online quedan sin asignar hasta el ingreso (R-07).
+      const minute = start.getHours() * 60;
+      const attendant = shifts.find(s => s.parking.id === parking.id && s.dayOfWeek === DOW[start.getDay()]
+        && toMin(s.startTime) <= minute && minute < toMin(s.endTime))!.employee;
       const chosen = (b.services ?? []).map(name => services.find(sp => sp.parking.id === parking.id && sp.serviceCatalog.name === name)).filter(Boolean) as ServicePrice[];
       const exit = new Date(end.getTime() + (b.extra ? (b.extra - 1) * H + 20 * 60_000 : -15 * 60_000));
       const reservation = em.create(Reservation, {

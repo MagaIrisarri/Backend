@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { ParkingPrice } from "../ParkingPrice/ParkingPrice.Entity.js";
 import { ParkingSpace } from "../ParkingSpace/ParkingSpace.Entity.js";
 import { User } from "../User/User.Entity.js";
+import { DEFAULT_RESERVATION_MARGIN_MINUTES } from "../Shared/constants/schedule.js";
 
 @Entity()
 export class Parking {
@@ -43,8 +44,9 @@ export class Parking {
   @Property({ type: 'number' })
   maxReservationHours!: number;
 
-  @Property({ type: 'number', default: 1 })
-  reservationMargin: number = 1;
+  // Minutos libres entre dos reservas de la misma plaza (R-22). La columna vieja en horas queda sin uso (L-39).
+  @Property({ type: 'number', fieldName: 'reservation_margin_minutes', default: DEFAULT_RESERVATION_MARGIN_MINUTES })
+  reservationMargin: number = DEFAULT_RESERVATION_MARGIN_MINUTES;
 
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;

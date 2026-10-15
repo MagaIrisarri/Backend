@@ -199,10 +199,8 @@ export class ScheduleService {
     return this.resolveDay(parking, holiday.date);
   }
 
-  // R-01: las horas sin cobertura no admiten reservas. Solo se exige si la sucursal ya tiene turnos cargados.
-  // shortcut: R-01, sucursales sin ningún turno no se validan, exigir cobertura siempre cuando todas tengan turnos
+  // R-01: las horas sin cobertura no admiten reservas; una sucursal sin turnos no tiene ninguna hora cubierta.
   async assertCovered(parking: Parking, start: Date, end: Date): Promise<void> {
-    if (!(await this.repo.countTemplateShifts(parking.id))) return;
     const date = iso(start);
     const day = await this.resolveDay(parking, date);
     const from = toMin(clock(start));

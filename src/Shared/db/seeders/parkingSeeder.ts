@@ -46,7 +46,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 20,
     motorcycleCapacity: 10,
     truckCapacity: 5,
@@ -69,7 +69,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 8,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 30,
     motorcycleCapacity: 15,
     truckCapacity: 0,
@@ -92,7 +92,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:59',
     minReservationHours: 1,
     maxReservationHours: 24,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 40,
     motorcycleCapacity: 20,
     truckCapacity: 10,
@@ -115,7 +115,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '21:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 25,
     motorcycleCapacity: 10,
     truckCapacity: 5,
@@ -138,7 +138,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:59',
     minReservationHours: 1,
     maxReservationHours: 48,
-    reservationMargin: 2,
+    reservationMargin: 60,
     carCapacity: 50,
     motorcycleCapacity: 20,
     truckCapacity: 15,
@@ -162,7 +162,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 18,
     motorcycleCapacity: 8,
     truckCapacity: 0,
@@ -185,7 +185,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:59',
     minReservationHours: 1,
     maxReservationHours: 24,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 35,
     motorcycleCapacity: 15,
     truckCapacity: 6,
@@ -208,7 +208,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 28,
     motorcycleCapacity: 12,
     truckCapacity: 4,
@@ -231,7 +231,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '21:00',
     minReservationHours: 1,
     maxReservationHours: 8,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 22,
     motorcycleCapacity: 10,
     truckCapacity: 0,
@@ -254,7 +254,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 16,
     motorcycleCapacity: 8,
     truckCapacity: 0,
@@ -277,7 +277,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 30,
     motorcycleCapacity: 14,
     truckCapacity: 8,
@@ -300,7 +300,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '20:00',
     minReservationHours: 1,
     maxReservationHours: 8,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 14,
     motorcycleCapacity: 6,
     truckCapacity: 0,
@@ -323,7 +323,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:59',
     minReservationHours: 1,
     maxReservationHours: 48,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 45,
     motorcycleCapacity: 20,
     truckCapacity: 10,
@@ -346,7 +346,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 20,
     motorcycleCapacity: 10,
     truckCapacity: 3,
@@ -369,7 +369,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '20:30',
     minReservationHours: 1,
     maxReservationHours: 9,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 24,
     motorcycleCapacity: 8,
     truckCapacity: 0,
@@ -392,7 +392,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:00',
     minReservationHours: 1,
     maxReservationHours: 24,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 38,
     motorcycleCapacity: 16,
     truckCapacity: 12,
@@ -415,7 +415,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '21:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 26,
     motorcycleCapacity: 12,
     truckCapacity: 6,
@@ -438,7 +438,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 15,
     motorcycleCapacity: 7,
     truckCapacity: 0,
@@ -461,7 +461,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 60,
     motorcycleCapacity: 25,
     truckCapacity: 10,
@@ -484,7 +484,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 32,
     motorcycleCapacity: 14,
     truckCapacity: 10,
@@ -507,7 +507,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 10,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 22,
     motorcycleCapacity: 12,
     truckCapacity: 0,
@@ -531,7 +531,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 18,
     motorcycleCapacity: 8,
     truckCapacity: 2,
@@ -554,7 +554,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '23:59',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 25,
     motorcycleCapacity: 10,
     truckCapacity: 4,
@@ -577,7 +577,7 @@ const PARKINGS_DATA: ParkingData[] = [
     closingTime: '22:00',
     minReservationHours: 1,
     maxReservationHours: 12,
-    reservationMargin: 1,
+    reservationMargin: 30,
     carCapacity: 15,
     motorcycleCapacity: 6,
     truckCapacity: 0,
@@ -590,14 +590,14 @@ const PARKINGS_DATA: ParkingData[] = [
   // Dueño 3: Córdoba (tres barrios) y Villa Carlos Paz. "Cochera Villa Cabrera" está pausada.
   {
     name: 'Cochera Nueva Córdoba', neighborhood: 'Nueva Córdoba', address: 'Av. Hipólito Yrigoyen 350', province: 'Córdoba', locality: 'Córdoba', postalCode: '5000',
-    latitude: -31.4250, longitude: -64.1860, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    latitude: -31.4250, longitude: -64.1860, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 30,
     carCapacity: 24, motorcycleCapacity: 10, truckCapacity: 4, owner: 'dueno3@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1600, priceMoto: 800, priceCamioneta: 2300,
   },
   {
     name: 'Estacionamiento Plaza San Martín', neighborhood: 'Centro', address: '27 de Abril 250', province: 'Córdoba', locality: 'Córdoba', postalCode: '5000',
-    latitude: -31.4165, longitude: -64.1855, openingTime: '08:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    latitude: -31.4165, longitude: -64.1855, openingTime: '08:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 30,
     carCapacity: 18, motorcycleCapacity: 6, truckCapacity: 0, owner: 'dueno3@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1500, priceMoto: 750, priceCamioneta: 0,
@@ -611,14 +611,14 @@ const PARKINGS_DATA: ParkingData[] = [
   },
   {
     name: 'Cochera Villa Cabrera', neighborhood: 'Villa Cabrera', address: 'Av. Rafael Núñez 3900', province: 'Córdoba', locality: 'Córdoba', postalCode: '5009',
-    latitude: -31.3725, longitude: -64.2160, openingTime: '08:00', closingTime: '20:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    latitude: -31.3725, longitude: -64.2160, openingTime: '08:00', closingTime: '20:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 30,
     carCapacity: 10, motorcycleCapacity: 4, truckCapacity: 0, owner: 'dueno3@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1300, priceMoto: 650, priceCamioneta: 0, isActive: false,
   },
   {
     name: 'Cochera Costanera Carlos Paz', neighborhood: 'Centro', address: 'Av. San Martín 400', province: 'Córdoba', locality: 'Villa Carlos Paz', postalCode: '5152',
-    latitude: -31.4241, longitude: -64.4978, openingTime: '08:00', closingTime: '23:59', minReservationHours: 2, maxReservationHours: 12, reservationMargin: 1,
+    latitude: -31.4241, longitude: -64.4978, openingTime: '08:00', closingTime: '23:59', minReservationHours: 2, maxReservationHours: 12, reservationMargin: 30,
     carCapacity: 30, motorcycleCapacity: 12, truckCapacity: 6, owner: 'dueno3@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1617886903355-93547526a666?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1700, priceMoto: 850, priceCamioneta: 2400,
@@ -626,21 +626,21 @@ const PARKINGS_DATA: ParkingData[] = [
   // Dueño 4: Santa Fe (capital) y Paraná, en dos provincias. "Cochera Bulevar" tiene plazas de camioneta sin tarifa (aviso "Falta tarifa").
   {
     name: 'Estacionamiento Peatonal San Martín', neighborhood: 'Centro', address: 'San Martín 2350', province: 'Santa Fe', locality: 'Santa Fe', postalCode: '3000',
-    latitude: -31.6440, longitude: -60.7020, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    latitude: -31.6440, longitude: -60.7020, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 30,
     carCapacity: 22, motorcycleCapacity: 8, truckCapacity: 3, owner: 'dueno4@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1500, priceMoto: 700, priceCamioneta: 2200,
   },
   {
     name: 'Cochera Bulevar', neighborhood: 'Candioti Sur', address: 'Bv. Pellegrini 2800', province: 'Santa Fe', locality: 'Santa Fe', postalCode: '3000',
-    latitude: -31.6355, longitude: -60.6975, openingTime: '06:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 12, reservationMargin: 1,
+    latitude: -31.6355, longitude: -60.6975, openingTime: '06:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 12, reservationMargin: 30,
     carCapacity: 16, motorcycleCapacity: 6, truckCapacity: 4, owner: 'dueno4@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1400, priceMoto: 650, priceCamioneta: 0,
   },
   {
     name: 'Parking Plaza 1° de Mayo', neighborhood: 'Centro', address: 'Urquiza 1000', province: 'Entre Ríos', locality: 'Paraná', postalCode: '3100',
-    latitude: -31.7330, longitude: -60.5290, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    latitude: -31.7330, longitude: -60.5290, openingTime: '07:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 30,
     carCapacity: 20, motorcycleCapacity: 10, truckCapacity: 2, owner: 'dueno4@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1573348722427-f1d6819fdf98?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1300, priceMoto: 600, priceCamioneta: 1900,
@@ -648,7 +648,7 @@ const PARKINGS_DATA: ParkingData[] = [
   // Dueño 5: Mendoza y una en Rosario.
   {
     name: 'Cochera Peatonal Sarmiento', neighborhood: 'Centro', address: 'Sarmiento 250', province: 'Mendoza', locality: 'Mendoza', postalCode: '5500',
-    latitude: -32.8895, longitude: -68.8420, openingTime: '08:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 1,
+    latitude: -32.8895, longitude: -68.8420, openingTime: '08:00', closingTime: '22:00', minReservationHours: 1, maxReservationHours: 10, reservationMargin: 30,
     carCapacity: 26, motorcycleCapacity: 10, truckCapacity: 4, owner: 'dueno5@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1600, priceMoto: 800, priceCamioneta: 2300,
@@ -662,7 +662,7 @@ const PARKINGS_DATA: ParkingData[] = [
   },
   {
     name: 'Cochera Barrio Lourdes', neighborhood: 'Lourdes', address: 'Mendoza 3100', province: 'Santa Fe', locality: 'Rosario', postalCode: '2000',
-    latitude: -32.9520, longitude: -60.6720, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 1,
+    latitude: -32.9520, longitude: -60.6720, openingTime: '07:00', closingTime: '21:00', minReservationHours: 1, maxReservationHours: 8, reservationMargin: 30,
     carCapacity: 12, motorcycleCapacity: 6, truckCapacity: 0, owner: 'dueno5@cocheras.com',
     imageUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?auto=format&fit=crop&w=800&q=80',
     priceAuto: 1300, priceMoto: 650, priceCamioneta: 0,
@@ -676,23 +676,14 @@ const addSpaces = (em: EntityManager, parking: Parking, type: VehicleType, count
   }
 };
 
-// Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan y completa el barrio y la provincia de las que no los tienen.
-// Las plazas y tarifas van a los tipos base (R-30), que crea antes seedVehicles. carCapacity, motorcycleCapacity y truckCapacity
-// son solo la cantidad de plazas que se siembran de cada tipo: la capacidad es la cantidad de plazas activas.
+// Idempotente por nombre: en una base ya sembrada solo crea las cocheras que faltan, sin tocar las existentes.
+// Las plazas y tarifas van a los tipos base (R-30), que crea antes seedVehicles; la capacidad es la cantidad de plazas activas.
 export const seedParkings = async (em: EntityManager, users: Map<string, User>): Promise<void> => {
   const types = new Map((await em.find(VehicleType, { name: [...VEHICLE_CATEGORIES] })).map((t) => [t.name as VehicleCategory, t]));
   const typeOf = (c: VehicleCategory) => types.get(c)!;
-  const existing = new Map((await em.find(Parking, {}, { populate: ['parkingpriceHistory'] })).map((p) => [p.name, p]));
+  const existing = new Set((await em.find(Parking, {}, { fields: ['name'] })).map((p) => p.name));
   for (const pData of PARKINGS_DATA) {
-    const found = existing.get(pData.name);
-    if (found) {
-      // Cocheras sembradas antes de que existiera el barrio: se completa solo si está vacío (no pisa lo que cargó el dueño).
-      if (!found.neighborhood) found.neighborhood = pData.neighborhood;
-      if (!found.province) found.province = pData.province;
-      // Tarifas en $0 que sembraba la versión anterior para tipos sin plazas: la API no las admite (precio > 0).
-      em.remove(found.parkingpriceHistory.getItems().filter((p) => Number(p.price) <= 0));
-      continue;
-    }
+    if (existing.has(pData.name)) continue;
     const parking = em.create(Parking, {
       name:                pData.name,
       address:             pData.address,

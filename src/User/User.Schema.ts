@@ -4,8 +4,10 @@ import { pageQuery } from '../Shared/utils/pagination.js';
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
 export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
 
-const dateOfBirthSchema = z.coerce
-  .date({ message: 'Fecha de nacimiento inválida' })
+// Solo texto: `z.coerce.date` convertiría `null`, `0` o `true` en una fecha de 1970 y pasaría la regla de edad.
+const dateOfBirthSchema = z
+  .string({ message: 'Fecha de nacimiento inválida' })
+  .pipe(z.coerce.date({ message: 'Fecha de nacimiento inválida' }))
   .refine((date) => {
     const today = new Date();
     let age = today.getFullYear() - date.getFullYear();

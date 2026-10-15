@@ -4,6 +4,7 @@ import { RequestContext } from '@mikro-orm/core';
 import { orm, syncSchema } from './Shared/db/orm.js';
 import { seedDatabase } from './Shared/db/seeder.js';
 import { migrateVehicleTypeRefs } from './Shared/db/vehicleTypeRefs.js';
+import { migrateReservationMargin } from './Shared/db/reservationMargin.js';
 import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
@@ -83,6 +84,8 @@ async function startServer() {
     // R-30: antes de sincronizar, plazas y tarifas pasan del tipo en texto al id del tipo de vehículo.
     const typed = await migrateVehicleTypeRefs();
     if (typed) console.log(`Plazas y tarifas pasadas al tipo de vehículo: ${typed}`);
+    const margins = await migrateReservationMargin();
+    if (margins) console.log(`Margen entre reservas pasado a minutos: ${margins} cocheras`);
     await syncSchema();
     // Antes de la siembra, que ve las reservas activas para elegir plazas libres.
     const unconfirmed = await reservationService.clearConfirmed();

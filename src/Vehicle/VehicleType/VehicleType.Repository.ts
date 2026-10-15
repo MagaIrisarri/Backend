@@ -7,7 +7,7 @@ import { ParkingPrice } from '../../ParkingPrice/ParkingPrice.Entity.js';
 import { Repository } from '../../Shared/base.Repository.js';
 import { DnrpaTypeMap } from '../Catalog/DnrpaTypeMap.Entity.js';
 import { Reservation, reservationCode } from '../../Reservation/Reservation.Entity.js';
-import { ReservationStatus } from '../../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES } from '../../Shared/constants/status.js';
 import { AppError } from '../../Shared/utils/AppError.js';
 import { descKey } from '../../Shared/utils/names.js';
 
@@ -82,7 +82,7 @@ export class VehicleTypeRepository implements Repository<VehicleType> {
         ? (await tx.find(Vehicle, { model: { $in: models.map((m) => m.id) } })).filter((v) => v.vehicleType.id !== modelType.get(v.model.id))
         : [];
       const active = vehicles.length
-        ? await tx.find(Reservation, { vehicle: { $in: vehicles.map((v) => v.id) }, status: { $in: [ReservationStatus.PENDIENTE, ReservationStatus.EN_CURSO] } },
+        ? await tx.find(Reservation, { vehicle: { $in: vehicles.map((v) => v.id) }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } },
           { populate: ['parkingSpace', 'parkingSpace.parking'] as any, orderBy: { startTime: 'ASC' } })
         : [];
       const result: DescriptionChange = {

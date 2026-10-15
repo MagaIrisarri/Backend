@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TIME_REGEX } from "../Shared/utils/validation.js";
 import { pageQuery } from "../Shared/utils/pagination.js";
+import { DEFAULT_RESERVATION_MARGIN_MINUTES, MAX_RESERVATION_MARGIN_MINUTES } from "../Shared/constants/schedule.js";
 
 const parkingBodyBaseSchema = z.object({
   ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),
@@ -27,7 +28,7 @@ const parkingBodyBaseSchema = z.object({
   closingTime: z.string().regex(TIME_REGEX, "Formato de hora de cierre inválido (HH:mm)"),
   minReservationHours: z.number().int().min(1).default(1),
   maxReservationHours: z.number().int().min(1),
-  reservationMargin: z.number().int().min(0).default(1),
+  reservationMargin: z.number().int().min(0).max(MAX_RESERVATION_MARGIN_MINUTES, `El margen entre reservas es de hasta ${MAX_RESERVATION_MARGIN_MINUTES} minutos`).default(DEFAULT_RESERVATION_MARGIN_MINUTES), // minutos
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres").max(80),
   latitude: z.number().min(-90).max(90, "Latitud inválida"),
   longitude: z.number().min(-180).max(180, "Longitud inválida"),
