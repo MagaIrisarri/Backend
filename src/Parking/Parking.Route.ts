@@ -14,7 +14,8 @@ export const parkingRouter = Router();
 
 const parkingRepository = new ParkingRepository(orm.em);
 const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
-const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
+// Compartido con las reservas: el aviso de sucursal llena usa sus plazas libres en vivo.
+export const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
 const parkingController = new ParkingController(parkingService);
 
 parkingRouter.get('/', auth(UserType.ADMINISTRADOR), validateSchema(listParkingsQuerySchema), parkingController.findAll);

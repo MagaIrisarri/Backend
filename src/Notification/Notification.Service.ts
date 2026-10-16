@@ -6,9 +6,12 @@ export class NotificationService {
 
   // Nunca lanza: el hecho que se avisa (una reserva, una cancelación) ya se guardó y un fallo acá no debe revertirlo ni responder error.
   async notify(recipientIds: string[], data: NewNotification): Promise<void> {
-    const ids = [...new Set(recipientIds.filter(Boolean))];
-    if (!ids.length) return;
+    const unique = [...new Set(recipientIds.filter(Boolean))];
+    if (!unique.length) return;
     try {
+      const muted = await this.repo.mutedRecipients(unique, data.type); // quien apagó ese aviso en su perfil
+      const ids = unique.filter((id) => !muted.has(id));
+      if (!ids.length) return;
       await this.repo.createMany(ids, data);
     } catch (err) {
       console.error(`No se pudo crear la notificación ${data.type}:`, err);

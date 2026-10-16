@@ -23,7 +23,12 @@ export enum NotificationType {
   RECORDATORIO = 'RECORDATORIO',
   INGRESO = 'INGRESO',
   RESERVA_TRANSFERIDA = 'RESERVA_TRANSFERIDA',
+  SUCURSAL_LLENA = 'SUCURSAL_LLENA',
 }
+
+// Avisos que el usuario puede apagar desde su perfil (User.mutedNotifications). Cancelaciones, salidas, vencidas y cambios
+// de plaza no se apagan: tocan el lugar o la plata del cliente.
+export const MUTABLE_NOTIFICATIONS = [NotificationType.RESERVA_NUEVA, NotificationType.SUCURSAL_LLENA] as const;
 
 export enum UserStatus {
   ACTIVO = 'ACTIVO',

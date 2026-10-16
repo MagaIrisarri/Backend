@@ -113,6 +113,12 @@ export class UserService {
   }
 
   async update(params: { id: string }, userData: Partial<User>): Promise<Omit<User, 'password'> | null> {
+    const fiscal = (['businessName', 'cuit', 'vatCondition', 'fiscalAddress'] as const).some((f) => userData[f] !== undefined);
+    if (fiscal) {
+      const target = await this.userRepository.findOne(params);
+      if (target && target.type !== UserType.DUENO) throw new AppError('Los datos fiscales son solo de un dueño', 400);
+    }
+    if (userData.mutedNotifications) userData.mutedNotifications = [...new Set(userData.mutedNotifications)];
     if (userData.password) {
       userData.password = await argon2.hash(userData.password);
     }

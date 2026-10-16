@@ -1,5 +1,22 @@
 import { z } from 'zod';
 import { pageQuery } from '../Shared/utils/pagination.js';
+import { MUTABLE_NOTIFICATIONS } from '../Shared/constants/status.js';
+
+export const VAT_CONDITIONS = ['Responsable Inscripto', 'Monotributo', 'Exento'] as const;
+
+// CUIT/CUIL: 11 dígitos con o sin guiones y dígito verificador de AFIP (módulo 11). Se guarda como 30-12345678-9.
+export const cuitDigitOk = (digits: string) => {
+  const sum = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2].reduce((acc, w, i) => acc + w * Number(digits[i]), 0);
+  const check = 11 - (sum % 11);
+  return (check === 11 ? 0 : check) === Number(digits[10]);
+};
+const cuitSchema = z.string().trim()
+  .regex(/^\d{2}-?\d{8}-?\d$/, 'El CUIT tiene que tener 11 dígitos: 30-12345678-9')
+  .transform((v) => v.replace(/-/g, ''))
+  .refine(cuitDigitOk, 'El dígito verificador del CUIT no coincide')
+  .transform((d) => `${d.slice(0, 2)}-${d.slice(2, 10)}-${d.slice(10)}`);
+// Texto opcional del perfil: vacío lo borra (null).
+const optionalText = (max: number) => z.string().trim().max(max, `Hasta ${max} caracteres`).transform((v) => v || null).nullable().optional();
 
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
 export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
@@ -66,6 +83,12 @@ export const updateUserSchema = z.object({
     date_of_birth: dateOfBirthSchema.optional(),
     email: baseUserFields.email.optional(),
     phone: baseUserFields.phone.optional(),
+    // Datos fiscales: solo para un dueño (User.Service.update).
+    businessName: optionalText(120),
+    cuit: z.union([z.literal('').transform(() => null), cuitSchema]).nullable().optional(),
+    vatCondition: z.enum(VAT_CONDITIONS).nullable().optional(),
+    fiscalAddress: optionalText(200),
+    mutedNotifications: z.array(z.enum(MUTABLE_NOTIFICATIONS)).max(MUTABLE_NOTIFICATIONS.length).optional(),
   }),
 });
 

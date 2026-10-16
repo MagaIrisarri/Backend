@@ -44,6 +44,12 @@ export class NotificationRepository {
   }
 
   // El dueño de la sucursal y sus empleados activos.
+  // Los que apagaron ese tipo de aviso desde su perfil (User.mutedNotifications).
+  async mutedRecipients(ids: string[], type: string): Promise<Set<string>> {
+    const users = await this.entityManager.fork().find(User, { id: { $in: ids } }, { fields: ['id', 'mutedNotifications'] as any });
+    return new Set(users.filter((u) => u.mutedNotifications?.includes(type)).map((u) => u.id));
+  }
+
   async findStaffIds(parking: { id: string; owner: { id: string } }): Promise<string[]> {
     const employees = await this.entityManager.fork().find(User, { type: UserType.EMPLEADO, parkingId: parking.id, status: UserStatus.ACTIVO });
     return [parking.owner.id, ...employees.map((e) => e.id)];

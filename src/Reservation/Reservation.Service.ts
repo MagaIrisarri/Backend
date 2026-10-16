@@ -15,6 +15,7 @@ import { SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import type { Parking } from '../Parking/Parking.Entity.js';
 import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 import { NotificationService } from '../Notification/Notification.Service.js';
+import type { ParkingService } from '../Parking/Parking.Service.js';
 import { wrap } from '@mikro-orm/core';
 import argon2 from 'argon2';
 import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
@@ -32,8 +33,24 @@ export class ReservationService {
     private parkingPriceRepo: ParkingPriceRepository,
     private parkingSpaceRepo: ParkingSpaceRepository,
     private scheduleService: ScheduleService,
-    private notifications: NotificationService
+    private notifications: NotificationService,
+    private parkings: ParkingService,
   ) {}
+
+  // Después de un ingreso: si ocupó la última plaza libre, se avisa al dueño (se puede apagar en su perfil). Sale solo en ese
+  // momento: cada ingreso ocupa una plaza que estaba libre, así que el siguiente ya no la encuentra llena "de nuevo".
+  private async notifyIfFull(parking: Parking): Promise<void> {
+    try {
+      const live = await this.parkings.findOne(parking.id);
+      if (!live || live.availableSpaces > 0) return;
+      await this.notifications.notify([parking.owner.id], {
+        type: NotificationType.SUCURSAL_LLENA, title: `Sucursal llena: ${parking.name}`,
+        message: `${parking.name} no tiene plazas libres: los ingresos nuevos esperan a que salga un vehículo`,
+      });
+    } catch (err) {
+      console.error('No se pudo revisar si la sucursal quedó llena:', err); // el ingreso ya se guardó
+    }
+  }
 
   // Avisa al cliente de la reserva (ya guardada la acción: un fallo del aviso no la revierte, ver NotificationService.notify).
   private notifyClient(r: Reservation, type: NotificationType, title: string, message: string): Promise<void> {
@@ -205,6 +222,7 @@ export class ReservationService {
       parking, plate, model, start, end, employeeId: userId, serviceIds,
       client: { ...client, passwordHash: await argon2.hash(client.dni) }, // R-29: el DNI es la contraseña inicial
     });
+    await this.notifyIfFull(parking);
     // accountCreated: el front avisa al empleado que la contraseña inicial es el DNI, para que se lo diga al cliente
     return { reservation: (await this.repo.findOne({ id: reservation.id }))!, accountCreated };
   }
@@ -429,6 +447,7 @@ export class ReservationService {
     } else if (updated) {
       await this.notifyClient(updated, NotificationType.INGRESO, 'Ingreso registrado', `Plaza ${updated.parkingSpace.spaceCode}, hasta las ${formatTimeHHMM(updated.endTime)}`);
     }
+    if (updated) await this.notifyIfFull(updated.parkingSpace.parking);
     return updated!;
   }
 
