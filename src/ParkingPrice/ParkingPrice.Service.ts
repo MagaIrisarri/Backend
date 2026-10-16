@@ -13,6 +13,10 @@ export class ParkingPriceService {
     const vehicleType = await this.repo.findVehicleType(data.vehicleTypeId);
     if (!vehicleType) throw new AppError('Tipo de vehículo no encontrado o dado de baja', 404);
 
+    // El mismo precio que la vigente no abre otra versión: el historial solo guarda cambios.
+    const active = await this.repo.findActive(parkingId, vehicleType.id);
+    if (active && Number(active.price) === data.price) return active;
+
     await this.repo.expireActiveByVehicleType(parkingId, vehicleType.id);
     return await this.repo.add({ parking, vehicleType, price: data.price });
   }
@@ -23,7 +27,6 @@ export class ParkingPriceService {
     if (!current || current.expirationDate !== null) {
       throw new AppError('Tarifa no encontrada o inactiva', 404);
     }
-    await this.repo.remove({ id });
     return await this.create(current.parking.id, { vehicleTypeId: current.vehicleType.id, price: data.price });
   }
 
