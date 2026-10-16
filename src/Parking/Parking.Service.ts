@@ -201,9 +201,11 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(updated);
   }
 
-  // shortcut: L-42, desactiva aunque tenga reservas pendientes o en curso y no avisa, rechazar con 409 como las otras bajas
-  async remove(id: string): Promise<boolean> {
-    return await this.parkingRepository.remove({ id });
+  // L-42: pausar corta las reservas nuevas (getDependencies exige isActive); las pendientes y en curso siguen y se atienden
+  // o se cancelan con motivo. Devuelve cuántas quedan para que el dueño lo sepa; la baja del dueño espera a que terminen.
+  async remove(id: string): Promise<{ activeReservations: number } | null> {
+    if (!await this.parkingRepository.remove({ id })) return null;
+    return { activeReservations: await this.parkingRepository.countActiveReservations(id) };
   }
 
   async findByOwnerId(ownerId: string): Promise<any[]> {

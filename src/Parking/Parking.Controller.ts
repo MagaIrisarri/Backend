@@ -91,14 +91,15 @@ export class ParkingController {
 
   public remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const deleted = await this.parkingService.remove(id);
+    const paused = await this.parkingService.remove(id);
 
-    if (!deleted) {
+    if (!paused) {
       throw new AppError('Estacionamiento no encontrado', 404);
     }
 
     return res.status(200).json({
-      message: 'Estacionamiento dado de baja con éxito',
+      message: 'Estacionamiento pausado con éxito',
+      data: paused,
     });
   });
 }

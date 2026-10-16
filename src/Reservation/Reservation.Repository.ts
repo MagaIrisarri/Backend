@@ -21,6 +21,7 @@ export interface CreateReservationParams {
   parkingSpaceId?: string;
   serviceIds?: string[];
   attendedById?: string | null; // R-07
+  hourlyRate: number; // L-43
 }
 
 // Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
@@ -250,7 +251,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
-    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById } = params;
+    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById, hourlyRate } = params;
     return await this.entityManager.transactional(async (transactionalEntityManager) => {
       await lockParking(transactionalEntityManager, parking.id);
       await this.validateVehicleOverlap(transactionalEntityManager, vehicle, reqStartTime, reqEndTime);
@@ -274,6 +275,7 @@ export class ReservationRepository implements Repository<Reservation> {
         parkingSpace: targetSpace,
         status: ReservationStatus.PENDIENTE,
         attendedBy: attendedById ? transactionalEntityManager.getReference(User, attendedById) : null,
+        hourlyRate,
       });
 
       if (serviceIds && serviceIds.length > 0) {
@@ -374,7 +376,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
   // Alta de mostrador en una sola transacción: cliente y vehículo (si la patente es nueva), reserva EN CURSO y plaza ocupada.
   async createWalkIn(p: {
-    parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[];
+    parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[]; hourlyRate: number;
     client: { name: string; last_name: string; dni: string; email: string; phone?: string; passwordHash: string };
   }): Promise<{ reservation: Reservation; accountCreated: boolean }> {
     const c = p.client;
@@ -416,6 +418,7 @@ export class ReservationRepository implements Repository<Reservation> {
       const reservation = em.create(Reservation, {
         id, code: reservationCode(id), startTime: p.start, endTime: p.end, vehicle, parkingSpace: space,
         status: ReservationStatus.EN_CURSO, checkedInBy: employee, attendedBy: employee, contactName: `${c.name} ${c.last_name}`, contactPhone: c.phone ?? null,
+        hourlyRate: p.hourlyRate,
       });
       if (p.serviceIds?.length) await this.attachServices(em, reservation, p.serviceIds, p.parking);
       return reservation;

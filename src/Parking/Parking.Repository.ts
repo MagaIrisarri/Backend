@@ -91,6 +91,10 @@ export class ParkingRepository implements Repository<Parking> {
     return await this.em.findOne(User, { id: userId });
   }
 
+  async countActiveReservations(parkingId: string): Promise<number> {
+    return await this.em.count(Reservation, { parkingSpace: { parking: { id: parkingId } }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
+  }
+
   async hasActivePrices(parkingId: string): Promise<boolean> {
     const count = await this.em.count(ParkingPrice, {
       parking: { id: parkingId },

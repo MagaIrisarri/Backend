@@ -138,11 +138,11 @@ export class ReservationService {
     return reservation;
   }
 
-  // Sin tarifa vigente para el tipo de vehículo no se reserva: no habría con qué cobrar la salida.
-  private async assertRate(parkingId: string, vehicleTypeId: string) {
-    if (!await this.parkingPriceRepo.findActive(parkingId, vehicleTypeId)) {
-      throw new AppError("La cochera no tiene tarifa para este tipo de vehículo", 409);
-    }
+  // Sin tarifa vigente para el tipo de vehículo no se reserva: no habría con qué cobrar la salida. El precio que devuelve queda en la reserva (L-43).
+  private async assertRate(parkingId: string, vehicleTypeId: string): Promise<number> {
+    const price = await this.parkingPriceRepo.findActive(parkingId, vehicleTypeId);
+    if (!price) throw new AppError("La cochera no tiene tarifa para este tipo de vehículo", 409);
+    return Number(price.price);
   }
 
   async create(data: CreateReservationInput): Promise<Reservation> {
@@ -154,7 +154,7 @@ export class ReservationService {
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
   if (vehicle.client.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
-  await this.assertRate(parking.id, vehicle.vehicleType.id);
+  const hourlyRate = await this.assertRate(parking.id, vehicle.vehicleType.id);
 
   await this.assertSchedule(parking, startTime, endTime);
 
@@ -184,6 +184,7 @@ export class ReservationService {
     parkingSpaceId: data.parkingSpaceId,
     serviceIds: data.serviceIds,
     attendedById: await this.scheduleService.employeeFor(parking, startTime, endTime), // R-07
+    hourlyRate,
   });
   await this.notifications.notifyStaff(parking, {
     type: NotificationType.RESERVA_NUEVA,
@@ -213,7 +214,7 @@ export class ReservationService {
 
     const model = await this.repo.findModel(data.brandId, data.modelId);
     if (!model) throw new AppError("Marca y modelo no coinciden o no existen", 404);
-    await this.assertRate(parking.id, model.vehicleType.id);
+    const hourlyRate = await this.assertRate(parking.id, model.vehicleType.id);
 
     const start = new Date();
     start.setSeconds(0, 0);
@@ -221,7 +222,7 @@ export class ReservationService {
     await this.assertSchedule(parking, start, end);
     const { parkingId, plate, brandId, modelId, hours, serviceIds, ...client } = data;
     const { reservation, accountCreated } = await this.repo.createWalkIn({
-      parking, plate, model, start, end, employeeId: userId, serviceIds,
+      parking, plate, model, start, end, employeeId: userId, serviceIds, hourlyRate,
       client: { ...client, passwordHash: await argon2.hash(client.dni) }, // R-29: el DNI es la contraseña inicial
     });
     await this.notifyIfFull(parking);
@@ -481,16 +482,16 @@ export class ReservationService {
     const endTime = new Date();
     const { reserved, extra: extraHours, total: durationHours } = billHours(reservation.startTime, reservation.endTime, endTime);
 
-    const priceRecord = await this.parkingPriceRepo.findForCheckout(
-      reservation.parkingSpace.parking.id,
-      reservation.vehicle.vehicleType.id
-    );
+    // L-43: la tarifa que regía al reservar; las reservas anteriores a guardarla cobran la vigente.
+    const priceRecord = reservation.hourlyRate == null
+      ? await this.parkingPriceRepo.findForCheckout(reservation.parkingSpace.parking.id, reservation.vehicle.vehicleType.id)
+      : null;
 
-    if (!priceRecord) {
+    if (reservation.hourlyRate == null && !priceRecord) {
       throw new AppError("La cochera nunca tuvo una tarifa para este tipo de vehículo: cargala para registrar la salida", 409);
     }
 
-    const hourlyRate = Number(priceRecord.price);
+    const hourlyRate = Number(reservation.hourlyRate ?? priceRecord!.price);
     const parkingCost = durationHours * hourlyRate;
     
     // Sumar servicios adicionales usando el repo
