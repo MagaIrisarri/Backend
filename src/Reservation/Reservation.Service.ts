@@ -5,7 +5,7 @@ import { AppError } from '../Shared/utils/AppError.js';
 import { isStaffOf } from '../Shared/utils/staff.js';
 import { ACTIVE_RESERVATION_STATUSES, NotificationType, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM, isoDate } from '../Shared/utils/dateUtils.js';
-import { ARRIVAL_TOLERANCE_MINUTES, CHECKOUT_GRACE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
+import { ARRIVAL_TOLERANCE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/constants/schedule.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
@@ -18,6 +18,7 @@ import { NotificationService } from '../Notification/Notification.Service.js';
 import { wrap } from '@mikro-orm/core';
 import argon2 from 'argon2';
 import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
+import { billHours } from './billing.js';
 
 const MS_PER_HOUR = 1000 * 60 * 60;
 const ARRIVAL_TOLERANCE_MS = ARRIVAL_TOLERANCE_MINUTES * 60 * 1000;
@@ -88,9 +89,21 @@ export class ReservationService {
     if (clash && clash.id !== id) {
       throw new AppError(`Este vehículo tiene otra reserva desde las ${formatTimeHHMM(clash.startTime)}: no se puede extender hasta las ${formatTimeHHMM(endTime)}`, 400);
     }
-    // shortcut: L-29, las reservas que se reubican por la extensión (moved) no avisan a sus clientes, avisarles cuando se pida
     const moved = await this.repo.extend(id, endTime);
     await this.notifyClient(reservation, NotificationType.RESERVA_EXTENDIDA, 'Reserva extendida', `Ahora termina a las ${formatTimeHHMM(endTime)}`);
+    // L-29: la reubicación es automática: se enteran su cliente y su empleado asignado (si no es quien extendió).
+    for (const m of moved) {
+      const other = await this.repo.findOne({ id: m.id });
+      if (!other) continue;
+      await this.notifyClient(other, NotificationType.PLAZA_CAMBIADA, 'Cambio de plaza', `Tu reserva pasó de la plaza ${m.from} a la ${m.to}`);
+      const assigned = other.attendedBy?.id;
+      if (assigned && assigned !== userId) {
+        await this.notifications.notify([assigned], {
+          type: NotificationType.PLAZA_CAMBIADA, title: `Cambio de plaza ${m.code}`, reservationId: other.id,
+          message: `${other.vehicle.plate} pasó de la plaza ${m.from} a la ${m.to} porque se extendió la reserva ${reservation.code ?? reservationCode(reservation.id)}`,
+        });
+      }
+    }
     return { reservation: await this.repo.findOne({ id }), moved };
   }
 
@@ -150,7 +163,8 @@ export class ReservationService {
     reqStartTime: startTime,
     reqEndTime: endTime,
     parkingSpaceId: data.parkingSpaceId,
-    serviceIds: data.serviceIds
+    serviceIds: data.serviceIds,
+    attendedById: await this.scheduleService.employeeFor(parking, startTime, endTime), // R-07
   });
   await this.notifications.notifyStaff(parking, {
     type: NotificationType.RESERVA_NUEVA,
@@ -241,7 +255,8 @@ export class ReservationService {
     return this.withInvoice(await this.repo.findByOwnerId(ownerId));
   }
 
-  async remove(id: string, userId: string): Promise<boolean> {
+  // El cliente cancela sin dar explicaciones; el personal, el dueño o el administrador dicen el motivo, que le llega al cliente.
+  async remove(id: string, userId: string, reason?: string): Promise<boolean> {
     const reservation = await this.repo.findOne({ id });
     if (!reservation) return false;
 
@@ -263,6 +278,8 @@ export class ReservationService {
         throw new AppError("No puedes dar de baja una reserva que ya está en curso", 400);
       }
     }
+    const cancelReason = isClient ? null : reason?.trim() || null;
+    if (!isClient && !cancelReason) throw new AppError("Indicá el motivo de la cancelación: se le avisa al cliente", 400);
 
     // Anular factura si estuviera pendiente
     const invoice = await this.invoiceRepo.findByReservationId(id);
@@ -270,7 +287,7 @@ export class ReservationService {
       await this.invoiceRepo.remove({ id: invoice.id });
     }
 
-    const removed = await this.repo.remove({ id });
+    const removed = await this.repo.remove({ id }, cancelReason);
     // Cancela el cliente → lo sabe el personal; cancela el personal, el dueño o el administrador → lo sabe el cliente.
     if (removed && isClient) {
       await this.notifications.notifyStaff(parking!, {
@@ -280,7 +297,7 @@ export class ReservationService {
         reservationId: reservation.id,
       });
     } else if (removed) {
-      await this.notifyClient(reservation, NotificationType.RESERVA_CANCELADA, 'Reserva cancelada', 'La sucursal canceló tu reserva');
+      await this.notifyClient(reservation, NotificationType.RESERVA_CANCELADA, 'Reserva cancelada', `La sucursal canceló tu reserva. Motivo: ${cancelReason}`);
     }
     return removed;
   }
@@ -342,6 +359,16 @@ export class ReservationService {
     return await this.repo.clearConfirmed();
   }
 
+  // R-07: las reservas activas que quedaron sin empleado (anteriores a la asignación al reservar) toman el de turno.
+  async fillMissingEmployees(): Promise<number> {
+    let filled = 0;
+    for (const r of await this.repo.findUnassigned()) {
+      const employeeId = await this.scheduleService.employeeFor(r.parkingSpace.parking, r.startTime, r.endTime);
+      if (employeeId && await this.repo.update(r.id, { attendedById: employeeId })) filled++;
+    }
+    return filled;
+  }
+
   async cancelExpired(): Promise<number> {
     const expired = await this.repo.cancelExpired(new Date(Date.now() - ARRIVAL_TOLERANCE_MS));
     for (const r of expired) {
@@ -399,6 +426,8 @@ export class ReservationService {
     }
     if (updated && updated.parkingSpace.id !== originalSpaceId) {
       await this.notifyClient(updated, NotificationType.PLAZA_CAMBIADA, 'Cambio de plaza', `La plaza reservada seguía ocupada: ingresás a la plaza ${updated.parkingSpace.spaceCode}`);
+    } else if (updated) {
+      await this.notifyClient(updated, NotificationType.INGRESO, 'Ingreso registrado', `Plaza ${updated.parkingSpace.spaceCode}, hasta las ${formatTimeHHMM(updated.endTime)}`);
     }
     return updated!;
   }
@@ -412,14 +441,8 @@ export class ReservationService {
       throw new AppError("La reserva debe estar EN CURSO para realizar el Check-out", 400);
     }
 
-    // Se cobran las horas reservadas aunque se retire antes; si se queda más, se suman las horas extra
-    // (cada hora empezada cuenta entera).
     const endTime = new Date();
-    const reservedHours = Math.ceil((reservation.endTime.getTime() - reservation.startTime.getTime()) / MS_PER_HOUR);
-    const graceMs = CHECKOUT_GRACE_MINUTES * 60 * 1000;
-    const stayedHours = Math.ceil((endTime.getTime() - graceMs - reservation.startTime.getTime()) / MS_PER_HOUR);
-    const durationHours = Math.max(1, reservedHours, stayedHours);
-    const extraHours = Math.max(0, durationHours - Math.max(1, reservedHours));
+    const { reserved, extra: extraHours, total: durationHours } = billHours(reservation.startTime, reservation.endTime, endTime);
 
     const priceRecord = await this.parkingPriceRepo.findForCheckout(
       reservation.parkingSpace.parking.id,
@@ -445,7 +468,7 @@ export class ReservationService {
     // Salida, plaza y factura (con el detalle del cobro) en una sola transacción.
     const invoice = await this.repo.finishWithInvoice(id, employeeId, endTime, {
       totalAmount,
-      reservedHours: durationHours - extraHours,
+      reservedHours: reserved,
       extraHours,
       hourlyRate,
       servicesAmount: servicesCost,

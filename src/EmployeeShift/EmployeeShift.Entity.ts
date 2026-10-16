@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 
 import { User } from '../User/User.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
+import { LocalDateType } from '../Shared/db/LocalDateType.js';
 
 export enum DayOfWeek {
   MONDAY = 'MONDAY',
@@ -31,6 +32,13 @@ export class EmployeeShift {
 
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;
+
+  // L-01: vigencia de la fila en la semana tipo, [validFrom, validTo). Sin validFrom vale desde siempre (las anteriores a la vigencia).
+  @Property({ type: LocalDateType, nullable: true })
+  validFrom?: string | null = null;
+
+  @Property({ type: LocalDateType, nullable: true })
+  validTo?: string | null = null;
 
   @ManyToOne(() => User, { eager: true })
   employee!: Rel<User>;

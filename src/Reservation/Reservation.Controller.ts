@@ -107,7 +107,7 @@ export class ReservationController {
   public remove = catchAsync(async (req: Request, res: Response) => {
     const userId = actorId(req, 'cancelar la reserva');
 
-    const deleted = await this.service.remove(req.params.id as string, userId);
+    const deleted = await this.service.remove(req.params.id as string, userId, req.body?.reason);
     if (!deleted) throw new AppError('Reserva no encontrada', 404);
 
     return res.status(200).json({ message: 'Reserva cancelada con éxito' });

@@ -2,7 +2,7 @@ import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import crypto from "node:crypto";
 
 // R-29: respuesta (403) a quien todavía tiene el DNI como contraseña e intenta cargar un vehículo o reservar.
-export const MUST_CHANGE_PASSWORD = 'Tu contraseña inicial es tu DNI: cambiala desde tu perfil para registrar vehículos y reservar';
+export const MUST_CHANGE_PASSWORD = 'Tenés una contraseña temporal (tu DNI, si la cuenta se creó en el mostrador): cambiala desde tu perfil para registrar vehículos y reservar';
 
 
 @Entity()
@@ -49,4 +49,11 @@ export class User {
   // Solo empleados: sucursal donde trabaja
   @Property({ type: 'string', nullable: true })
   parkingId?: string;
+
+  // Alta y última modificación. Nullable: los usuarios que ya existían quedan sin fecha de alta (null) al actualizar el esquema.
+  @Property({ type: 'datetime', nullable: true })
+  createdAt?: Date | null = new Date();
+
+  @Property({ type: 'datetime', nullable: true, onUpdate: () => new Date() })
+  updatedAt?: Date | null = new Date();
 }

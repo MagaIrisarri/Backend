@@ -20,6 +20,7 @@ export interface CreateReservationParams {
   reqEndTime: Date;
   parkingSpaceId?: string;
   serviceIds?: string[];
+  attendedById?: string | null; // R-07
 }
 
 // Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
@@ -206,10 +207,17 @@ export class ReservationRepository implements Repository<Reservation> {
     return result.affectedRows ?? 0;
   }
 
-  async remove(item: { id: string }): Promise<boolean> {
+  // R-07: activas sin empleado asignado (las online anteriores a que se asignara al reservar).
+  async findUnassigned(): Promise<Reservation[]> {
+    return await this.entityManager.find(Reservation, { attendedBy: null, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } },
+      { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
+  }
+
+  async remove(item: { id: string }, cancelReason: string | null = null): Promise<boolean> {
     const res = await this.findOne(item);
     if (!res) return false;
     res.status = ReservationStatus.CANCELADA;
+    res.cancelReason = cancelReason;
     await this.entityManager.flush();
     return true;
   }
@@ -221,7 +229,7 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
-    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds } = params;
+    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById } = params;
     return await this.entityManager.transactional(async (transactionalEntityManager) => {
       await lockParking(transactionalEntityManager, parking.id);
       await this.validateVehicleOverlap(transactionalEntityManager, vehicle, reqStartTime, reqEndTime);
@@ -243,7 +251,8 @@ export class ReservationRepository implements Repository<Reservation> {
         endTime: reqEndTime,
         vehicle,
         parkingSpace: targetSpace,
-        status: ReservationStatus.PENDIENTE
+        status: ReservationStatus.PENDIENTE,
+        attendedBy: attendedById ? transactionalEntityManager.getReference(User, attendedById) : null,
       });
 
       if (serviceIds && serviceIds.length > 0) {
@@ -304,7 +313,7 @@ export class ReservationRepository implements Repository<Reservation> {
    * (con el margen) pasan a la primera plaza libre de su tipo (findFreeSpaces). Si alguna no tiene lugar, o hay otro vehículo
    * adentro, no se cambia nada (409). Devuelve las que se movieron.
    */
-  async extend(id: string, endTime: Date): Promise<{ code: string; from: string; to: string }[]> {
+  async extend(id: string, endTime: Date): Promise<{ id: string; code: string; from: string; to: string }[]> {
     return await this.entityManager.transactional(async (em) => {
       const reservation = await em.findOneOrFail(Reservation, { id }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
       await lockParking(em, reservation.parkingSpace.parking.id);
@@ -325,7 +334,7 @@ export class ReservationRepository implements Repository<Reservation> {
         if (!to) throw new AppError(`La reserva ${code(other)} de la plaza ${space.spaceCode} empieza a las ${formatTimeHHMM(other.startTime)} y no hay otra plaza libre para pasarla: no se puede extender hasta las ${formatTimeHHMM(endTime)}`, 409);
         other.parkingSpace = to;
         await em.flush();
-        moved.push({ code: code(other), from: space.spaceCode, to: to.spaceCode });
+        moved.push({ id: other.id, code: code(other), from: space.spaceCode, to: to.spaceCode });
       }
       return moved;
     });

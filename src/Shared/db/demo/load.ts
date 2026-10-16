@@ -12,8 +12,7 @@ import crypto from 'node:crypto';
 import { EntityManager } from '@mikro-orm/core';
 import { orm, syncSchema } from '../orm.js';
 import { seedDatabase } from '../seeder.js';
-import { migrateVehicleTypeRefs } from '../vehicleTypeRefs.js';
-import { migrateReservationMargin } from '../reservationMargin.js';
+
 import { resetDemoData, txConnection } from './reset.js';
 import type { DemoMeta, DemoParking, DemoReservation, DemoServiceCatalog, DemoStaff, DemoUsers, DemoVehicle } from './data.js';
 import { User } from '../../../User/User.Entity.js';
@@ -73,8 +72,6 @@ type Ctx = { byEmail: Map<string, User>; parkings: Map<string, Loaded>; vehicles
 
 try {
   await orm.schema.ensureDatabase();
-  await migrateVehicleTypeRefs();
-  await migrateReservationMargin();
   await syncSchema();
   await seedDatabase(orm.em.fork()); // catálogo: feriados, tipos, seguros, marcas y modelos
   const t0 = Date.now();
@@ -270,6 +267,7 @@ async function insertReservations(em: EntityManager, { byEmail, parkings, vehicl
     if (!l || !vehicle || !space) throw new Error(`Reserva con datos que no existen: ${JSON.stringify(d)}`);
     const start = dateAt(d.day, d.start), end = new Date(start.getTime() + d.hours * H);
     const client = vehicle.client;
+    if (d.walkIn && start.getTime() > now) return; // un ingreso por mostrador que todavía no pasó no existe (se carga antes del ancla o más tarde ese día)
     // Alta: `lead` antes del inicio, nunca después de ahora (las lejanas, en algún momento de las últimas dos semanas).
     const createdAt = new Date(d.walkIn ? start.getTime() : Math.min(start.getTime() - d.lead * MIN, now - (1 + (i * 7919) % (14 * 1440)) * MIN));
     // El código son 6 caracteres del id: con miles de reservas alguno se repite. Como al reservar (Repository), otro id.
@@ -286,7 +284,7 @@ async function insertReservations(em: EntityManager, { byEmail, parkings, vehicl
       const checkIn = new Date(start.getTime() + (d.arrive ?? 0) * MIN);
       const exit = new Date(end.getTime() + (d.exit ?? 0) * MIN);
       if (now < checkIn.getTime()) {
-        if (d.assigned) r.attendedBy = onShift(l, start);
+        r.attendedBy = onShift(l, start); // R-07: toda reserva tiene empleado asignado
       } else if (d.outcome === 'overstay' || now < exit.getTime()) {
         r.status = ReservationStatus.EN_CURSO;
         r.attendedBy = r.checkedInBy = onShift(l, checkIn);

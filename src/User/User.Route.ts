@@ -8,6 +8,7 @@ import { auth, self } from '../Shared/middlewares/auth.js';
 import { UserType } from '../Shared/constants/status.js';
 import {
   createPublicUserSchema,
+  resetPasswordSchema,
   createEmployeeSchema,
   updateEmployeeSchema,
   employeeIdSchema,
@@ -42,4 +43,5 @@ userRouter.put('/:id', auth(), self('id'), validateSchema(userIdSchema), validat
 userRouter.patch('/:id', auth(), self('id'), validateSchema(userIdSchema), validateSchema(updateUserSchema), userController.update);
 userRouter.patch('/:id/password', auth(), self('id'), validateSchema(updatePasswordSchema), userController.updatePassword);
 userRouter.post('/:id/reactivate', auth(UserType.ADMINISTRADOR), validateSchema(userIdSchema), userController.reactivate);
+userRouter.post('/:id/reset-password', auth(UserType.ADMINISTRADOR), validateSchema(resetPasswordSchema), userController.resetPassword);
 userRouter.delete('/:id', auth(), self('id'), validateSchema(userIdSchema), userController.delete);

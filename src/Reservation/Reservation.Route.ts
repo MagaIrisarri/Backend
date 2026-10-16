@@ -7,7 +7,7 @@ import { orm } from '../Shared/db/orm.js';
 import { ReservationController } from './Reservation.Controller.js';
 import { ReservationRepository } from './Reservation.Repository.js';
 import { ReservationService } from './Reservation.Service.js';
-import { createReservationSchema, updateReservationSchema, reservationIdSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema, walkInSchema } from './Reservation.Schema.js';
+import { createReservationSchema, updateReservationSchema, reservationIdSchema, cancelReservationSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema, walkInSchema } from './Reservation.Schema.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
@@ -39,6 +39,6 @@ reservationRouter.post('/:id/check-in', auth(UserType.DUENO, UserType.EMPLEADO),
 reservationRouter.post('/:id/check-out', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(reservationIdSchema), reservationController.checkOut);
 reservationRouter.put('/:id', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.assignEmployee);
 reservationRouter.patch('/:id', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(reservationIdSchema), validateSchema(updateReservationSchema), reservationController.assignEmployee);
-reservationRouter.delete('/:id', auth(), validateSchema(reservationIdSchema), reservationController.remove);
+reservationRouter.delete('/:id', auth(), validateSchema(cancelReservationSchema), reservationController.remove);
 
 export default reservationRouter;

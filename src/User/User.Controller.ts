@@ -64,6 +64,11 @@ export class UserController {
     res.status(200).json({ message: 'Usuario reactivado exitosamente', data: reactivatedUser });
   });
 
+  public resetPassword = catchAsync(async (req: Request, res: Response) => {
+    if (!(await this.userService.resetPassword(req.params.id as string, req.body.password))) throw new AppError('Usuario no encontrado', 404);
+    res.status(200).json({ message: 'Contraseña restablecida: el usuario la cambia al iniciar sesión' });
+  });
+
   public updatePassword = catchAsync(async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
     const success = await this.userService.updatePassword(req.params.id as string, currentPassword, newPassword);

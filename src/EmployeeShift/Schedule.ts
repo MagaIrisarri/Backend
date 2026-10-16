@@ -102,3 +102,10 @@ export function diffDay(before: DaySchedule, after: DaySchedule): DayLoss {
   }
   return { uncovered: union([...newlyClosed, ...noLongerCovered]), byEmployee };
 }
+
+// L-03: la parte del día anterior a `min` (lo que ya pasó hoy), para compararla antes y después de un cambio.
+export function clipBefore(day: DaySchedule, min: number): DaySchedule {
+  const cut = <T extends { from: string; to: string }>(xs: T[]) =>
+    xs.filter(x => toMin(x.from) < min).map(x => ({ ...x, to: toMin(x.to) > min ? hhmm(min) : x.to }));
+  return { shifts: cut(day.shifts), closures: cut(day.closures) };
+}

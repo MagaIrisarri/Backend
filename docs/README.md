@@ -30,6 +30,10 @@
 - Issues: No se utilizaron issues de GitHub. Los bugs encontrados y resueltos, con sus commits, están registrados en el tablero de Notion (sección "Bugs encontrados y resueltos"). Pull requests: [Backend](https://github.com/MagaIrisarri/Backend/pulls?q=is%3Apr+state%3Aclosed) · [Frontend](https://github.com/MagaIrisarri/Frontend/pulls?q=is%3Apr+state%3Aclosed)
 
 
+## Pruebas
+
+[tests.md](tests.md): las pruebas de la cátedra (Backend y Frontend), cómo se corren y la salida de consola de cada corrida.
+
 ## Alcance y evidencia
 
 El mapeo de cada requisito de la propuesta al código que lo cumple está en el repo Frontend: [revision-alcance.md](https://github.com/MagaIrisarri/Frontend/blob/master/docs/revision-alcance.md).

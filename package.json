@@ -8,7 +8,10 @@
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/index.js\"",
     "demo:generate": "node ./dist/Shared/db/demo/generate.js",
     "demo:load": "node ./dist/Shared/db/demo/load.js",
-    "demo:reservations": "node ./dist/Shared/db/demo/load.js --reservations"
+    "demo:reservations": "node ./dist/Shared/db/demo/load.js --reservations",
+    "db:drop-legacy": "node ./dist/Shared/db/dropLegacy.js",
+    "test": "node --import tsx --test \"tests-catedra/unit/*.test.ts\"",
+    "test:integration": "node --import tsx --test tests-catedra/integration/Reservation.db.test.ts"
   },
   "keywords": [],
   "author": "",

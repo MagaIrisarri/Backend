@@ -51,3 +51,6 @@ graphify-out/*
 .agents/
 skills-lock.json
 scripts/ralph/
+
+# Pruebas de desarrollo, locales. Las de la cátedra viven en tests-catedra/ y se versionan.
+tests/

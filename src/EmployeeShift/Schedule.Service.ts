@@ -9,11 +9,12 @@ import { Holiday } from '../Holiday/Holiday.Entity.js';
 import { HolidayAdhesion } from '../Holiday/HolidayAdhesion.Entity.js';
 import { SaveDayInput } from './Schedule.Schema.js';
 import {
-  DaySchedule, Range, covers, diffDay, employeeRanges, hhmm, normalizeDay, overlaps, sameDay, toMin, union,
+  DaySchedule, Range, clipBefore, covers, diffDay, employeeRanges, hhmm, normalizeDay, overlaps, sameDay, toMin, union,
 } from './Schedule.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { PLANNING_HORIZON_MONTHS } from '../Shared/constants/schedule.js';
-import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, NotificationType } from '../Shared/constants/status.js';
+import { NotificationService } from '../Notification/Notification.Service.js';
 
 const DOW: DayOfWeek[] = [
   DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
@@ -25,6 +26,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
 const dayStart = (date: string) => new Date(`${date}T00:00:00`);
 const dayOf = (date: string): DayOfWeek => DOW[new Date(`${date}T12:00:00`).getDay()]!;
 const clock = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const nextDay = (date: string) => { const d = dayStart(date); d.setDate(d.getDate() + 1); return iso(d); };
 
 export type DaySource = 'exception' | 'holiday-closed' | 'template';
 
@@ -38,12 +40,11 @@ export interface ResolvedDay extends DaySchedule {
 }
 
 export class ScheduleService {
-  constructor(private repo: ScheduleRepository) {}
+  constructor(private repo: ScheduleRepository, private notifications: NotificationService) {}
 
   config() { return { horizonMonths: PLANNING_HORIZON_MONTHS }; }
 
-  // R-09: fechas pasadas de solo lectura; hoy y el futuro hasta el horizonte (D-06).
-  // shortcut: L-03, hoy se puede editar aunque ya pasaron horas, bloquear franjas anteriores a la hora actual
+  // R-09: fechas pasadas de solo lectura; hoy y el futuro hasta el horizonte (D-06). L-03: de hoy, lo que ya pasó (assertPastUnchanged).
   // shortcut: L-04, "hoy" sale del reloj del servidor, calcular con la zona de la sucursal
   isEditable(date: string): boolean {
     const now = new Date();
@@ -56,18 +57,30 @@ export class ScheduleService {
     if (!this.isEditable(date)) throw new AppError('Solo se pueden editar turnos desde hoy hasta el horizonte de planificación', 400);
   }
 
+  // L-03: hoy solo se cambia de la hora actual en adelante. La semana tipo lo resuelve con su vigencia (L-01, saveTemplateDay).
+  private assertPastUnchanged(date: string, before: DaySchedule, after: DaySchedule) {
+    const now = new Date();
+    if (date !== iso(now)) return;
+    const min = toMin(clock(now));
+    if (!sameDay(clipBefore(before, min), clipBefore(after, min))) {
+      throw new AppError(`No se pueden cambiar los turnos de hoy anteriores a las ${hhmm(min)}`, 400);
+    }
+  }
+
   private async mustParking(parkingId: string): Promise<Parking> {
     const parking = await this.repo.findParking(parkingId);
     if (!parking) throw new AppError('Estacionamiento no encontrado o inactivo', 404);
     return parking;
   }
 
+  // L-01: la semana tipo que regía esa fecha, no la de hoy.
   private templateDay(parking: Parking, date: string): Promise<DaySchedule> {
-    return this.templateFor(parking, dayOf(date));
+    return this.templateFor(parking, dayOf(date), date);
   }
 
-  private async templateFor(parking: Parking, dow: DayOfWeek): Promise<DaySchedule> {
-    const [shifts, closures] = await Promise.all([this.repo.templateShifts(parking.id, dow), this.repo.templateClosures(parking.id, dow)]);
+  // Sin fecha, la última versión: la que se edita y la que siguen las fechas futuras.
+  private async templateFor(parking: Parking, dow: DayOfWeek, date?: string): Promise<DaySchedule> {
+    const [shifts, closures] = await Promise.all([this.repo.templateShifts(parking.id, dow, date), this.repo.templateClosures(parking.id, dow, date)]);
     return normalizeDay({
       shifts: shifts.map(s => ({ employeeId: s.employee.id, from: s.startTime.slice(0, 5), to: s.endTime.slice(0, 5) })),
       closures: closures.map(c => ({ from: c.startTime.slice(0, 5), to: c.endTime.slice(0, 5) })),
@@ -135,6 +148,14 @@ export class ScheduleService {
     await this.validateEmployees(parking, after);
     this.validateWithinOpening(parking, after);
     const before = await this.templateFor(parking, dayOfWeek);
+    // L-01: el cambio rige desde hoy. Si hoy sigue la plantilla y el cambio tocaría horas que ya pasaron (L-03), rige desde mañana
+    // y hoy queda como estaba: así se puede editar la semana tipo a cualquier hora.
+    const today = iso(new Date());
+    let from = today;
+    if (dayOf(today) === dayOfWeek && (await this.resolveDay(parking, today)).source === 'template') {
+      const min = toMin(clock(new Date()));
+      if (!sameDay(clipBefore(await this.templateDay(parking, today), min), clipBefore(after, min))) from = nextDay(today);
+    }
 
     const em = this.repo.em;
     const upcoming = await em.find(Reservation, {
@@ -146,22 +167,20 @@ export class ScheduleService {
     const affected: Reservation[] = [];
     for (const r of upcoming) {
       const date = iso(r.startTime);
-      if (dayOf(date) !== dayOfWeek) continue;
+      if (dayOf(date) !== dayOfWeek || date < from) continue;
       if (!followsTemplate.has(date)) followsTemplate.set(date, (await this.resolveDay(parking, date)).source === 'template');
       if (followsTemplate.get(date)) affected.push(r);
     }
     const moves = this.checkLoss(affected, null, before, after, input.transfers);
-
-    // shortcut: L-30, el empleado que recibe la reserva no se entera en la app, notificarlo con NotificationService
-    for (const [r, toId] of moves) r.attendedBy = em.getReference(User, toId);
-    const [rows, closures] = await Promise.all([this.repo.templateShifts(parking.id, dayOfWeek), this.repo.templateClosures(parking.id, dayOfWeek)]);
-    rows.forEach(s => { s.isActive = false; });
-    closures.forEach(c => em.remove(c));
+    const transferred = this.reassign(moves);
+    const [rows, closures] = await this.repo.templateRowsFrom(parking.id, dayOfWeek, from);
+    [...rows, ...closures].forEach(row => this.retire(row, from));
     for (const s of after.shifts) {
-      em.create(EmployeeShift, { parking, employee: em.getReference(User, s.employeeId), dayOfWeek, startTime: s.from, endTime: s.to, isActive: true });
+      em.create(EmployeeShift, { parking, employee: em.getReference(User, s.employeeId), dayOfWeek, startTime: s.from, endTime: s.to, isActive: true, validFrom: from });
     }
-    for (const c of after.closures) em.create(ShiftClosure, { parking, dayOfWeek, startTime: c.from, endTime: c.to });
+    for (const c of after.closures) em.create(ShiftClosure, { parking, dayOfWeek, startTime: c.from, endTime: c.to, validFrom: from });
     await em.flush(); // una sola transacción: plantilla y transferencias juntas
+    await this.notifyTransfers(transferred);
     return { dayOfWeek, ...(await this.templateFor(parking, dayOfWeek)) };
   }
 
@@ -211,31 +230,62 @@ export class ScheduleService {
     }
   }
 
-  listClosures(parkingId: string) { return this.repo.em.find(ShiftClosure, { parking: { id: parkingId } }); }
+  // R-07: el empleado que atiende una reserva nueva es el de turno que cubre todo su horario o, si ninguno, el que está al inicio.
+  async employeeFor(parking: Parking, start: Date, end: Date): Promise<string | null> {
+    const date = iso(start);
+    const day = await this.resolveDay(parking, date);
+    const range: Range = [toMin(clock(start)), iso(end) === date ? toMin(clock(end)) : 1440];
+    const full = day.shifts.find(s => covers(employeeRanges(day, s.employeeId), range));
+    const atStart = day.shifts.find(s => toMin(s.from) <= range[0] && range[0] < toMin(s.to));
+    return (full ?? atStart)?.employeeId ?? null;
+  }
+
+  listClosures(parkingId: string) { return this.repo.em.find(ShiftClosure, { parking: { id: parkingId }, validTo: null }); }
 
   async createClosure(input: { parkingId: string; dayOfWeek: DayOfWeek; startTime: string; endTime: string }) {
     const parking = await this.mustParking(input.parkingId);
     // R-05: no se cierra un horario con reservas activas o pendientes (de cualquier empleado) en las fechas futuras que lo repiten.
-    // shortcut: R-05, las fechas con excepción cuentan igual aunque el cierre semanal no las afecte, afinar si molesta
+    // Las fechas con excepción o feriado cerrado no siguen la semana tipo: el cierre no las toca.
     const upcoming = await this.repo.em.find(Reservation, {
       parkingSpace: { parking: { id: parking.id } },
       status: { $in: [...ACTIVE_RESERVATION_STATUSES] },
       endTime: { $gt: new Date() },
     });
     const range: Range = [toMin(input.startTime), toMin(input.endTime)];
-    const hits = upcoming.filter(r => dayOf(iso(r.startTime)) === input.dayOfWeek && overlaps(range, this.resRange(r, iso(r.startTime))));
+    const hits: Reservation[] = [];
+    for (const r of upcoming) {
+      const date = iso(r.startTime);
+      if (dayOf(date) !== input.dayOfWeek || !overlaps(range, this.resRange(r, date))) continue;
+      if ((await this.resolveDay(parking, date)).source === 'template') hits.push(r);
+    }
     if (hits.length) throw new AppError('Hay reservas activas o pendientes en ese horario', 409, { conflicts: hits.map(r => ({ reservationId: r.id, kind: 'cierre' })) });
-    const closure = this.repo.em.create(ShiftClosure, { parking, dayOfWeek: input.dayOfWeek, startTime: input.startTime, endTime: input.endTime });
+    const closure = this.repo.em.create(ShiftClosure, {
+      parking, dayOfWeek: input.dayOfWeek, startTime: input.startTime, endTime: input.endTime, validFrom: this.closureFrom(input.dayOfWeek, input.startTime),
+    });
     await this.repo.em.flush();
     return closure;
   }
 
   async removeClosure(id: string): Promise<boolean> {
-    const closure = await this.repo.em.findOne(ShiftClosure, { id });
+    const closure = await this.repo.em.findOne(ShiftClosure, { id, validTo: null });
     if (!closure) return false;
-    this.repo.em.remove(closure);
+    this.retire(closure, this.closureFrom(closure.dayOfWeek, closure.startTime));
     await this.repo.em.flush();
     return true;
+  }
+
+  // L-01 y L-03: un cierre suelto rige (o deja de regir) desde hoy, salvo que hoy sea ese día y ya haya empezado: entonces desde mañana.
+  private closureFrom(dow: DayOfWeek, startTime: string): string {
+    const now = new Date(), today = iso(now);
+    return dayOf(today) === dow && toMin(startTime.slice(0, 5)) < toMin(clock(now)) ? nextDay(today) : today;
+  }
+
+  // L-01: una fila de la semana tipo deja de regir desde `from` y queda para leer los días anteriores; si todavía no había
+  // empezado a regir (validFrom desde `from`), no rigió ningún día y se borra.
+  private retire(row: EmployeeShift | ShiftClosure, from: string) {
+    if (row.validFrom && row.validFrom >= from) { this.repo.em.remove(row); return; }
+    row.validTo = from;
+    if (row instanceof EmployeeShift) row.isActive = false;
   }
 
   // ---- internos ----
@@ -300,7 +350,7 @@ export class ScheduleService {
       const lost = empId ? loss.byEmployee.get(empId) : undefined;
       if (!empId || !lost || !hit(r, lost)) continue;
       const to = transfers.find(t => t.fromEmployeeId === empId)?.toEmployeeId;
-      // shortcut: L-07, no se valida que el destino esté libre a esa hora ni se avisa a nadie, validar disponibilidad y notificar
+      // L-07: el destino tiene que tener turno durante toda la reserva; un empleado atiende varias a la vez, así que no hay "ocupado".
       if (to && covers(employeeRanges(after, to), range(r))) moves.push([r, to]);
       else blocked.push(r);
     }
@@ -311,17 +361,37 @@ export class ScheduleService {
   }
 
   private async commit(parking: Parking, date: string, before: DaySchedule, after: DaySchedule, transfers: SaveDayInput['transfers']) {
+    this.assertPastUnchanged(date, before, after);
     const moves = this.checkLoss(await this.reservationsOn(parking.id, date), date, before, after, transfers);
 
     // R-12: una excepción idéntica a la semana tipo se descarta sola.
     const base = await this.templateDay(parking, date);
     const exception = await this.repo.findException(parking.id, date);
     const em = this.repo.em;
-    // shortcut: L-30, el empleado que recibe la reserva no se entera en la app, notificarlo con NotificationService
-    for (const [r, toId] of moves) r.attendedBy = em.getReference(User, toId);
+    const transferred = this.reassign(moves);
     if (sameDay(after, base)) { if (exception) em.remove(exception); }
     else if (exception) { exception.shifts = after.shifts; exception.closures = after.closures; }
     else em.create(DayException, { parking, date, shifts: after.shifts, closures: after.closures });
-    await em.flush(); // un solo flush = una transacción: transferencia de reservas y excepción juntas (L-06)
+    await em.flush(); // un solo flush = una transacción: transferencia de reservas y excepción juntas
+    await this.notifyTransfers(transferred);
+  }
+
+  // Pasa cada reserva al empleado destino (se guarda con el flush) y recuerda quién la tenía, para avisarles.
+  private reassign(moves: [Reservation, string][]) {
+    return moves.map(([r, toId]) => {
+      const fromId = r.attendedBy?.id ?? null;
+      r.attendedBy = this.repo.em.getReference(User, toId);
+      return { r, fromId, toId };
+    });
+  }
+
+  // L-30: avisa al que recibe la reserva y al que la deja, después de guardar.
+  private async notifyTransfers(list: { r: Reservation; fromId: string | null; toId: string }[]) {
+    for (const { r, fromId, toId } of list) {
+      const when = `${r.startTime.toLocaleDateString('es-AR')} de ${clock(r.startTime)} a ${clock(r.endTime)}`;
+      const base = { type: NotificationType.RESERVA_TRANSFERIDA, title: `Reserva transferida ${r.code ?? ''}`.trim(), reservationId: r.id };
+      await this.notifications.notify([toId], { ...base, message: `Te asignaron la reserva del ${when} por un cambio de turnos` });
+      if (fromId && fromId !== toId) await this.notifications.notify([fromId], { ...base, message: `La reserva del ${when} pasó a otro empleado por un cambio de turnos` });
+    }
   }
 }

@@ -16,7 +16,7 @@ export const findBaseType = <T extends { name: string }>(types: T[], category: V
  * Tipo base que corresponde a una descripción escrita como sea:
  * "Moto", "MOTOCICLETA", "motos" → MOTO; "Camioneta", "Utilitario", "SUV" → CAMIONETA; el resto → AUTO.
  * Plazas y tarifas ya no la usan (R-30: van por el id del tipo). Queda para dos cosas: asignar un tipo base
- * a los modelos del CSV del DNRPA y del vehiculos.json, y pasar al tipo los datos guardados como texto (vehicleTypeRefs).
+ * a los modelos del CSV del DNRPA y del vehiculos.json, y elegir el tipo de la demo (demoCategory).
  */
 export function categorizeVehicleType(raw?: string): VehicleCategory {
   const upper = (raw ?? '').trim().toUpperCase();

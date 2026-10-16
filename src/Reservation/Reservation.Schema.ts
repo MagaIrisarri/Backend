@@ -42,6 +42,11 @@ export const reservationIdSchema = z.object({
   }),
 });
 
+// El motivo lo exige el servicio cuando cancela el personal (el cliente no da explicaciones).
+export const cancelReservationSchema = reservationIdSchema.extend({
+  body: z.object({ reason: z.string().trim().max(300, "El motivo es de hasta 300 caracteres").optional() }).optional(),
+});
+
 export const changeSpaceSchema = z.object({
   params: z.object({
     id: z.string().uuid("El ID de la reserva debe ser un UUID válido"),

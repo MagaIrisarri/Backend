@@ -102,6 +102,12 @@ export const loginSchema = z.object({
   }),
 });
 
+// DA-02: contraseña temporal que pone el administrador; el usuario la cambia al entrar.
+export const resetPasswordSchema = z.object({
+  params: userIdSchema.shape.params,
+  body: z.object({ password: baseUserFields.password }),
+});
+
 export const updatePasswordSchema = z.object({
   params: userIdSchema.shape.params,
   body: z.object({

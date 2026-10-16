@@ -21,6 +21,8 @@ export enum NotificationType {
   PLAZA_CAMBIADA = 'PLAZA_CAMBIADA',
   SALIDA = 'SALIDA',
   RECORDATORIO = 'RECORDATORIO',
+  INGRESO = 'INGRESO',
+  RESERVA_TRANSFERIDA = 'RESERVA_TRANSFERIDA',
 }
 
 export enum UserStatus {

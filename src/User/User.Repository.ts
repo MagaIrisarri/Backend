@@ -99,6 +99,12 @@ export class UserRepository implements Repository<User> {
     return { shifts: template + special, reservations };
   }
 
+  async parkingNames(ids: string[]): Promise<Map<string, string>> {
+    if (!ids.length) return new Map();
+    const parkings = await this.em.find(Parking, { id: { $in: [...new Set(ids)] } }, { fields: ['id', 'name'] as any });
+    return new Map(parkings.map((p) => [p.id, p.name]));
+  }
+
   async ownsParking(ownerId: string, parkingId: string): Promise<boolean> {
     return (await this.em.count(Parking, { id: parkingId, owner: { id: ownerId } })) > 0;
   }

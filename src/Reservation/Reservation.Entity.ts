@@ -58,6 +58,10 @@ export class Reservation {
   @Property({ type: 'string', nullable: true })
   contactPhone?: string | null;
 
+  // Motivo que da el personal al cancelar (le llega al cliente); vacío si canceló el cliente o el sistema (R-17).
+  @Property({ type: 'string', length: 300, nullable: true })
+  cancelReason?: string | null;
+
   // R-27: valoración opcional (1 a 5) que el cliente deja en una reserva finalizada (valoracion_servicio del DER).
   @Property({ type: 'integer', nullable: true })
   rating?: number | null;

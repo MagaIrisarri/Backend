@@ -36,7 +36,10 @@ export class UserService {
 
   async findPage(options: { page: number; limit: number; q?: string; role?: string; status?: string }) {
     const { items, total, counts } = await this.userRepository.findPage(options);
-    return { data: items.map((u) => this.excludePassword(u)), meta: { page: options.page, limit: options.limit, total, counts } };
+    // DA-03: el nombre de la sucursal de cada empleado viene con la página.
+    const names = await this.userRepository.parkingNames(items.map((u) => u.parkingId).filter((id): id is string => !!id));
+    const data = items.map((u) => ({ ...this.excludePassword(u), parkingName: u.parkingId ? names.get(u.parkingId) ?? null : null }));
+    return { data, meta: { page: options.page, limit: options.limit, total, counts } };
   }
 
   async findOne(params: { id: string }): Promise<Omit<User, 'password'> | null> {
@@ -123,6 +126,15 @@ export class UserService {
     const user = await this.userRepository.update(params.id, { status: 'ACTIVO' });
     if (!user) return null;
     return this.excludePassword(user);
+  }
+
+  // DA-02 / LA-03: el administrador pone una contraseña temporal y el usuario tiene que cambiarla (mustChangePassword).
+  async resetPassword(id: string, password: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) return false;
+    if (user.type === UserType.ADMINISTRADOR) throw new AppError('El administrador cambia su contraseña desde su perfil', 400);
+    await this.userRepository.update(id, { password: await argon2.hash(password), mustChangePassword: true });
+    return true;
   }
 
   async updatePassword(id: string, currentPass: string, newPass: string): Promise<boolean> {

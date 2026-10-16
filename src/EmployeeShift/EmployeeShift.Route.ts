@@ -5,6 +5,7 @@ import { EmployeeShift } from './EmployeeShift.Entity.js';
 import { ShiftClosure } from './ShiftClosure.Entity.js';
 import { UserType } from '../Shared/constants/status.js';
 import { orm } from "../Shared/db/orm.js";
+import { notificationService } from '../Notification/Notification.Route.js';
 
 import { EmployeeShiftController } from "./EmployeeShift.Controller.js";
 import { EmployeeShiftRepository } from "./EmployeeShift.Repository.js";
@@ -17,7 +18,7 @@ import { dayParamsSchema, saveDaySchema, createClosureSchema, closureIdSchema, p
 
 export const employeeShiftRouter = Router();
 
-export const scheduleService = new ScheduleService(new ScheduleRepository(orm.em));
+export const scheduleService = new ScheduleService(new ScheduleRepository(orm.em), notificationService);
 
 const employeeShiftRepository = new EmployeeShiftRepository(orm.em);
 const employeeShiftService = new EmployeeShiftService(employeeShiftRepository, scheduleService);

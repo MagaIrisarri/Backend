@@ -29,8 +29,7 @@ export class Parking {
   @Property({ type: 'string', nullable: false })
   address!: string;
 
-  // La capacidad de cada tipo es la cantidad de plazas activas de ese tipo (R-30): no se guarda aparte.
-  // shortcut: L-39, las columnas car_capacity, motorcycle_capacity y truck_capacity quedan en la base sin uso, borrarlas con SQL a mano
+  // La capacidad de cada tipo es la cantidad de plazas activas de ese tipo (R-30): no se guarda aparte (las columnas viejas las borra pnpm db:drop-legacy, L-39).
 
   @Property({ type: 'time' })
   openingTime!: string;

@@ -37,7 +37,8 @@ export type DemoReservation = {
   parking: string; space: string; plate: string; day: number; start: string; hours: number; outcome: Outcome;
   lead: number; // minutos entre el alta y el inicio (0: mostrador)
   arrive?: number; exit?: number; extra?: number; pay?: string; unpaid?: boolean; rating?: number;
-  services?: string[]; walkIn?: boolean; cancelLead?: number; assigned?: boolean;
+  services?: string[]; walkIn?: boolean; cancelLead?: number;
+  assigned?: boolean; // sin uso desde R-07 (toda reserva tiene empleado); generate lo sigue sorteando para no cambiar la semilla
 };
 
 export type DemoServiceCatalog = { name: string; description: string }[];
