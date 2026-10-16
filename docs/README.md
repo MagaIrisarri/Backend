@@ -12,7 +12,7 @@
 
 ## Instalación y ejecución
 
-- Backend: [README](../README.md#instalación)
+- Backend: [README](../README.MD#instalación)
 - Frontend: [README](https://github.com/MagaIrisarri/Frontend#instalación)
 
 ## Minutas de reunión y avance
