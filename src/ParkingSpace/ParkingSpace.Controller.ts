@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ParkingSpaceService } from './ParkingSpace.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { actorId } from '../Shared/utils/actorId.js';
 
 export class ParkingSpaceController {
   constructor(private parkingSpaceService: ParkingSpaceService) {}
@@ -51,7 +52,7 @@ export class ParkingSpaceController {
 
   update = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const { space, moved } = await this.parkingSpaceService.update(id, req.body);
+    const { space, moved } = await this.parkingSpaceService.update(id, req.body, actorId(req, 'modificar la plaza'));
 
     if (!space) {
       throw new AppError('Plaza no encontrada', 404);
@@ -67,7 +68,7 @@ export class ParkingSpaceController {
   // ?relocate=true confirma pasar las reservas futuras a otras plazas libres (R-19).
   remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const { moved } = await this.parkingSpaceService.remove(id, req.query.relocate === 'true');
+    const { moved } = await this.parkingSpaceService.remove(id, req.query.relocate === 'true', actorId(req, 'dar de baja la plaza'));
 
     return res.status(200).json({
       message: 'Plaza dada de baja con éxito',

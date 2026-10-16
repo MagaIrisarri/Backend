@@ -201,6 +201,7 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(updated);
   }
 
+  // shortcut: L-42, desactiva aunque tenga reservas pendientes o en curso y no avisa, rechazar con 409 como las otras bajas
   async remove(id: string): Promise<boolean> {
     return await this.parkingRepository.remove({ id });
   }

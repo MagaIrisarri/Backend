@@ -239,7 +239,15 @@ export class ReservationService {
     if (employee?.type !== UserType.EMPLEADO || employee.parkingId !== reservation.parkingSpace?.parking?.id) {
       throw new AppError("El empleado no existe, está dado de baja o no trabaja en esta sucursal", 400);
     }
-    return (await this.repo.update(id, { attendedById: employeeId }))!;
+    const previous = reservation.attendedBy?.id;
+    if (previous === employeeId) return reservation;
+    const updated = (await this.repo.update(id, { attendedById: employeeId }))!;
+    // Como en los cambios de turnos (L-30): se enteran el que recibe la reserva y el que la deja, salvo quien hizo el cambio.
+    const when = `${reservation.startTime.toLocaleDateString('es-AR')} de ${formatTimeHHMM(reservation.startTime)} a ${formatTimeHHMM(reservation.endTime)}`;
+    const base = { type: NotificationType.RESERVA_TRANSFERIDA, title: `Reserva transferida ${reservation.code ?? reservationCode(id)}`, reservationId: id };
+    if (employeeId !== userId) await this.notifications.notify([employeeId], { ...base, message: `Te asignaron la reserva de ${reservation.vehicle.plate} del ${when}` });
+    if (previous && previous !== userId) await this.notifications.notify([previous], { ...base, message: `La reserva de ${reservation.vehicle.plate} del ${when} pasó a otro empleado` });
+    return updated;
   }
 
   async findByClientId(clientId: string): Promise<Reservation[]> {
@@ -336,9 +344,17 @@ export class ReservationService {
       throw new AppError("La reserva ya está en esa plaza", 400);
     }
 
+    const from = reservation.parkingSpace.spaceCode; // antes de mover: la transacción actualiza esta misma entidad
     await this.repo.changeSpace(id, parkingSpaceId);
     const updated = (await this.repo.findOne({ id }))!;
     await this.notifyClient(updated, NotificationType.PLAZA_CAMBIADA, 'Cambio de plaza', `Tu reserva pasó a la plaza ${updated.parkingSpace.spaceCode}`);
+    const assigned = updated.attendedBy?.id;
+    if (assigned && assigned !== userId) {
+      await this.notifications.notify([assigned], {
+        type: NotificationType.PLAZA_CAMBIADA, title: `Cambio de plaza ${updated.code ?? reservationCode(updated.id)}`, reservationId: updated.id,
+        message: `${updated.vehicle.plate} pasó de la plaza ${from} a la ${updated.parkingSpace.spaceCode}`,
+      });
+    }
     return updated;
   }
 

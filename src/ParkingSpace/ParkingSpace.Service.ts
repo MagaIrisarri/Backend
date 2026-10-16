@@ -4,12 +4,36 @@ import { ParkingSpaceRepository, type Relocation } from "./ParkingSpace.Reposito
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
 import { VehicleType } from "../Vehicle/VehicleType/VehicleType.Entity.js";
+import { NotificationService } from "../Notification/Notification.Service.js";
+import { NotificationType } from "../Shared/constants/status.js";
 
 export class ParkingSpaceService {
   constructor(
     private spaceRepo: ParkingSpaceRepository,
-    private parkingRepo: ParkingRepository
+    private parkingRepo: ParkingRepository,
+    private notifications: NotificationService,
   ) {}
+
+  // R-19: las reservas que pasaron a otra plaza se le avisan a su cliente y a su empleado asignado (si no es quien sacó la plaza).
+  // Corre después de la transacción: un fallo acá no revierte la reubicación.
+  private async notifyRelocated(space: ParkingSpace, moved: Relocation[], why: string, actorId: string): Promise<void> {
+    if (!moved.length) return;
+    try {
+      const reservations = await this.spaceRepo.findRelocated(moved.map((m) => m.reservationId));
+      for (const m of moved) {
+        const r = reservations.find((x) => x.id === m.reservationId);
+        if (!r) continue;
+        const base = { type: NotificationType.PLAZA_CAMBIADA, title: `Cambio de plaza ${m.code}`, reservationId: r.id };
+        await this.notifications.notify([r.vehicle.client.id], { ...base, message: `Tu reserva pasó de la plaza ${space.spaceCode} a la ${m.toSpaceCode} (${space.parking.name})` });
+        const assigned = r.attendedBy?.id;
+        if (assigned && assigned !== actorId) {
+          await this.notifications.notify([assigned], { ...base, message: `${m.plate} pasó de la plaza ${space.spaceCode} a la ${m.toSpaceCode} porque la plaza ${why}` });
+        }
+      }
+    } catch (err) {
+      console.error('No se pudo avisar la reubicación de reservas:', err);
+    }
+  }
 
   async findByParking(parkingId: string): Promise<ParkingSpace[]> {
     return await this.spaceRepo.findByParking(parkingId);
@@ -76,16 +100,19 @@ export class ParkingSpaceService {
   }
 
   // Pasar a mantenimiento saca la plaza de servicio (R-18/R-19: reubica sus reservas futuras si se confirma).
-  async update(id: string, data: Partial<ParkingSpace> & { relocate?: boolean }): Promise<{ space: ParkingSpace | null; moved: Relocation[] }> {
+  async update(id: string, data: Partial<ParkingSpace> & { relocate?: boolean }, actorId: string): Promise<{ space: ParkingSpace | null; moved: Relocation[] }> {
     const { relocate, ...changes } = data;
     if (changes.state === SpaceState.MANTENIMIENTO) {
-      return await this.spaceRepo.takeOutOfService(id, 'MANTENIMIENTO', !!relocate);
+      const result = await this.spaceRepo.takeOutOfService(id, 'MANTENIMIENTO', !!relocate);
+      await this.notifyRelocated(result.space, result.moved, 'pasó a mantenimiento', actorId);
+      return result;
     }
     return { space: await this.spaceRepo.update(id, changes), moved: [] };
   }
 
-  async remove(id: string, relocate = false): Promise<{ moved: Relocation[] }> {
-    const { moved } = await this.spaceRepo.takeOutOfService(id, 'BAJA', relocate);
+  async remove(id: string, relocate: boolean, actorId: string): Promise<{ moved: Relocation[] }> {
+    const { space, moved } = await this.spaceRepo.takeOutOfService(id, 'BAJA', relocate);
+    await this.notifyRelocated(space, moved, 'se dio de baja', actorId);
     return { moved };
   }
 

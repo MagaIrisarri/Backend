@@ -106,6 +106,11 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
     });
   }
 
+  // Reservas recién reubicadas, con su cliente y su empleado asignado, para avisarles (R-19).
+  async findRelocated(ids: string[]): Promise<Reservation[]> {
+    return await this.em.find(Reservation, { id: { $in: ids } }, { populate: ['vehicle.client', 'attendedBy'] as any });
+  }
+
   // Asigna en orden de inicio la primera plaza libre del mismo tipo sin choque, contando lo que ya se reasignó en esta pasada.
   private async planRelocation(tx: EntityManager, space: ParkingSpace) {
     const reservations = await tx.find(Reservation, {
