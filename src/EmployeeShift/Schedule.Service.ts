@@ -9,7 +9,7 @@ import { Holiday } from '../Holiday/Holiday.Entity.js';
 import { HolidayAdhesion } from '../Holiday/HolidayAdhesion.Entity.js';
 import { SaveDayInput } from './Schedule.Schema.js';
 import {
-  DaySchedule, Range, clipBefore, covers, diffDay, employeeRanges, hhmm, normalizeDay, overlaps, sameDay, toMin, union,
+  DaySchedule, Range, assigneeFor, clipBefore, covers, diffDay, employeeRanges, hhmm, normalizeDay, overlaps, sameDay, toMin, union,
 } from './Schedule.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { PLANNING_HORIZON_MONTHS } from '../Shared/constants/schedule.js';
@@ -109,7 +109,7 @@ export class ScheduleService {
     return this.resolveDay(await this.mustParking(parkingId), date);
   }
 
-  async saveDay(parkingId: string, date: string, input: SaveDayInput): Promise<ResolvedDay> {
+  async saveDay(parkingId: string, date: string, input: SaveDayInput): Promise<ResolvedDay & { reassigned: number }> {
     this.assertEditable(date);
     const parking = await this.mustParking(parkingId);
     const before = await this.resolveDay(parking, date);
@@ -118,8 +118,8 @@ export class ScheduleService {
     const after = normalizeDay(input);
     await this.validateEmployees(parking, after);
     this.validateWithinOpening(parking, after);
-    await this.commit(parking, date, before, after, input.transfers);
-    return this.resolveDay(parking, date);
+    const reassigned = await this.commit(parking, date, before, after, input.transfers);
+    return { ...(await this.resolveDay(parking, date)), reassigned };
   }
 
   // Días resueltos de un rango (semana del calendario, resumen mensual de horas). Máximo 62 días.
@@ -181,7 +181,7 @@ export class ScheduleService {
     for (const c of after.closures) em.create(ShiftClosure, { parking, dayOfWeek, startTime: c.from, endTime: c.to, validFrom: from });
     await em.flush(); // una sola transacción: plantilla y transferencias juntas
     await this.notifyTransfers(transferred);
-    return { dayOfWeek, ...(await this.templateFor(parking, dayOfWeek)) };
+    return { dayOfWeek, ...(await this.templateFor(parking, dayOfWeek)), reassigned: transferred.length };
   }
 
   // Vuelve el día a la semana tipo; si no hay excepción no hace nada.
@@ -233,11 +233,8 @@ export class ScheduleService {
   // R-07: el empleado que atiende una reserva nueva es el de turno que cubre todo su horario o, si ninguno, el que está al inicio.
   async employeeFor(parking: Parking, start: Date, end: Date): Promise<string | null> {
     const date = iso(start);
-    const day = await this.resolveDay(parking, date);
     const range: Range = [toMin(clock(start)), iso(end) === date ? toMin(clock(end)) : 1440];
-    const full = day.shifts.find(s => covers(employeeRanges(day, s.employeeId), range));
-    const atStart = day.shifts.find(s => toMin(s.from) <= range[0] && range[0] < toMin(s.to));
-    return (full ?? atStart)?.employeeId ?? null;
+    return assigneeFor(await this.resolveDay(parking, date), range);
   }
 
   listClosures(parkingId: string) { return this.repo.em.find(ShiftClosure, { parking: { id: parkingId }, validTo: null }); }
@@ -328,7 +325,7 @@ export class ScheduleService {
     };
   }
 
-  // R-05 / R-01 / R-06 sobre las reservas afectadas por un cambio. Devuelve las transferencias a aplicar o lanza 409.
+  // R-05 / R-01 / R-06 sobre las reservas afectadas por un cambio. Devuelve las reasignaciones a aplicar o lanza 409.
   // date null = cada reserva se mide en su propia fecha (cambios de la semana tipo).
   // shortcut: L-08, la reserva se mide solo en su fecha de inicio, usar el intervalo completo con reservas que cruzan medianoche
   private checkLoss(reservations: Reservation[], date: string | null, before: DaySchedule, after: DaySchedule, transfers: SaveDayInput['transfers']) {
@@ -342,17 +339,18 @@ export class ScheduleService {
       throw new AppError('Hay reservas activas o pendientes en horas que quedarían cerradas o sin cobertura', 409, this.conflicts(uncovered, date, 'cobertura'));
     }
 
-    // R-06: no se quita el turno de un empleado con reservas, salvo que otro lo reemplace y la reserva quede dentro de su turno.
+    // R-06: si el empleado asignado pierde horas de una reserva, la reserva pasa sola a quien la atiende con los turnos nuevos (R-07).
+    // Una transferencia pedida se respeta si el destino tiene turno durante toda la reserva (L-07).
     const moves: [Reservation, string][] = [];
     const blocked: Reservation[] = [];
     for (const r of reservations) {
       const empId = r.attendedBy?.id;
       const lost = empId ? loss.byEmployee.get(empId) : undefined;
       if (!empId || !lost || !hit(r, lost)) continue;
-      const to = transfers.find(t => t.fromEmployeeId === empId)?.toEmployeeId;
-      // L-07: el destino tiene que tener turno durante toda la reserva; un empleado atiende varias a la vez, así que no hay "ocupado".
-      if (to && covers(employeeRanges(after, to), range(r))) moves.push([r, to]);
-      else blocked.push(r);
+      const asked = transfers.find(t => t.fromEmployeeId === empId)?.toEmployeeId;
+      const to = asked && covers(employeeRanges(after, asked), range(r)) ? asked : assigneeFor(after, range(r));
+      if (!to) blocked.push(r); // no pasa: lo que queda sin nadie lo rechaza R-01 arriba
+      else if (to !== empId) moves.push([r, to]);
     }
     if (blocked.length) {
       throw new AppError('El empleado tiene reservas activas o pendientes en ese horario', 409, this.conflicts(blocked, date, 'empleado'));
@@ -360,7 +358,7 @@ export class ScheduleService {
     return moves;
   }
 
-  private async commit(parking: Parking, date: string, before: DaySchedule, after: DaySchedule, transfers: SaveDayInput['transfers']) {
+  private async commit(parking: Parking, date: string, before: DaySchedule, after: DaySchedule, transfers: SaveDayInput['transfers']): Promise<number> {
     this.assertPastUnchanged(date, before, after);
     const moves = this.checkLoss(await this.reservationsOn(parking.id, date), date, before, after, transfers);
 
@@ -374,6 +372,7 @@ export class ScheduleService {
     else em.create(DayException, { parking, date, shifts: after.shifts, closures: after.closures });
     await em.flush(); // un solo flush = una transacción: transferencia de reservas y excepción juntas
     await this.notifyTransfers(transferred);
+    return transferred.length;
   }
 
   // Pasa cada reserva al empleado destino (se guarda con el flush) y recuerda quién la tenía, para avisarles.

@@ -79,6 +79,13 @@ export function employeeRanges(day: DaySchedule, employeeId: string): Range[] {
   return union(day.shifts.filter(s => s.employeeId === employeeId).map(shiftRange));
 }
 
+// R-07: quien atiende un horario es el empleado que lo cubre entero o, si ninguno, el que está de turno al inicio.
+export function assigneeFor(day: DaySchedule, range: Range): string | null {
+  const full = day.shifts.find(s => covers(employeeRanges(day, s.employeeId), range));
+  const atStart = day.shifts.find(s => toMin(s.from) <= range[0] && range[0] < toMin(s.to));
+  return (full ?? atStart)?.employeeId ?? null;
+}
+
 const coveredRanges = (day: DaySchedule): Range[] => union(day.shifts.map(shiftRange));
 
 export interface DayLoss {

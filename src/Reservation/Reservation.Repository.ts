@@ -68,7 +68,7 @@ export class ReservationRepository implements Repository<Reservation> {
     return await this.entityManager.find(
       Reservation,
       { parkingSpace: { parking: { owner: { id: ownerId } } } },
-      { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any,
+      { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy', 'checkedInBy'] as any,
         orderBy: { startTime: 'DESC' }
       }
     );
