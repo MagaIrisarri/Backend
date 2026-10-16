@@ -38,7 +38,6 @@ El servidor toma la configuración de variables de entorno. Todas tienen un valo
 | `DB_NAME` | `parkingdb` | Nombre de la base |
 | `PORT` | `3000` | Puerto de la API |
 | `NODE_ENV` | — | Fuera de `production` se muestran las consultas SQL en consola; con `development` los errores 500 devuelven el detalle |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | — | Envío de mails (recordatorio de reserva). Sin `SMTP_HOST` el mail se escribe en la consola |
 
 Ejemplo en bash:
 
@@ -62,7 +61,7 @@ Compila con TypeScript, levanta la API en `http://localhost:3000` y se reinicia 
 
 1. Sincroniza el esquema de la base (crea tablas y columnas que falten; nunca borra).
 2. Carga los datos de prueba si no están (es seguro reiniciar: no duplica nada).
-3. Inicia los procesos automáticos (cancelación de reservas vencidas y recordatorios por mail).
+3. Inicia los procesos automáticos (cancelación de reservas vencidas y avisos de recordatorio en la app).
 
 Otros scripts:
 
@@ -72,16 +71,32 @@ Otros scripts:
 
 > El frontend tiene que correr en `http://localhost:5173`, que es el origen habilitado por CORS.
 
-## Usuarios de prueba
+## Datos de demostración
 
-Todos con contraseña `password123`:
+Al arrancar, el backend solo carga el catálogo (feriados, tipos de vehículo, seguros, marcas y modelos) y el administrador.
+Los datos de uso salen de la demo, que se carga una vez en la base de siempre (borra los datos que no son de catálogo):
+
+```bash
+pnpm build
+pnpm demo:load --yes
+```
+
+El día de la exposición, poco antes de presentar, se recargan solo las reservas, para que su estado corresponda a esa hora:
+
+```bash
+pnpm demo:reservations --yes
+```
+
+Son 20 dueños, 45 sucursales, 150 empleados, 200 clientes, 250 vehículos y unas 15.000 reservas, de un mes antes a un mes
+después del 23/10/2026. Para regenerar los JSON (`demo/data/`): `pnpm demo:generate`, y después
+volver a cargar todo. Usuarios para mostrar, todos con contraseña `password123`:
 
 | Rol | Email |
 |---|---|
 | Administrador | `admin@cocheras.com` |
-| Dueño | `dueno1@cocheras.com` … `dueno5@cocheras.com` |
-| Empleado | `empleado1@cocheras.com` … `empleado8@cocheras.com` (el 8 está dado de baja) |
-| Cliente | `cliente1@cocheras.com` … `cliente10@cocheras.com` (el 10 está dado de baja) |
+| Dueño | `dueno@cocheras.com` (Laura Benítez: Estacionamiento Central Plaza y Parking Alberdi, en Rosario) |
+| Empleado | `empleado@cocheras.com` (Lucas Ferreyra, Central Plaza, lunes a viernes de 7 a 13) |
+| Cliente | `cliente@cocheras.com` (Sofía Martínez, con auto, moto y camioneta) |
 
 ## Estructura
 
@@ -128,8 +143,8 @@ El sistema soporta 4 roles: `CLIENTE`, `DUEÑO`, `EMPLEADO` y `ADMIN`:
 
 ### 3. Asignación y Disponibilidad de Plazas (`ParkingSpace`)
 
-- **Generación en lote**: Al registrar un estacionamiento, el dueño define capacidades (`cant_total_auto`, `cant_total_moto`), lo que permite generar masivamente las plazas iniciales.
-- **Búsqueda por solapamiento temporal (`checkAvailability`)**: Determina plazas libres cruzando el rango horario solicitado (`startTime` a `endTime`) contra las reservas activas en ese intervalo, filtrando por tipo de vehículo y asegurando que no haya sobreventa de lugares.
+- **Plazas y tarifas por tipo de vehículo (R-30)**: cada plaza y cada tarifa apuntan a un tipo del catálogo del administrador (AUTO, MOTO, CAMIONETA o los que agregue). Al registrar un estacionamiento, el dueño indica cuántas plazas quiere de cada tipo y se generan con código correlativo (A-01, M-01, UTI-01…). La capacidad de cada tipo es la cantidad de plazas activas.
+- **Búsqueda por solapamiento temporal (`checkAvailability`)**: Determina plazas libres cruzando el rango horario solicitado (`startTime` a `endTime`) contra las reservas activas en ese intervalo, filtrando por el tipo del vehículo (solo sus plazas) y asegurando que no haya sobreventa de lugares.
 
 ### 4. Versionado e Historial de Precios (`ParkingPrice` y `ServicePrice`)
 
@@ -143,4 +158,10 @@ El sistema soporta 4 roles: `CLIENTE`, `DUEÑO`, `EMPLEADO` y `ADMIN`:
 
 ### 6. Consistencia de Fechas y Zona Horaria
 
-- Todo el entorno de ejecución fija la zona horaria en `America/Argentina/Buenos_Aires` (`process.env.TZ`), garantizando paridad entre el cálculo de reservas, vigencia de precios, turnos y columnas `DATETIME` de MySQL sin desfasajes de UTC.
+- El proceso fija la zona horaria en `America/Argentina/Buenos_Aires` (`process.env.TZ`, en `src/Shared/db/orm.ts`) para los cálculos de reservas, precios y turnos. MikroORM guarda y lee los `DATETIME` en UTC. Las columnas `date` del sistema usan `LocalDateType` para guardar el día local; si no, una fecha asignada después de las 21 h quedaría con el día siguiente.
+
+### 7. Autenticación (JWT)
+
+- `POST /api/users/login` devuelve un token firmado con la variable de entorno `JWT_SECRET`, vigente 8 horas. **`JWT_SECRET` es obligatoria con `NODE_ENV=production`**: sin ella el servidor no arranca. Fuera de producción tiene un valor por defecto.
+- El frontend manda el token en `Authorization: Bearer`. Cada ruta protegida exige la sesión y el rol (`auth`), que el id propio en la ruta o el body sea el del token (`self`) y que el recurso sea del usuario (`ownParking`, `ownVehicle`, `ownReservation`, `staffOfInvoice`). Todo está en `src/Shared/middlewares/auth.ts`.
+- Son públicos el registro, el login y lo que muestra el mapa sin sesión (cocheras activas, plazas, disponibilidad, tarifas, servicios y catálogos de vehículos).

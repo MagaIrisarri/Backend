@@ -6,6 +6,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     return res.status(err.statusCode).json({
       status: 'error',
       message: err.message,
+      details: err.details,
     });
   }
 

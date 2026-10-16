@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Lavado exterior",
+    "description": "Lavado a mano de carrocería, llantas y vidrios"
+  },
+  {
+    "name": "Lavado completo",
+    "description": "Lavado exterior e interior con aspirado"
+  },
+  {
+    "name": "Control de neumáticos",
+    "description": "Control de presión e inflado de las cuatro ruedas"
+  },
+  {
+    "name": "Carga de batería",
+    "description": "Carga lenta de batería mientras el vehículo está estacionado"
+  },
+  {
+    "name": "Aspirado interior",
+    "description": "Aspirado de butacas, alfombras y baúl"
+  }
+]

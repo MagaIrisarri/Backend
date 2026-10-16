@@ -1,57 +1,79 @@
 import { AppError } from '../Shared/utils/AppError.js';
-import { ParkingSpaceRepository } from "./ParkingSpace.Repository.js";
+import { spacePrefix } from '../Shared/utils/vehicleTypes.js';
+import { ParkingSpaceRepository, type Relocation } from "./ParkingSpace.Repository.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { ParkingRepository } from "../Parking/Parking.Repository.js";
-import { ReservationRepository } from "../Reservation/Reservation.Repository.js";
+import { VehicleType } from "../Vehicle/VehicleType/VehicleType.Entity.js";
+import { NotificationService } from "../Notification/Notification.Service.js";
+import { NotificationType } from "../Shared/constants/status.js";
 
 export class ParkingSpaceService {
   constructor(
     private spaceRepo: ParkingSpaceRepository,
     private parkingRepo: ParkingRepository,
-    private reservationRepo: ReservationRepository
+    private notifications: NotificationService,
   ) {}
+
+  // R-19: las reservas que pasaron a otra plaza se le avisan a su cliente y a su empleado asignado (si no es quien sacó la plaza).
+  // Corre después de la transacción: un fallo acá no revierte la reubicación.
+  private async notifyRelocated(space: ParkingSpace, moved: Relocation[], why: string, actorId: string): Promise<void> {
+    if (!moved.length) return;
+    try {
+      const reservations = await this.spaceRepo.findRelocated(moved.map((m) => m.reservationId));
+      for (const m of moved) {
+        const r = reservations.find((x) => x.id === m.reservationId);
+        if (!r) continue;
+        const base = { type: NotificationType.PLAZA_CAMBIADA, title: `Cambio de plaza ${m.code}`, reservationId: r.id };
+        await this.notifications.notify([r.vehicle.client.id], { ...base, message: `Tu reserva pasó de la plaza ${space.spaceCode} a la ${m.toSpaceCode} (${space.parking.name})` });
+        const assigned = r.attendedBy?.id;
+        if (assigned && assigned !== actorId) {
+          await this.notifications.notify([assigned], { ...base, message: `${m.plate} pasó de la plaza ${space.spaceCode} a la ${m.toSpaceCode} porque la plaza ${why}` });
+        }
+      }
+    } catch (err) {
+      console.error('No se pudo avisar la reubicación de reservas:', err);
+    }
+  }
 
   async findByParking(parkingId: string): Promise<ParkingSpace[]> {
     return await this.spaceRepo.findByParking(parkingId);
-  }
-
-  async findAvailable(parkingId: string, vehicleType?: string): Promise<ParkingSpace[]> {
-    return await this.spaceRepo.findAvailableByParking(parkingId, vehicleType);
   }
 
   async findOne(id: string): Promise<ParkingSpace | null> {
     return await this.spaceRepo.findOne({ id });
   }
 
-  async create(parkingId: string, data: { spaceCode: string; vehicleType: string }): Promise<ParkingSpace> {
+  // R-30: una plaza admite un tipo de vehículo activo del catálogo del administrador.
+  private async vehicleType(id: string): Promise<VehicleType> {
+    const type = await this.spaceRepo.findVehicleType(id);
+    if (!type) throw new AppError("Tipo de vehículo no encontrado o dado de baja", 404);
+    return type;
+  }
+
+  async create(parkingId: string, data: { spaceCode: string; vehicleTypeId: string }): Promise<ParkingSpace> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
 
     return await this.spaceRepo.add({
-      ...data,
+      spaceCode: data.spaceCode,
+      vehicleType: await this.vehicleType(data.vehicleTypeId),
       state: SpaceState.LIBRE,
       parking,
     });
   }
 
+  // Plazas en lote con código correlativo por tipo (A-01, M-01, UTI-01…), a continuación del último usado.
+  // La capacidad del tipo es la cantidad de plazas activas (R-30), así que no hay nada más que ajustar.
   async createBulkManual(
-    parkingId: string, 
-    data: { vehicleType: string; count: number }
+    parkingId: string,
+    data: { vehicleTypeId: string; count: number }
   ): Promise<void> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
+    const vehicleType = await this.vehicleType(data.vehicleTypeId);
 
     const existingSpaces = await this.spaceRepo.findByParking(parkingId);
-    const prefixMap: Record<string, string> = {
-      AUTO: 'A',
-      AUTOMOVIL: 'A',
-      MOTOCICLETA: 'M',
-      MOTO: 'M',
-      CAMIONETA: 'C',
-      UTILITARIO: 'C',
-    };
-    const upperType = data.vehicleType.trim().toUpperCase();
-    const prefix = prefixMap[upperType] || upperType.charAt(0);
+    const prefix = spacePrefix(vehicleType.name);
 
     let maxNumber = 0;
     for (const s of existingSpaces) {
@@ -68,7 +90,7 @@ export class ParkingSpaceService {
     for (let i = 0; i < data.count; i++) {
       spacesToCreate.push({
         spaceCode: `${prefix}-${String(startNumber + i).padStart(2, '0')}`,
-        vehicleType: data.vehicleType,
+        vehicleType,
         state: SpaceState.LIBRE,
         parking,
       });
@@ -77,84 +99,30 @@ export class ParkingSpaceService {
     await this.spaceRepo.createBulk(spacesToCreate);
   }
 
-  async update(id: string, data: Partial<ParkingSpace>): Promise<ParkingSpace | null> {
-    if (data.state === SpaceState.MANTENIMIENTO) {
-      const space = await this.spaceRepo.findOne({ id });
-      if (!space) throw new AppError("Plaza no encontrada", 404);
-
-      // Verificar si la plaza tiene reservas activas o futuras
-      const em = (this.reservationRepo as any).em;
-      const { Reservation } = await import('../Reservation/Reservation.Entity.js');
-      const activeReservations = await em.find(Reservation, {
-        parkingSpace: { id },
-        status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-        endTime: { $gte: new Date() },
-      });
-
-      if (activeReservations.length > 0) {
-        throw new AppError(
-          `No se puede pasar a mantenimiento la plaza ${space.spaceCode} porque posee ${activeReservations.length} reserva(s) vigente(s) o programada(s)`,
-          400
-        );
-      }
+  // Pasar a mantenimiento saca la plaza de servicio (R-18/R-19: reubica sus reservas futuras si se confirma).
+  async update(id: string, data: Partial<ParkingSpace> & { relocate?: boolean }, actorId: string): Promise<{ space: ParkingSpace | null; moved: Relocation[] }> {
+    const { relocate, ...changes } = data;
+    if (changes.state === SpaceState.MANTENIMIENTO) {
+      const result = await this.spaceRepo.takeOutOfService(id, 'MANTENIMIENTO', !!relocate);
+      await this.notifyRelocated(result.space, result.moved, 'pasó a mantenimiento', actorId);
+      return result;
     }
-
-    return await this.spaceRepo.update(id, data);
+    return { space: await this.spaceRepo.update(id, changes), moved: [] };
   }
 
-  async remove(id: string): Promise<boolean> {
-    const space = await this.spaceRepo.findOne({ id });
-    if (!space) throw new AppError("Plaza no encontrada", 404);
-
-    const em = (this.reservationRepo as any).em;
-    const { Reservation } = await import('../Reservation/Reservation.Entity.js');
-    const activeReservations = await em.find(Reservation, {
-      parkingSpace: { id },
-      status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-      endTime: { $gte: new Date() },
-    });
-
-    if (activeReservations.length > 0) {
-      throw new AppError(
-        `No se puede dar de baja la plaza ${space.spaceCode} porque posee ${activeReservations.length} reserva(s) vigente(s) o programada(s)`,
-        400
-      );
-    }
-
-    return await this.spaceRepo.remove({ id });
+  async remove(id: string, relocate: boolean, actorId: string): Promise<{ moved: Relocation[] }> {
+    const { space, moved } = await this.spaceRepo.takeOutOfService(id, 'BAJA', relocate);
+    await this.notifyRelocated(space, moved, 'se dio de baja', actorId);
+    return { moved };
   }
 
-  async checkAvailability(parkingId: string, vehicleType: string, startTime: Date, endTime: Date): Promise<(ParkingSpace & { available: boolean })[]> {
+  async checkAvailability(parkingId: string, vehicleTypeId: string, startTime: Date, endTime: Date): Promise<(ParkingSpace & { available: boolean })[]> {
     const parking = await this.parkingRepo.findOne({ id: parkingId });
     if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
-    const marginMs = parking.reservationMargin * 60 * 60 * 1000;
-    const startWithMargin = new Date(startTime.getTime() - marginMs);
-    const endWithMargin = new Date(endTime.getTime() + marginMs);
-    const existingSpaces = await this.spaceRepo.findByParking(parkingId);
-
-    const matchesVehicleType = (spaceType: string, queryType: string): boolean => {
-      const s = (spaceType || '').trim().toUpperCase();
-      const q = (queryType || '').trim().toUpperCase();
-      if (s === q) return true;
-      if (['MOTO', 'MOTOCICLETA'].includes(s) && ['MOTO', 'MOTOCICLETA'].includes(q)) return true;
-      if (
-        ['CAMIONETA', 'UTILITARIO', 'VAN', 'PICKUP', 'PICK-UP'].includes(s) &&
-        ['CAMIONETA', 'UTILITARIO', 'VAN', 'PICKUP', 'PICK-UP'].includes(q)
-      ) return true;
-      if (['AUTO', 'AUTOMOVIL'].includes(s) && ['AUTO', 'AUTOMOVIL'].includes(q)) return true;
-      return false;
-    };
-
-    const spacesOfSameType = existingSpaces.filter((s) =>
-      matchesVehicleType(s.vehicleType, vehicleType)
-    );
-
-    const spacesOccupied = await this.reservationRepo.findConflictingSpaceIds(parking, startWithMargin, endWithMargin);
-
-    return spacesOfSameType.map((space) => ({
-      ...space,
-      available: space.state === 'LIBRE' && !spacesOccupied.has(space.id),
-    }));
+    // Misma regla que al reservar: una plaza ocupada ahora puede estar libre en el horario pedido.
+    const free = new Set((await this.spaceRepo.freeSpaces(parking, vehicleTypeId, startTime, endTime)).map((s) => s.id));
+    const spacesOfSameType = (await this.spaceRepo.findByParking(parkingId)).filter((s) => s.vehicleType.id === vehicleTypeId);
+    return spacesOfSameType.map((space) => ({ ...space, available: free.has(space.id) }));
   }
 
 }

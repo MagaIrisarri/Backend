@@ -6,7 +6,12 @@ import { AppError } from '../Shared/utils/AppError.js';
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
   
-  public findAll = catchAsync(async (_req: Request, res: Response) => {
+  public findAll = catchAsync(async (req: Request, res: Response) => {
+    const { page, ...rest } = req.query as any; // ya validado por listParkingsQuerySchema
+    if (page) {
+      const { data, meta } = await this.parkingService.findPage({ page, ...rest });
+      return res.status(200).json({ message: data.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados', data, meta });
+    }
     const parkings = await this.parkingService.findAll();
     return res.status(200).json({
       message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
@@ -14,36 +19,14 @@ export class ParkingController {
     });
   });
 
-  public findActive = async (_req: Request, res: Response) => {
-    try {
-      const parkings = await this.parkingService.findActive();
-      return res.status(200).json({
-        message: parkings.length === 0 ? 'No se encontraron estacionamientos activos' : 'Estacionamientos encontrados',
-        data: parkings,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al obtener estacionamientos activos',
-        error: error.message,
-      });
-    }
-  };
+  public findActive = catchAsync(async (_req: Request, res: Response) => {
+    const parkings = await this.parkingService.findActive();
+    return res.status(200).json({
+      message: parkings.length === 0 ? 'No se encontraron estacionamientos activos' : 'Estacionamientos encontrados',
+      data: parkings,
+    });
+  });
 
-  public findByOwner = async (req: Request, res: Response) => {
-    try {
-      const ownerId = req.params.ownerId as string;
-      const parkings = await this.parkingService.findByOwner(ownerId);
-      return res.status(200).json({
-        message: parkings.length === 0 ? 'El dueño no tiene estacionamientos' : 'Estacionamientos encontrados',
-        data: parkings,
-      });
-    } catch (error: any) {
-      return res.status(500).json({
-        message: 'Error al obtener los estacionamientos del dueño',
-        error: error.message,
-      });
-    }
-  };
 
   public findOne = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;

@@ -1,0 +1,11 @@
+[
+  {"parking": "Estacionamiento Central Plaza", "space": "A-01", "plate": "AC301LB", "day": 0, "start": "07:00", "hours": 3, "outcome": "overstay", "arrive": 4, "lead": 2880},
+  {"parking": "Estacionamiento Central Plaza", "space": "A-01", "plate": "AF512KD", "day": 0, "start": "11:00", "hours": 3, "outcome": "done", "arrive": 5, "exit": -10, "pay": "MERCADO_PAGO", "lead": 2940},
+  {"parking": "Estacionamiento Central Plaza", "space": "A-02", "plate": "AE904TN", "day": 0, "start": "09:00", "hours": 4, "outcome": "done", "arrive": 6, "exit": -20, "pay": "TARJETA_DEBITO", "services": ["Lavado exterior"], "lead": 1500},
+  {"parking": "Estacionamiento Central Plaza", "space": "M-01", "plate": "A902KZX", "day": 0, "start": "07:00", "hours": 2, "outcome": "done", "arrive": 2, "exit": 5, "pay": "EFECTIVO", "unpaid": true, "lead": 600},
+  {"parking": "Estacionamiento Central Plaza", "space": "M-01", "plate": "A902KZX", "day": 0, "start": "12:00", "hours": 2, "outcome": "done", "arrive": 3, "exit": -15, "pay": "EFECTIVO", "lead": 200},
+  {"parking": "Estacionamiento Central Plaza", "space": "A-04", "plate": "AG215FH", "day": 0, "start": "09:37", "hours": 2, "outcome": "done", "arrive": 0, "exit": -25, "pay": "EFECTIVO", "walkIn": true, "lead": 0},
+  {"parking": "Estacionamiento Central Plaza", "space": "A-03", "plate": "AG215FH", "day": 0, "start": "15:00", "hours": 2, "outcome": "cancel", "cancelLead": 330, "lead": 4320},
+  {"parking": "Cochera Pichincha", "space": "A-01", "plate": "AF512KD", "day": 2, "start": "10:00", "hours": 3, "outcome": "done", "arrive": 4, "exit": -5, "pay": "MERCADO_PAGO", "lead": 600},
+  {"parking": "Estacionamiento Central Plaza", "space": "C-01", "plate": "AD718PQ", "day": 5, "start": "18:00", "hours": 2, "outcome": "done", "arrive": 2, "exit": 0, "pay": "TARJETA_CREDITO", "assigned": true, "lead": 2000}
+]

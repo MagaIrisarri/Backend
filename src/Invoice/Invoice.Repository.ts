@@ -18,6 +18,12 @@ export class InvoiceRepository implements Repository<Invoice> {
     );
   }
 
+  async byReservation(reservationIds: string[]): Promise<Map<string, Invoice>> {
+    if (!reservationIds.length) return new Map();
+    const invoices = await this.em.find(Invoice, { reservation: { $in: reservationIds }, status: { $ne: 'ANULADA' } });
+    return new Map(invoices.map(i => [i.reservation.id, i]));
+  }
+
   async findByReservationId(reservationId: string): Promise<Invoice | null> {
     return await this.em.findOne( Invoice, { reservation: { id: reservationId }, status: { $ne: 'ANULADA' } },
       { populate: ['reservation'] }
@@ -28,7 +34,7 @@ export class InvoiceRepository implements Repository<Invoice> {
     return await this.em.find(
       Invoice,
       { reservation: { vehicle: { client: { id: clientId } } }, status: { $ne: 'ANULADA' } },
-      { populate: ['reservation', 'reservation.parkingSpace', 'reservation.parkingSpace.parking', 'reservation.vehicle'] as any }
+      { populate: ['reservation', 'reservation.parkingSpace', 'reservation.parkingSpace.parking', 'reservation.vehicle', 'reservation.services', 'reservation.services.serviceCatalog'] as any }
     );
   }
 
@@ -39,6 +45,10 @@ export class InvoiceRepository implements Repository<Invoice> {
       paymentDate: item.paymentDate ?? (item.status === 'PAGADA' ? new Date() : null),
       paymentMethod: item.paymentMethod,
       totalAmount: item.totalAmount,
+      reservedHours: item.reservedHours ?? null,
+      extraHours: item.extraHours ?? null,
+      hourlyRate: item.hourlyRate ?? null,
+      servicesAmount: item.servicesAmount ?? null,
       status: item.status ?? 'PENDIENTE',
       reservation,
     });

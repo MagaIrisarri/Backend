@@ -2,9 +2,6 @@ import { MikroORM } from '@mikro-orm/core';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { MySqlDriver } from '@mikro-orm/mysql';
 
-// Todas las fechas/horas de la app (parseo de strings, columnas datetime, validaciones
-// de horario de atención) asumen la hora local de Argentina. Sin esto, el proceso de
-// Node usa la zona horaria del sistema, que puede no coincidir y desfasar los horarios.
 process.env.TZ = 'America/Argentina/Buenos_Aires';
 
 export const orm = await MikroORM.init({
@@ -29,11 +26,9 @@ export const orm = await MikroORM.init({
   },
   });
 
+// safe: agrega lo que falta pero nunca borra tablas ni columnas (una rama vieja contra la base no se lleva datos).
+// Si falla, el error sube a startServer y el servidor no arranca con la base a medio sincronizar.
 export const syncSchema = async () => {
-  try {
-    await orm.schema.update();
-    console.log('Base de datos sincronizada con MikroORM y MySQL');
-  } catch (error) {
-    console.error('Error al sincronizar la base de datos:', error);
-  }
+  await orm.schema.update({ safe: true });
+  console.log('Base de datos sincronizada con MikroORM y MySQL');
 };

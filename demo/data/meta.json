@@ -1,0 +1,15 @@
+{
+  "anchor": "2026-10-23",
+  "seed": 2310,
+  "from": -30,
+  "to": 31,
+  "counts": {
+    "owners": 20,
+    "parkings": 45,
+    "employees": 150,
+    "clients": 200,
+    "vehicles": 250,
+    "reservations": 14962,
+    "skipped": 17
+  }
+}

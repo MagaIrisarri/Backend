@@ -1,21 +1,27 @@
 import { UserRepository } from './User.Repository.js';
 import { User } from './User.Entity.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { UserStatus, UserType } from '../Shared/constants/status.js';
 import argon2 from 'argon2';
 
 export class UserService {
   constructor(private userRepository: UserRepository) {}
 
   private async createUser(userData: Partial<User>, overrides: Partial<User> = {}): Promise<Omit<User, 'password'>> {
-    const existing = await this.userRepository.findOneForEmail(userData.email!);
-    if (existing) throw new AppError('El email ya está registrado', 409);
+    await this.assertUnique(userData);
 
     userData.password = await argon2.hash(userData.password!);
-    userData.status = 'ACTIVO';
+    userData.status = UserStatus.ACTIVO;
 
     const user = await this.userRepository.add({ ...userData, ...overrides });
     const { password, ...rest } = user;
     return rest;
+  }
+
+  // RA-08: email, DNI y teléfono son únicos en el alta y en la edición de cualquier rol.
+  private async assertUnique(data: Partial<User>, exceptId?: string): Promise<void> {
+    const field = await this.userRepository.findDuplicateField(data, exceptId);
+    if (field) throw new AppError(`${{ email: 'El email', dni: 'El DNI', phone: 'El teléfono' }[field]} ya está registrado`, 409);
   }
 
   private excludePassword(user: User): Omit<User, 'password'> {
@@ -28,46 +34,95 @@ export class UserService {
     return users.map((user) => this.excludePassword(user));
   }
 
+  async findPage(options: { page: number; limit: number; q?: string; role?: string; status?: string }) {
+    const { items, total, counts } = await this.userRepository.findPage(options);
+    // DA-03: el nombre de la sucursal de cada empleado viene con la página.
+    const names = await this.userRepository.parkingNames(items.map((u) => u.parkingId).filter((id): id is string => !!id));
+    const data = items.map((u) => ({ ...this.excludePassword(u), parkingName: u.parkingId ? names.get(u.parkingId) ?? null : null }));
+    return { data, meta: { page: options.page, limit: options.limit, total, counts } };
+  }
+
   async findOne(params: { id: string }): Promise<Omit<User, 'password'> | null> {
     const user = await this.userRepository.findOne(params);
     if (!user) return null;
     return this.excludePassword(user);
   }
 
-  async findEmployeesByOwner(ownerId: string): Promise<Omit<User, 'password'>[]> {
-    const users = await this.userRepository.findByOwner(ownerId);
+  async findEmployeesByOwner(ownerId: string, status = UserStatus.ACTIVO): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userRepository.findByOwner(ownerId, status);
     return users.map((user) => this.excludePassword(user));
   }
 
   async addPublicUser(userData: Partial<User>): Promise<Omit<User, 'password'>> {
-    const existing = await this.userRepository.findOneForEmail(userData.email!);
-    if (existing) throw new Error('El email ya está registrado');
-    if (userData.type === 'ADMINISTRADOR' || userData.type === 'EMPLEADO') {
-        throw new Error('No podés registrarte con ese tipo de usuario');
-        }
-    userData.password = await argon2.hash(userData.password!);
-    userData.status = 'ACTIVO';
-    userData.type = userData.type || 'CLIENTE';
-
-    const user = await this.userRepository.add(userData);
-    const { password, ...rest } = user;
-    
-    return rest;
+    if (userData.type === UserType.ADMINISTRADOR || userData.type === UserType.EMPLEADO) {
+      throw new AppError('No podés registrarte con ese tipo de usuario', 400);
+    }
+    return this.createUser(userData, { type: userData.type || UserType.CLIENTE });
   }
 
   async addEmployee(userData: Partial<User>, ownerId: string): Promise<Omit<User, 'password'>> {
     const owner = await this.userRepository.findOne({ id: ownerId });
-    if (!owner || owner.status !== 'ACTIVO' || owner.type !== 'DUEÑO') {
+    if (!owner || owner.status !== UserStatus.ACTIVO || owner.type !== UserType.DUENO) {
       throw new AppError('Dueño no válido o inactivo', 400);
     }
+    if (!(await this.userRepository.ownsParking(ownerId, userData.parkingId!))) {
+      throw new AppError('El estacionamiento no pertenece a este dueño', 400);
+    }
 
-    return this.createUser(userData, { type: 'EMPLEADO', ownerId });
+    return this.createUser(userData, { type: UserType.EMPLEADO, ownerId });
+  }
+
+  // El empleado debe existir, tener ese estado y pertenecer al dueño
+  private async findOwnedEmployee(ownerId: string, id: string, status = UserStatus.ACTIVO): Promise<User> {
+    const employee = await this.userRepository.findOne({ id });
+    if (!employee || employee.type !== UserType.EMPLEADO || employee.ownerId !== ownerId || employee.status !== status) {
+      throw new AppError('Empleado no encontrado', 404);
+    }
+    return employee;
+  }
+
+  async updateEmployee(ownerId: string, id: string, userData: Partial<User>): Promise<Omit<User, 'password'>> {
+    const employee = await this.findOwnedEmployee(ownerId, id);
+    if (userData.parkingId && !(await this.userRepository.ownsParking(ownerId, userData.parkingId))) {
+      throw new AppError('El estacionamiento no pertenece a este dueño', 400);
+    }
+    // RA-18: cambiar de sucursal dejaría turnos y reservas de la actual sin responsable, igual que la baja (R-20).
+    if (userData.parkingId && userData.parkingId !== employee.parkingId) await this.assertNoPendingWork(employee, 'cambiar de sucursal');
+    await this.assertUnique(userData, id);
+    const user = await this.userRepository.update(id, userData);
+    return this.excludePassword(user!);
+  }
+
+  async removeEmployee(ownerId: string, id: string): Promise<void> {
+    await this.assertNoPendingWork(await this.findOwnedEmployee(ownerId, id));
+    await this.userRepository.remove({ id });
+  }
+
+  // Como R-20: un empleado dado de baja no puede seguir cubriendo turnos (R-01) ni quedar asignado a reservas activas (R-07).
+  private async assertNoPendingWork(employee: User, action = 'dar de baja'): Promise<void> {
+    const { shifts, reservations } = await this.userRepository.countPendingWorkOfEmployee(employee);
+    if (shifts || reservations) {
+      throw new AppError(`No se puede ${action}: tiene ${shifts} turno(s) cargados y ${reservations} reserva(s) activas asignadas. Sacalo de los turnos y reasigná sus reservas primero.`, 409);
+    }
+  }
+
+  async reactivateEmployee(ownerId: string, id: string): Promise<Omit<User, 'password'>> {
+    await this.findOwnedEmployee(ownerId, id, UserStatus.BAJA);
+    const user = await this.userRepository.update(id, { status: UserStatus.ACTIVO });
+    return this.excludePassword(user!);
   }
 
   async update(params: { id: string }, userData: Partial<User>): Promise<Omit<User, 'password'> | null> {
+    const fiscal = (['businessName', 'cuit', 'vatCondition', 'fiscalAddress'] as const).some((f) => userData[f] !== undefined);
+    if (fiscal) {
+      const target = await this.userRepository.findOne(params);
+      if (target && target.type !== UserType.DUENO) throw new AppError('Los datos fiscales son solo de un dueño', 400);
+    }
+    if (userData.mutedNotifications) userData.mutedNotifications = [...new Set(userData.mutedNotifications)];
     if (userData.password) {
       userData.password = await argon2.hash(userData.password);
     }
+    await this.assertUnique(userData, params.id);
     const user = await this.userRepository.update(params.id, userData);
     if (!user) return null;
     return this.excludePassword(user);
@@ -79,6 +134,15 @@ export class UserService {
     return this.excludePassword(user);
   }
 
+  // DA-02 / LA-03: el administrador pone una contraseña temporal y el usuario tiene que cambiarla (mustChangePassword).
+  async resetPassword(id: string, password: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ id });
+    if (!user) return false;
+    if (user.type === UserType.ADMINISTRADOR) throw new AppError('El administrador cambia su contraseña desde su perfil', 400);
+    await this.userRepository.update(id, { password: await argon2.hash(password), mustChangePassword: true });
+    return true;
+  }
+
   async updatePassword(id: string, currentPass: string, newPass: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ id });
     if (!user) return false;
@@ -86,23 +150,36 @@ export class UserService {
     const isValid = await argon2.verify(user.password, currentPass);
     if (!isValid) return false;
 
+    // R-29: la cuenta del mostrador empieza con el DNI como contraseña; nadie puede volver a usarlo.
+    if (newPass === user.dni) throw new AppError('La contraseña nueva no puede ser tu DNI', 400);
+
     const hashedNew = await argon2.hash(newPass);
-    await this.userRepository.update(id, { password: hashedNew });
+    await this.userRepository.update(id, { password: hashedNew, mustChangePassword: false });
     return true;
   }
 
+  // R-20: la baja (la pida el administrador o el propio usuario) no deja reservas ni sucursales activas sin responsable.
   async remove(params: { id: string }): Promise<boolean> {
+    const user = await this.userRepository.findOne(params);
+    if (!user) return false;
+
+    if (user.type === UserType.CLIENTE) {
+      const n = await this.userRepository.countActiveReservationsOfClient(user.id);
+      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} reserva(s) pendiente(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
+    }
+    if (user.type === UserType.EMPLEADO) await this.assertNoPendingWork(user);
+    if (user.type === UserType.DUENO) {
+      const n = await this.userRepository.countActiveParkingsOfOwner(user.id);
+      if (n) throw new AppError(`No se puede dar de baja: tiene ${n} sucursal(es) activa(s). Pausalas primero desde su panel.`, 409);
+    }
     return await this.userRepository.remove(params);
   }
 
-  async login(email: string, pass: string): Promise<Omit<User, 'password'> | { error: string }> {
+  // Un solo 401 para email inexistente, contraseña incorrecta o usuario dado de baja: la respuesta no dice qué emails existen.
+  async login(email: string, password: string): Promise<Omit<User, 'password'>> {
     const user = await this.userRepository.findOneForEmail(email);
-    if (!user) return { error: 'not found' };
-    if (user.status !== 'ACTIVO') return { error: 'user not ACTIVO' };
-
-    const isValid = await argon2.verify(user.password, pass);
-    if (!isValid) return { error: 'password incorrect' };
-
+    const ok = user?.status === UserStatus.ACTIVO && (await argon2.verify(user.password, password));
+    if (!ok) throw new AppError('Email o contraseña incorrectos', 401);
     return this.excludePassword(user);
   }
 }

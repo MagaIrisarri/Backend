@@ -1,8 +1,9 @@
-import { Repository } from "../Shared/base.Repository.js";
+import { ServiceCatalogRepository } from "./ServiceCatalog.Repository.js";
 import { ServiceCatalog } from "./ServiceCatalog.Entity.js";
+import { assertNoActiveReservations } from "../ServicePrice/ServicePrice.Service.js";
 
 export class ServiceCatalogService {
-  constructor(private repo: Repository<ServiceCatalog>) {}
+  constructor(private repo: ServiceCatalogRepository) {}
 
   async findAll(): Promise<ServiceCatalog[]> {
     return await this.repo.findAll();
@@ -20,7 +21,10 @@ export class ServiceCatalogService {
     return await this.repo.update(id, input);
   }
 
+  // La baja del catálogo vence el servicio en todas las sucursales: no con reservas pendientes o en curso que lo tienen.
   async remove(id: string): Promise<boolean> {
+    const service = await this.repo.findOne({ id });
+    if (service) assertNoActiveReservations(service.name, await this.repo.activeReservationsUsing(id));
     return await this.repo.remove({ id });
   }
 }

@@ -5,13 +5,15 @@ import { Model } from './Model/Model.Entity.js';
 import { VehicleType } from './VehicleType/VehicleType.Entity.js';
 import { Insurance } from './Insurance/Insurance.Entity.js';
 import { User } from '../User/User.Entity.js'; 
+import { LocalDateType } from '../Shared/db/LocalDateType.js';
 
 @Entity()
 export class Vehicle {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 
-  @Property({ type: 'string', unique: true })
+  // Única entre los vehículos activos (lo valida VehicleService): una patente dada de baja se puede volver a cargar.
+  @Property({ type: 'string', index: true })
   plate!: string;
 
   @Property({ type: 'string', nullable: true })
@@ -41,9 +43,9 @@ export class Vehicle {
   @ManyToOne(() => User)
   client!: User;
   
-  @Property({ type: 'date' })
+  @Property({ type: LocalDateType })
   createdAt: Date = new Date();
 
-  @Property({ type: 'date', onUpdate: () => new Date() })
+  @Property({ type: LocalDateType, onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 }

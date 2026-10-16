@@ -4,30 +4,59 @@ import { User } from '../User/User.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Invoice } from '../Invoice/Invoice.Entity.js';
 import { ParkingPrice } from '../ParkingPrice/ParkingPrice.Entity.js';
+import { VehicleType } from '../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { likeWords } from '../Shared/utils/pagination.js';
+import { ACTIVE_RESERVATION_STATUSES, ReservationStatus } from '../Shared/constants/status.js';
+
+// Localidades con cocheras (con su provincia: hay localidades homónimas), para elegir el alcance de un listado o del panel.
+export const listLocalities = (em: EntityManager): Promise<{ province: string; locality: string }[]> =>
+  em.getConnection().execute('SELECT DISTINCT province, locality FROM parking WHERE province IS NOT NULL ORDER BY province, locality');
+
+export interface ParkingPageOptions { page: number; limit: number; q?: string; province?: string; locality?: string; status?: 'on' | 'off' }
 
 export class ParkingRepository implements Repository<Parking> {
   constructor(private em: EntityManager) {}
 
   async findAll(): Promise<Parking[]> {
-    return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.find(Parking, {}, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
+  }
+
+  // Una página de cocheras con búsqueda (nombre, dirección, barrio o dueño), localidad y estado. `counts` ignora el estado para rotular sus filtros.
+  async findPage(o: ParkingPageOptions): Promise<{ items: Parking[]; total: number; counts: { on: number; off: number } }> {
+    const filters: any[] = [];
+    if (o.province) filters.push({ province: o.province });
+    if (o.locality) filters.push({ locality: o.locality });
+    for (const w of likeWords(o.q)) {
+      filters.push({ $or: [{ name: { $like: w } }, { address: { $like: w } }, { neighborhood: { $like: w } }, { owner: { $or: [{ name: { $like: w } }, { last_name: { $like: w } }] } }] });
+    }
+    const where: any = filters.length ? { $and: filters } : {};
+    const [[items, total], on, off] = await Promise.all([
+      this.em.findAndCount(Parking, { ...where, ...(o.status && { isActive: o.status === 'on' }) }, {
+        populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any, orderBy: { name: 'ASC' }, limit: o.limit, offset: (o.page - 1) * o.limit,
+      }),
+      this.em.count(Parking, { ...where, isActive: true }),
+      this.em.count(Parking, { ...where, isActive: false }),
+    ]);
+    return { items, total, counts: { on, off } };
+  }
+
+  async localities() {
+    return listLocalities(this.em);
   }
 
   async findActive(): Promise<Parking[]> {
-    return await this.em.find(Parking, { isActive: true }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.find(Parking, { isActive: true }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
   }
 
   async findOne(item: { id: string }): Promise<Parking | null> {
-    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.findOne(Parking, { id: item.id }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any });
   }
 
   async findByOwnerId(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any });
+    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingpriceHistory.vehicleType', 'parkingSpaces', 'parkingSpaces.vehicleType'] as any, orderBy: { name: 'ASC' } });
   }
 
-  async findByOwner(ownerId: string): Promise<Parking[]> {
-    return await this.em.find(Parking, { owner: { id: ownerId } }, { populate: ['owner', 'parkingpriceHistory', 'parkingSpaces'] as any, orderBy: { name: 'ASC' } });
-  }
 
   async add(data: any): Promise<Parking> {
     const parking = this.em.create(Parking, { ...data, isActive: false });
@@ -53,6 +82,11 @@ export class ParkingRepository implements Repository<Parking> {
     return true;
   }
 
+  // Tipos de vehículo activos entre los pedidos (alta de cochera con plazas por tipo, R-30).
+  async findVehicleTypes(ids: string[]): Promise<VehicleType[]> {
+    return ids.length ? await this.em.find(VehicleType, { id: { $in: ids }, isActive: true }) : [];
+  }
+
   async getUserById(userId: string): Promise<User | null> {
     return await this.em.findOne(User, { id: userId });
   }
@@ -65,27 +99,9 @@ export class ParkingRepository implements Repository<Parking> {
     return count > 0;
   }
 
-  async countReservedSpaces(
-    parkingId: string,
-    vehicleType: 'AUTO' | 'MOTOCICLETA'
-  ): Promise<number> {
-    const qb = this.em.createQueryBuilder(Reservation, 'r')
-      .select(raw('count(distinct r.parking_space_id) as count'))
-      .join('r.parkingSpace', 'ps')
-      .where({
-        'ps.parking': parkingId,
-        'ps.vehicleType': vehicleType,
-        'r.status': { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-        'r.endTime': { $gte: new Date() },
-      });
-    const result = await qb.execute<any>();
-    return Number(result?.[0]?.count ?? result?.count ?? 0);
-  }
-
   async getReservationStatusCounts(parkingId: string): Promise<Record<string, number>> {
     const counts: Record<string, number> = {
       PENDIENTE: 0,
-      CONFIRMADA: 0,
       'EN CURSO': 0,
       FINALIZADA: 0,
       CANCELADA: 0,
@@ -122,23 +138,12 @@ export class ParkingRepository implements Repository<Parking> {
     return Number(result?.[0]?.total ?? result?.total ?? 0);
   }
 
-  async findActiveReservationsForSpaces(
-    spaceIds: string[],
-    from: Date,
-    to: Date
-  ): Promise<Reservation[]> {
-    if (!spaceIds || spaceIds.length === 0) return [];
+  // Vehículos adentro ahora: reservas EN CURSO (entre el check-in y el check-out), aunque se hayan pasado de hora.
+  async findInProgressReservationsForSpaces(spaceIds: string[]): Promise<Reservation[]> {
+    if (!spaceIds.length) return [];
     return await this.em.find(
       Reservation,
-      {
-        parkingSpace: { id: { $in: spaceIds } },
-        status: { $in: ['PENDIENTE', 'CONFIRMADA', 'EN CURSO'] },
-        $and: [
-          { startTime: { $lte: to } },
-          { endTime: { $gte: from } },
-        ],
-      },
-      { populate: ['parkingSpace', 'vehicle', 'vehicle.vehicleType'] as any }
+      { parkingSpace: { id: { $in: spaceIds } }, status: ReservationStatus.EN_CURSO },
     );
   }
 }

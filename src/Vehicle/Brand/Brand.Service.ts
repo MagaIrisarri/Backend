@@ -11,16 +11,4 @@ export class BrandService {
   async findOne(id: string): Promise<Brand | null> {
     return await this.brandRepository.findOne({ id });
   }
-
-  async create(data: { name: string }): Promise<Brand> {
-    return await this.brandRepository.add(data);
-  }
-
-  async update(id: string, data: any): Promise<Brand | null> {
-    return await this.brandRepository.update(id, data);
-  }
-
-  async remove(id: string): Promise<boolean> {
-    return await this.brandRepository.remove({ id });
-  }
 }

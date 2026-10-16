@@ -1,6 +1,7 @@
 import { Vehicle } from './Vehicle.Entity.js';
 import { VehicleRepository } from './Vehicle.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { MUST_CHANGE_PASSWORD } from '../User/User.Entity.js';
 
 export class VehicleService {
   constructor(private readonly vehicleRepository: VehicleRepository) {}
@@ -26,15 +27,9 @@ export class VehicleService {
     if (user.type === 'EMPLEADO') {
       throw new AppError("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO", 403);
     }
-    const model = await this.vehicleRepository.findModelWithDetails(data.modelId);
-    
-    if (!model) {
-      throw new AppError("El modelo seleccionado no existe en la base de datos.", 404);
-    }
-   
-    if (model.brand.id !== data.brandId) {
-      throw new AppError("Marca y modelo no coinciden", 400);
-    }
+    if (user.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
+    await this.assertPlateFree(data.plate);
+    const model = await this.resolveModel(data.brandId, data.modelId);
 
     const vehicleData = {
       ...data,               
@@ -48,11 +43,45 @@ export class VehicleService {
     return await this.vehicleRepository.add(vehicleData);
   }
 
-  async update(id: string, data: any): Promise<Vehicle | null> {
-    return await this.vehicleRepository.update(id, data);
+  private async assertPlateFree(plate: string, exceptId?: string): Promise<void> {
+    const other = await this.vehicleRepository.findActiveByPlate(plate);
+    if (other && other.id !== exceptId) throw new AppError(`Ya hay un vehículo activo con la patente ${plate}`, 409);
   }
 
+  private async resolveModel(brandId: string, modelId: string) {
+    const model = await this.vehicleRepository.findModelWithDetails(modelId);
+    if (!model) {
+      throw new AppError("El modelo seleccionado no existe en la base de datos.", 404);
+    }
+    if (model.brand.id !== brandId) {
+      throw new AppError("Marca y modelo no coinciden", 400);
+    }
+    return model;
+  }
+
+  async update(id: string, data: any): Promise<Vehicle | null> {
+    const vehicle = await this.vehicleRepository.findOne({ id });
+    if (!vehicle) return null;
+
+    const { brandId, modelId, insuranceId, ...changes } = data;
+    if (changes.plate !== undefined) await this.assertPlateFree(changes.plate, id);
+    if (brandId !== undefined || modelId !== undefined) {
+      const model = await this.resolveModel(brandId ?? vehicle.brand.id, modelId ?? vehicle.model.id);
+      // R-25: la plaza de una reserva activa es del tipo del vehículo; cambiarlo la dejaría en una plaza incompatible.
+      if (model.vehicleType.id !== vehicle.vehicleType.id && await this.vehicleRepository.countActiveReservations(id)) {
+        throw new AppError("No se puede cambiar el tipo de un vehículo con reservas pendientes o en curso", 400);
+      }
+      Object.assign(changes, { brand: model.brand, model, vehicleType: model.vehicleType });
+    }
+    if (insuranceId !== undefined) changes.insurance = insuranceId;
+
+    return await this.vehicleRepository.update(id, changes);
+  }
+
+  // Como R-20: un vehículo con reservas pendientes o en curso no se da de baja.
   async remove(id: string): Promise<boolean> {
+    const n = await this.vehicleRepository.countActiveReservations(id);
+    if (n) throw new AppError(`No se puede dar de baja: el vehículo tiene ${n} reserva(s) pendiente(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
     return await this.vehicleRepository.remove({ id });
   }
 

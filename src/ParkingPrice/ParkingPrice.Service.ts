@@ -5,42 +5,29 @@ import { AppError } from '../Shared/utils/AppError.js';
 export class ParkingPriceService {
   constructor(private repo: ParkingPriceRepository) {}
 
-  async create(parkingId: string, data: { vehicleType: string; price: number }): Promise<ParkingPrice> {
+  // R-30: una tarifa por tipo de vehículo; la nueva vence la vigente de ese tipo (precios versionados).
+  async create(parkingId: string, data: { vehicleTypeId: string; price: number }): Promise<ParkingPrice> {
     const parking = await this.repo.findParking(parkingId);
     if (!parking) throw new AppError('Estacionamiento no encontrado', 404);
 
-    const officialType = await this.repo.findOfficialVehicleType(data.vehicleType);
-    const vehicleTypeName = officialType ? officialType.name : data.vehicleType.trim();
+    const vehicleType = await this.repo.findVehicleType(data.vehicleTypeId);
+    if (!vehicleType) throw new AppError('Tipo de vehículo no encontrado o dado de baja', 404);
 
-    // Expirar cualquier tarifa activa previa de este tipo oficial
-    await this.repo.expireActiveByVehicleType(parkingId, vehicleTypeName);
+    // El mismo precio que la vigente no abre otra versión: el historial solo guarda cambios.
+    const active = await this.repo.findActive(parkingId, vehicleType.id);
+    if (active && Number(active.price) === data.price) return active;
 
-    return await this.repo.add({ 
-      parking, 
-      vehicleType: vehicleTypeName, 
-      price: data.price 
-    });
+    await this.repo.expireActiveByVehicleType(parkingId, vehicleType.id);
+    return await this.repo.add({ parking, vehicleType, price: data.price });
   }
 
-  async update(id: string, data: { price: number; vehicleType?: string }): Promise<ParkingPrice> {
-    const price = await this.repo.findOne({ id });
-    if (!price || price.expirationDate !== null) {
+  // Modificar una tarifa vence la vigente y crea una versión nueva (fecha de vigencia): el historial no se pisa.
+  async update(id: string, data: { price: number }): Promise<ParkingPrice> {
+    const current = await this.repo.findOne({ id });
+    if (!current || current.expirationDate !== null) {
       throw new AppError('Tarifa no encontrada o inactiva', 404);
     }
-
-    let officialName: string | undefined;
-    if (data.vehicleType) {
-      const officialType = await this.repo.findOfficialVehicleType(data.vehicleType);
-      officialName = officialType ? officialType.name : data.vehicleType.trim();
-    }
-
-    const updated = await this.repo.update(id, {
-      price: data.price,
-      ...(officialName ? { vehicleType: officialName } : {}),
-    });
-
-    if (!updated) throw new AppError('No se pudo actualizar la tarifa', 400);
-    return updated;
+    return await this.create(current.parking.id, { vehicleTypeId: current.vehicleType.id, price: data.price });
   }
 
   async findOne(id: string): Promise<ParkingPrice | null> {
@@ -55,7 +42,7 @@ export class ParkingPriceService {
     return await this.repo.findByParking(parkingId);
   }
 
-  async findActive(parkingId: string, vehicleType: string): Promise<ParkingPrice | null> {
-    return await this.repo.findActive(parkingId, vehicleType);
+  async findActive(parkingId: string, vehicleTypeId: string): Promise<ParkingPrice | null> {
+    return await this.repo.findActive(parkingId, vehicleTypeId);
   }
 }

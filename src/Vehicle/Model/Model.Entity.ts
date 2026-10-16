@@ -19,4 +19,9 @@ export class Model {
 
   @ManyToOne(() => VehicleType)
   vehicleType!: VehicleType;
+
+  // Descripción del tipo de automotor en el CSV del DNRPA ("PICK-UP CABINA DOBLE"). La tabla DnrpaTypeMap
+  // dice a qué tipo va cada descripción (RA-26). Nullable por los modelos cargados antes: la próxima importación la completa.
+  @Property({ type: 'string', nullable: true })
+  dnrpaDescription?: string | null;
 }

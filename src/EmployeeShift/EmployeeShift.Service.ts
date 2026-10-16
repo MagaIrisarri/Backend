@@ -2,9 +2,11 @@ import { EmployeeShiftRepository } from './EmployeeShift.Repository.js';
 import { EmployeeShift, DayOfWeek } from './EmployeeShift.Entity.js';
 import { CreateShiftInput, UpdateShiftInput } from './EmployeeShift.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import type { ScheduleService } from './Schedule.Service.js';
+import type { DayShift } from './Schedule.js';
 
 export class EmployeeShiftService {
-  constructor(private repo: EmployeeShiftRepository) {}
+  constructor(private repo: EmployeeShiftRepository, private schedule: ScheduleService) {}
 
   async findAll(): Promise<EmployeeShift[]> {
     return await this.repo.findAll();
@@ -18,53 +20,50 @@ export class EmployeeShiftService {
     return await this.repo.findByEmployeeId(employeeId);
   }
 
+  // CRUD TurnoEmpleado sobre la semana tipo: cada alta, cambio o baja rearma el día y lo guarda con ScheduleService.saveTemplateDay,
+  // que valida solapes (R-02), horario de la sucursal, empleados de la sucursal y reservas activas (R-05, R-06). Sin transferencias:
+  // si el cambio deja reservas sin su empleado, responde 409 y el reemplazo se hace desde la agenda.
+  private async saveDay(parkingId: string, dayOfWeek: DayOfWeek, change: (shifts: DayShift[]) => DayShift[]) {
+    const day = (await this.schedule.getTemplate(parkingId)).find((d) => d.dayOfWeek === dayOfWeek)!;
+    await this.schedule.saveTemplateDay(parkingId, dayOfWeek, { shifts: change(day.shifts), closures: day.closures, transfers: [] });
+  }
+
+  // El turno guardado que cubre el pedido (los turnos contiguos del mismo empleado se fusionan, R-04).
+  private async savedShift(parkingId: string, employeeId: string, dayOfWeek: DayOfWeek, from: string, to: string): Promise<EmployeeShift> {
+    const shifts = await this.repo.findByParkingAndDay(parkingId, dayOfWeek);
+    return shifts.find((s) => s.employee.id === employeeId && s.startTime.slice(0, 5) <= from && s.endTime.slice(0, 5) >= to)!;
+  }
+
   async create(data: CreateShiftInput): Promise<EmployeeShift> {
-    const employee = await this.repo.findUserById(data.employeeId);
-    if (!employee) throw new AppError("Empleado no encontrado o inactivo", 400);
-    if (employee.type !== 'EMPLEADO') throw new AppError("El usuario asignado no tiene rol de EMPLEADO", 400);
-
-    const parking = await this.repo.findParkingById(data.parkingId);
-    if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 400);
-
     const day = data.dayOfWeek as DayOfWeek;
-
-    const overlap = await this.repo.findOverlappingShift(employee, day, data.startTime, data.endTime);
-    if (overlap) {
-      throw new AppError(`El empleado ya tiene un turno asignado que se cruza (${overlap.startTime} - ${overlap.endTime})`, 400);
-    }
-
-    return await this.repo.add({
-      employee,
-      parking,
-      dayOfWeek: data.dayOfWeek,
-      startTime: data.startTime,
-      endTime: data.endTime
-    });
+    const from = data.startTime.slice(0, 5), to = data.endTime.slice(0, 5);
+    await this.saveDay(data.parkingId, day, (shifts) => [...shifts, { employeeId: data.employeeId, from, to }]);
+    return this.savedShift(data.parkingId, data.employeeId, day, from, to);
   }
 
   async update(id: string, data: UpdateShiftInput): Promise<EmployeeShift | null> {
-    const currentShift = await this.repo.findOne({ id });
-    if (!currentShift) return null;
-
-    // Si cambian el día o la hora, validamos que no se solape
-    if (data.startTime || data.endTime || data.dayOfWeek) {
-      const newStart = data.startTime || currentShift.startTime;
-      const newEnd = data.endTime || currentShift.endTime;
-      const newDay = (data.dayOfWeek || currentShift.dayOfWeek) as DayOfWeek;
-
-      if (newStart >= newEnd) throw new AppError("La hora de inicio debe ser anterior a la hora de fin", 400);
-
-      const overlap = await this.repo.findOverlappingShift(currentShift.employee, newDay, newStart, newEnd, id);
-      if (overlap) {
-        throw new AppError(`El turno se superpone con otro existente (${overlap.startTime} - ${overlap.endTime})`, 400);
-      }
+    const current = await this.repo.findOne({ id });
+    if (!current) return null;
+    if (data.dayOfWeek && data.dayOfWeek !== current.dayOfWeek) {
+      throw new AppError("Para pasar el turno a otro día, dalo de baja y crealo en ese día", 400);
     }
-
-    return await this.repo.update(id, data);
+    const from = (data.startTime ?? current.startTime).slice(0, 5), to = (data.endTime ?? current.endTime).slice(0, 5);
+    if (from >= to) throw new AppError("La hora de inicio debe ser anterior a la hora de fin", 400);
+    const old = { employeeId: current.employee.id, from: current.startTime.slice(0, 5), to: current.endTime.slice(0, 5) };
+    await this.saveDay(current.parking.id, current.dayOfWeek, (shifts) => [
+      ...shifts.filter((s) => !(s.employeeId === old.employeeId && s.from === old.from && s.to === old.to)),
+      { employeeId: old.employeeId, from, to },
+    ]);
+    return this.savedShift(current.parking.id, old.employeeId, current.dayOfWeek, from, to);
   }
 
   async remove(id: string): Promise<boolean> {
-    return await this.repo.remove({ id });
+    const current = await this.repo.findOne({ id });
+    if (!current) return false;
+    const from = current.startTime.slice(0, 5), to = current.endTime.slice(0, 5);
+    await this.saveDay(current.parking.id, current.dayOfWeek, (shifts) =>
+      shifts.filter((s) => !(s.employeeId === current.employee.id && s.from === from && s.to === to)));
+    return true;
   }
 
   async getShiftsByParkingAndDay(parkingId: string, dayOfWeek: string): Promise<EmployeeShift[]> {

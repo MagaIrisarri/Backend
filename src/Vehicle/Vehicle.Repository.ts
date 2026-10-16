@@ -3,6 +3,8 @@ import { Vehicle } from './Vehicle.Entity.js';
 import { Model } from './Model/Model.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { Reservation } from '../Reservation/Reservation.Entity.js';
+import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
 
 export class VehicleRepository implements Repository<Vehicle> {
   constructor(private readonly em: EntityManager) {}
@@ -43,7 +45,7 @@ export class VehicleRepository implements Repository<Vehicle> {
 
   async findActiveByUserId(userId: string): Promise<Vehicle[]> {
     return await this.em.find(Vehicle, { client: userId as any, isActive: true },
-    { populate: ['brand', 'model', 'vehicleType', 'insurance', 'client']}
+    { populate: ['brand', 'model', 'vehicleType', 'insurance', 'client'], orderBy: { createdAt: 'ASC', plate: 'ASC' } } // en el orden en que se registraron
     );
   }
 
@@ -51,6 +53,14 @@ export class VehicleRepository implements Repository<Vehicle> {
     return await this.em.findOne(Model, { id: modelId }, 
       { populate: ['vehicleType', 'brand']}
     );
+  }
+
+  async findActiveByPlate(plate: string): Promise<Vehicle | null> {
+    return await this.em.findOne(Vehicle, { plate, isActive: true });
+  }
+
+  async countActiveReservations(vehicleId: string): Promise<number> {
+    return await this.em.count(Reservation, { vehicle: vehicleId, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
   }
 
   getUserReference(userId: string): User {

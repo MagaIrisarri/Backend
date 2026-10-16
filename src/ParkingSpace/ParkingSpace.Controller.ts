@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ParkingSpaceService } from './ParkingSpace.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { actorId } from '../Shared/utils/actorId.js';
 
 export class ParkingSpaceController {
   constructor(private parkingSpaceService: ParkingSpaceService) {}
@@ -12,17 +13,6 @@ export class ParkingSpaceController {
     
     return res.status(200).json({
       message: spaces.length === 0 ? 'No se encontraron plazas' : 'Plazas encontradas',
-      data: spaces,
-    });
-  });
-
-  findAvailable = catchAsync(async (req: Request, res: Response) => {
-    const parkingId = req.params.parkingId as string;
-    const vehicleType = req.query.vehicleType as string | undefined;
-    const spaces = await this.parkingSpaceService.findAvailable(parkingId, vehicleType);
-
-    return res.status(200).json({
-      message: 'Plazas disponibles encontradas',
       data: spaces,
     });
   });
@@ -62,38 +52,37 @@ export class ParkingSpaceController {
 
   update = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const updatedSpace = await this.parkingSpaceService.update(id, req.body);
+    const { space, moved } = await this.parkingSpaceService.update(id, req.body, actorId(req, 'modificar la plaza'));
 
-    if (!updatedSpace) {
+    if (!space) {
       throw new AppError('Plaza no encontrada', 404);
     }
 
     return res.status(200).json({
       message: 'Plaza actualizada con éxito',
-      data: updatedSpace,
+      data: space,
+      moved, // reservas que se pasaron a otra plaza (R-19)
     });
   });
 
+  // ?relocate=true confirma pasar las reservas futuras a otras plazas libres (R-19).
   remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const isDeleted = await this.parkingSpaceService.remove(id);
-
-    if (!isDeleted) {
-      throw new AppError('Plaza no encontrada', 404);
-    }
+    const { moved } = await this.parkingSpaceService.remove(id, req.query.relocate === 'true', actorId(req, 'dar de baja la plaza'));
 
     return res.status(200).json({
       message: 'Plaza dada de baja con éxito',
+      moved,
     });
   });
 
   checkAvailability = catchAsync(async (req: Request, res: Response) => {
     const parkingId = req.params.parkingId as string;
-    const vehicleType = req.query.vehicleType as string;
+    const vehicleTypeId = req.query.vehicleTypeId as string;
     const startTime = req.query.startTime as unknown as Date;
     const endTime = req.query.endTime as unknown as Date;
 
-    const spaces = await this.parkingSpaceService.checkAvailability(parkingId, vehicleType, startTime, endTime);
+    const spaces = await this.parkingSpaceService.checkAvailability(parkingId, vehicleTypeId, startTime, endTime);
 
     return res.status(200).json({
       message: 'Plazas disponibles encontradas',

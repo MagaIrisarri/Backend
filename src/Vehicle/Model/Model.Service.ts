@@ -11,17 +11,4 @@ export class ModelService {
   async findOne(id: string): Promise<Model | null> {
     return await this.modelRepository.findOne({ id });
   }
-
-  async create(data: any): Promise<Model> {
-    const modelData = { name: data.name, brand: data.brandId, vehicleType: data.vehicleTypeId };
-    return await this.modelRepository.add(modelData);
-  }
-
-  async update(id: string, data: any): Promise<Model | null> {
-    return await this.modelRepository.update(id, data);
-  }
-
-  async remove(id: string): Promise<boolean> {
-    return await this.modelRepository.remove({ id });
-  }
 }
