@@ -64,8 +64,10 @@ export class ReservationService {
     return await this.repo.findAll();
   }
 
-  async findOne(id: string): Promise<Reservation | null> {
-    return await this.repo.findOne({ id });
+  // Detalle de una reserva: la misma forma que los listados, con el importe y la factura.
+  async findOne(id: string): Promise<any | null> {
+    const reservation = await this.repo.findDetail(id);
+    return reservation ? (await this.withInvoice([reservation]))[0] : null;
   }
 
   // Duración, horario de atención y un empleado de turno (R-01): al reservar y al extender (R-23).
@@ -395,13 +397,13 @@ export class ReservationService {
 
   // R-07: las reservas activas que quedaron sin empleado (anteriores a la asignación al reservar) toman el de turno.
   async fillMissingEmployees(): Promise<number> {
-    let filled = 0;
+    const moves: [string, string][] = [];
     for (const r of await this.repo.findUnassigned()) {
       const employeeId = await this.scheduleService.employeeFor(r.parkingSpace.parking, r.startTime, r.endTime);
-      if (employeeId && await this.repo.update(r.id, { attendedById: employeeId })) filled++;
+      if (employeeId) moves.push([r.id, employeeId]);
     }
-    return filled;
-  }
+    return moves.length ? this.repo.assignEmployees(moves) : 0;
+}
 
   async cancelExpired(): Promise<number> {
     const expired = await this.repo.cancelExpired(new Date(Date.now() - ARRIVAL_TOLERANCE_MS));

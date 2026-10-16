@@ -42,6 +42,14 @@ export class ReservationRepository implements Repository<Reservation> {
     );
   }
 
+  // Detalle de una reserva en cualquier estado (también cancelada), con lo que muestra el panel.
+  async findDetail(id: string): Promise<Reservation | null> {
+    return await this.entityManager.findOne(Reservation, { id }, {
+      populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking',
+        'services', 'services.serviceCatalog', 'attendedBy', 'checkedInBy', 'checkedOutBy'] as any,
+    });
+  }
+
   async populateServices(reservation: Reservation): Promise<void> {
     await this.entityManager.populate(reservation, ['services']);
   }
@@ -213,6 +221,19 @@ export class ReservationRepository implements Repository<Reservation> {
       { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
   }
 
+  // R-07: asigna en bloque el empleado de turno a las reservas que no tenían. Un UPDATE por empleado, sin cargar entidades.
+  async assignEmployees(moves: [string, string][]): Promise<number> {
+    const byEmployee = new Map<string, string[]>();
+    for (const [reservationId, employeeId] of moves) {
+      byEmployee.set(employeeId, [...(byEmployee.get(employeeId) ?? []), reservationId]);
+    }
+    const em = this.entityManager.fork();
+    let updated = 0;
+    for (const [employeeId, ids] of byEmployee) {
+      updated += await em.nativeUpdate(Reservation, { id: { $in: ids }, attendedBy: null }, { attendedBy: employeeId });
+    }
+    return updated;
+}
   async remove(item: { id: string }, cancelReason: string | null = null): Promise<boolean> {
     const res = await this.findOne(item);
     if (!res) return false;
