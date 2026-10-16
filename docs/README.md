@@ -8,7 +8,7 @@
 
 | Entrega | Backend | Frontend |
 |---|---|---|
-| Regularidad | [[https://github.com/MagaIrisarri/Backend/pulls](https://github.com/MagaIrisarri/Frontend/pull/13)] | [https://github.com/MagaIrisarri/Frontend/pulls](https://github.com/MagaIrisarri/Frontend/pull/13) |
+| Regularidad | [https://github.com/MagaIrisarri/Backend/pulls](https://github.com/MagaIrisarri/Frontend/pull/13) | [https://github.com/MagaIrisarri/Frontend/pulls](https://github.com/MagaIrisarri/Frontend/pull/13) |
 
 ## Instalación y ejecución
 
