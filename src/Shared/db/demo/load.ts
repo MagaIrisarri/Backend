@@ -35,6 +35,7 @@ import { Notification } from '../../../Notification/Notification.Entity.js';
 import { NotificationType, ReservationStatus, UserStatus, UserType } from '../../constants/status.js';
 import { ARRIVAL_TOLERANCE_MINUTES } from '../../constants/schedule.js';
 import { defaultPassword } from '../seeders/userSeeder.js';
+import { cuitDigitOk } from '../../../User/User.Schema.js';
 import { nameKey } from '../../utils/names.js';
 import { spacePrefix, type VehicleCategory } from '../../utils/vehicleTypes.js';
 import { formatTimeHHMM } from '../../utils/dateUtils.js';
@@ -103,17 +104,46 @@ async function loadAll(em: EntityManager) {
   // Usuarios
   const password = await defaultPassword();
   const byEmail = new Map<string, User>();
-  const createUser = (p: DemoUsers['admin'], type: UserType, extra: Partial<User> = {}) => {
+  // Alta y última modificación de cada usuario, antes de lo que hace en la demo: el dueño antes de sus tarifas (desde -150),
+  // el empleado antes de las reservas (desde -30), el cliente antes de su primer vehículo. Salen de la posición, sin azar;
+  // uno de cada tres editó sus datos después del alta.
+  const stamps = (n: number, created: number, edited = n % 3 ? created : Math.min(created + 1 + (n * 17) % 120, -1)) => { // a lo sumo, ayer
+    const time = `${String(8 + (n % 12)).padStart(2, '0')}:${String((n * 7) % 60).padStart(2, '0')}`;
+    return { createdAt: dateAt(created, time), updatedAt: dateAt(edited, time) };
+  };
+  const firstVehicle = new Map<string, number>();
+  for (const v of vehiclesData) firstVehicle.set(v.client, Math.min(firstVehicle.get(v.client) ?? 0, v.since));
+  const createUser = (p: DemoUsers['admin'], type: UserType, when: { createdAt: Date; updatedAt: Date }, extra: Partial<User> = {}) => {
     const u = em.create(User, {
       email: p.email, dni: p.dni, name: p.name, last_name: p.last_name, date_of_birth: new Date(p.birth), phone: p.phone,
-      password, type, status: UserStatus.ACTIVO, mustChangePassword: false, ...extra,
+      password, type, status: UserStatus.ACTIVO, mustChangePassword: false, ...when, ...extra,
     });
     byEmail.set(p.email, u);
     return u;
   };
-  createUser(users.admin, UserType.ADMINISTRADOR);
-  for (const o of users.owners) createUser(o, UserType.DUENO);
-  for (const c of users.clients) createUser(c, UserType.CLIENTE);
+  createUser(users.admin, UserType.ADMINISTRADOR, stamps(0, -1000));
+  // Datos fiscales del dueño (los muestra su perfil): con tres sucursales o más factura una S.R.L. (Responsable Inscripto);
+  // el resto, a su nombre, con el CUIT del DNI (prefijo por el nombre: heurística). Domicilio fiscal: su primera sucursal.
+  const cuit = (prefixes: string[], body: string) => {
+    for (const p of prefixes) {
+      const digit = [...'0123456789'].find((c) => cuitDigitOk(p + body + c));
+      if (digit) return `${p}-${body}-${digit}`; // con verificador 10 no hay CUIT: AFIP usa el prefijo siguiente
+    }
+    throw new Error(`Sin CUIT válido para ${body}`);
+  };
+  const fiscal = (o: DemoUsers['owners'][number], i: number): Partial<User> => {
+    const own = parkingsData.filter((d) => d.owner === o.email), first = own[0];
+    const company = own.length >= 3;
+    return {
+      businessName: company ? `${o.last_name} Estacionamientos S.R.L.` : `${o.name} ${o.last_name}`,
+      cuit: company ? cuit(['30', '33'], String(71_000_000 + i * 104_729)) : cuit([/[ae]$/.test(o.name) ? '27' : '20', '23'], o.dni.padStart(8, '0')),
+      vatCondition: company || i % 2 ? 'Responsable Inscripto' : 'Monotributo',
+      fiscalAddress: first ? `${first.address}, ${first.locality} (${first.postalCode}), ${first.province}` : null,
+    };
+  };
+  const ownerDay = new Map(users.owners.map((o, i) => [o.email, -200 - (i * 37) % 300]));
+  users.owners.forEach((o, i) => createUser(o, UserType.DUENO, stamps(i + 1, ownerDay.get(o.email)!), fiscal(o, i)));
+  users.clients.forEach((c, i) => createUser(c, UserType.CLIENTE, stamps(i + 2, (firstVehicle.get(c.email) ?? -40) - 1 - (i * 13) % 30)));
 
   const holidays = new Map((await em.find(Holiday, { owner: null })).map((h) => [h.date, h]));
   const ownHolidays = new Map<string, Holiday>(); // `${dueño}|fecha`
@@ -123,12 +153,16 @@ async function loadAll(em: EntityManager) {
 
   // Sucursales
   const parkings = new Map<string, Loaded>();
-  for (const d of parkingsData) {
+  for (const [j, d] of parkingsData.entries()) {
+    // Alta después de la de su dueño y antes de su primera tarifa o servicio (-150); las pausadas se editaron al pausarlas,
+    // hace una semana (generate.ts no les da reservas desde -7). Sin azar, como los usuarios.
+    const opened = Math.min(...d.prices.map((p) => p.from), -150) - 1;
+    const created = opened - (j * 23) % (opened - ownerDay.get(d.owner)!);
     const parking = em.create(Parking, {
       name: d.name, owner: byEmail.get(d.owner)!, province: d.province, locality: d.locality, neighborhood: d.neighborhood, postalCode: d.postalCode,
       address: d.address, latitude: d.latitude, longitude: d.longitude, openingTime: d.openingTime, closingTime: d.closingTime,
       minReservationHours: d.minReservationHours, maxReservationHours: d.maxReservationHours, reservationMargin: d.reservationMargin,
-      isActive: d.isActive, imageUrl: d.imageUrl,
+      isActive: d.isActive, imageUrl: d.imageUrl, ...(d.isActive ? stamps(j + 4, created) : stamps(j + 4, created, -7)),
     });
     const spaces = new Map<string, ParkingSpace>();
     for (const type of ['AUTO', 'MOTO', 'CAMIONETA'] as const) {
@@ -153,9 +187,9 @@ async function loadAll(em: EntityManager) {
   }
 
   // Personal
-  for (const s of staffData) {
+  for (const [i, s] of staffData.entries()) {
     const loaded = parkings.get(s.parking)!;
-    const employee = createUser(s, UserType.EMPLEADO, { ownerId: loaded.parking.owner.id, parkingId: loaded.parking.id });
+    const employee = createUser(s, UserType.EMPLEADO, stamps(i + 3, -60 - (i * 11) % 90), { ownerId: loaded.parking.owner.id, parkingId: loaded.parking.id });
     loaded.staff.push(s);
     for (const shift of s.shifts) {
       for (const day of shift.days) em.create(EmployeeShift, { parking: loaded.parking, employee, dayOfWeek: day as DayOfWeek, startTime: shift.from, endTime: shift.to, isActive: true });

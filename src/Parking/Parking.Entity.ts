@@ -80,4 +80,11 @@ export class Parking {
     cascade: [Cascade.REMOVE],
   })
   parkingSpaces = new Collection<ParkingSpace>(this);
+
+  // Alta y última modificación (como en User). Nullable: las sucursales que ya existían quedan sin fecha al actualizar el esquema.
+  @Property({ type: 'datetime', nullable: true })
+  createdAt?: Date | null = new Date();
+
+  @Property({ type: 'datetime', nullable: true, onUpdate: () => new Date() })
+  updatedAt?: Date | null = new Date();
 }

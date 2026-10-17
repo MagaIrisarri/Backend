@@ -108,6 +108,8 @@ export class ParkingService {
       image: parking.imageUrl,
       owner: sanitizedOwner,
       prices,
+      createdAt: parking.createdAt ?? null,
+      updatedAt: parking.updatedAt ?? null,
     };
   }
 
