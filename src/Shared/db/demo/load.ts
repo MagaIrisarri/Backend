@@ -274,7 +274,11 @@ async function insertReservations(em: EntityManager, { byEmail, parkings, vehicl
     let attempt = 0, id = fixedId(i);
     while (codes.has(reservationCode(id))) id = fixedId(i, ++attempt);
     codes.add(reservationCode(id));
-    const r = em.create(Reservation, { id, code: reservationCode(id), startTime: start, endTime: end, status: ReservationStatus.PENDIENTE, vehicle, parkingSpace: space, createdAt });
+    // L-43: como la API, la reserva guarda la tarifa vigente el día del alta, y la salida cobra esa.
+    const bookedDay = Math.floor((createdAt.getTime() - dateAt(0).getTime()) / DAY);
+    const hourlyRate = priceAt(l.data, vehicle.vehicleType.name, bookedDay);
+    if (hourlyRate === undefined) throw new Error(`${l.data.name} no tiene tarifa de ${vehicle.vehicleType.name} el ${isoAt(bookedDay)}`);
+    const r = em.create(Reservation, { id, code: reservationCode(id), startTime: start, endTime: end, status: ReservationStatus.PENDIENTE, vehicle, parkingSpace: space, createdAt, hourlyRate });
     if (d.walkIn) { r.contactName = `${client.name} ${client.last_name}`; r.contactPhone = client.phone ?? null; }
     const code = r.code!;
     const when = `${start.toLocaleDateString('es-AR')} de ${formatTimeHHMM(start)} a ${formatTimeHHMM(end)}`;
@@ -301,8 +305,7 @@ async function insertReservations(em: EntityManager, { byEmail, parkings, vehicl
       const chosen = (d.services ?? []).map((n) => l.services.get(n)!).filter(Boolean);
       if (chosen.length) r.services.set(chosen);
       if (r.status === ReservationStatus.FINALIZADA) {
-        const rate = priceAt(l.data, vehicle.vehicleType.name, d.day);
-        if (rate === undefined) throw new Error(`${l.data.name} no tiene tarifa de ${vehicle.vehicleType.name} el ${isoAt(d.day)}`);
+        const rate = hourlyRate;
         const extra = d.extra ?? 0, servicesAmount = chosen.reduce((a, s) => a + Number(s.price), 0);
         const totalAmount = (d.hours + extra) * rate + servicesAmount;
         const unpaid = d.unpaid && exit.getTime() > now - 2 * DAY;
@@ -352,6 +355,8 @@ async function insertReservations(em: EntityManager, { byEmail, parkings, vehicl
 function verify(created: { r: Reservation; d: DemoReservation; l: Loaded; occupiedTo: Date }[], now: number, shiftsOf: (l: Loaded, day: number) => { from: number; to: number }[]) {
   const problems: string[] = [];
   const active = created.filter((c) => c.r.status !== ReservationStatus.CANCELADA);
+  // L-43: toda reserva lleva la tarifa del alta, y la factura cobra esa.
+  for (const c of created) if (c.r.hourlyRate == null) problems.push(`${c.r.code}: sin tarifa guardada`);
   const bySpace = new Map<string, typeof active>(), byVehicle = new Map<string, typeof active>();
   for (const c of active) {
     const s = `${c.d.parking}|${c.d.space}`, v = c.d.plate;
