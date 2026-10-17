@@ -44,7 +44,7 @@ API de cocheras (Express 5 + MikroORM 7 + MySQL, TypeScript ESM con pnpm). La co
 - **Escrituras atómicas en el repositorio** con `em.transactional` cuando tocan varias entidades: alta de reserva, extender, cambio de plaza, salida con factura, baja de servicio, sacar plaza de servicio.
   - Las que eligen plaza bloquean antes la fila de la cochera (`lockParking`, `PESSIMISTIC_WRITE`).
   - Los cambios dentro de la transacción se propagan al `em` del request, así que un `findOne` posterior ve el estado nuevo.
-- **Precios versionados:** `ParkingPrice` y `ServicePrice` nunca se editan en el lugar. Dar de alta o modificar vence la vigente (`expirationDate`) y crea otra. La reserva guarda el precio por hora vigente al reservar (`Reservation.hourlyRate`, L-43) y la salida cobra ese; las anteriores a la columna, la vigente (`findForCheckout`). La factura guarda la tarifa y el detalle del cobro (R-14).
+- **Precios versionados:** `ParkingPrice` y `ServicePrice` nunca se editan en el lugar. Dar de alta o modificar vence la vigente (`expirationDate`) y crea otra. La reserva guarda el precio por hora vigente al reservar (`Reservation.hourlyRate`, L-43) y la salida cobra ese; las anteriores a la columna, la vigente (`findForCheckout`). La otra forma válida, una FK a la fila de `ParkingPrice` como hacen los servicios, está en D-16. La factura guarda la tarifa y el detalle del cobro (R-14).
 - **Bajas lógicas** (`isActive = false` o `status = 'BAJA'`). Las bajas con dependencias activas se rechazan con 409:
   - cliente con reservas;
   - dueño con sucursales activas, o con reservas pendientes o en curso en alguna, aunque esté pausada (L-42);
