@@ -44,7 +44,7 @@ export class ReservationService {
       const live = await this.parkings.findOne(parking.id);
       if (!live || live.availableSpaces > 0) return;
       await this.notifications.notify([parking.owner.id], {
-        type: NotificationType.SUCURSAL_LLENA, title: `Sucursal llena: ${parking.name}`,
+        type: NotificationType.SUCURSAL_LLENA, title: `Sucursal llena: ${parking.name}`, parkingId: parking.id,
         message: `${parking.name} no tiene plazas libres: los ingresos nuevos esperan a que salga un vehículo`,
       });
     } catch (err) {

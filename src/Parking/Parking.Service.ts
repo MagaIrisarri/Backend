@@ -222,7 +222,7 @@ export class ParkingService {
       });
     }
     await this.notifications.notifyStaff(parking, {
-      type: NotificationType.SUCURSAL_PAUSADA,
+      type: NotificationType.SUCURSAL_PAUSADA, parkingId: parking.id,
       title: walkInOnly ? `${parking.name}: solo atención en el lugar` : `${parking.name} pausada`,
       message: `${walkInOnly ? 'No acepta reservas online; el mostrador sigue atendiendo.' : 'No acepta reservas nuevas.'} Se cancelaron ${cancelled.length} pendiente(s); las ${inProgress} en curso siguen hasta su salida.`,
     }, actorId);

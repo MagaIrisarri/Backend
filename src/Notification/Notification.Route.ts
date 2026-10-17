@@ -6,7 +6,7 @@ import { orm } from '../Shared/db/orm.js';
 import { NotificationController } from './Notification.Controller.js';
 import { NotificationRepository } from './Notification.Repository.js';
 import { NotificationService } from './Notification.Service.js';
-import { notificationIdSchema } from './Notification.Schema.js';
+import { listNotificationsSchema, notificationIdSchema } from './Notification.Schema.js';
 
 export const notificationRouter = Router();
 
@@ -15,7 +15,7 @@ const notificationRepository = new NotificationRepository(orm.em);
 export const notificationService = new NotificationService(notificationRepository);
 const notificationController = new NotificationController(notificationService);
 
-notificationRouter.get('/', auth(), notificationController.list);
+notificationRouter.get('/', auth(), validateSchema(listNotificationsSchema), notificationController.list);
 notificationRouter.post('/read-all', auth(), notificationController.markAllRead);
 notificationRouter.patch('/:id/read', auth(), validateSchema(notificationIdSchema), notificationController.markRead);
 

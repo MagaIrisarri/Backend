@@ -7,8 +7,9 @@ export class NotificationController {
   constructor(private service: NotificationService) {}
 
   public list = catchAsync(async (req: Request, res: Response) => {
-    const { data, unread } = await this.service.list(actorId(req, 'ver las notificaciones'));
-    res.status(200).json({ message: data.length === 0 ? 'No hay notificaciones' : 'Notificaciones encontradas', data, unread });
+    const { data, unread, next } = await this.service.list(actorId(req, 'ver las notificaciones'),
+      { unreadOnly: req.query.unread === '1', cursor: typeof req.query.cursor === 'string' ? req.query.cursor : undefined });
+    res.status(200).json({ message: data.length === 0 ? 'No hay notificaciones' : 'Notificaciones encontradas', data, unread, next });
   });
 
   public markRead = catchAsync(async (req: Request, res: Response) => {
