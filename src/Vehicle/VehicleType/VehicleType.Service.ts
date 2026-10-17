@@ -2,7 +2,7 @@ import { VehicleTypeRepository, type VehicleTypeUsage } from './VehicleType.Repo
 import { VehicleType } from './VehicleType.Entity.js';
 import { AppError } from '../../Shared/utils/AppError.js';
 import { cleanName, descKey, nameKey } from '../../Shared/utils/names.js';
-import { suggestType } from '../Catalog/typeMap.js';
+import { suggestNotAdmitted, suggestType } from '../Catalog/typeMap.js';
 import { isBaseVehicleType } from '../../Shared/utils/vehicleTypes.js';
 
 // AUTO, MOTO y CAMIONETA son la base: el catálogo del DNRPA les asigna los modelos nuevos por nombre (Catalog.Repository),
@@ -60,20 +60,20 @@ export class VehicleTypeService {
     return await this.repository.remove({ id });
   }
 
-  // RA-26: las descripciones del DNRPA de la tabla, con cuántos modelos tiene cada una, a qué tipo van hoy,
+  // RA-26: las descripciones del DNRPA de la tabla, con cuántos modelos tiene cada una, a qué tipo van hoy (null: no admitida),
   // si son de este tipo y si se le sugieren (su nombre aparece en la descripción). Primero las de este tipo y las sugeridas.
-  async descriptions(id: string) {
-    const type = await this.repository.findOne({ id });
-    if (!type) return null;
+  // `id` null (L-33): el grupo de las no admitidas, con la sugerencia de no admitir (camión, remolque…).
+  async descriptions(id: string | null) {
+    if (id && !(await this.repository.findOne({ id }))) return null;
     const [rows, models, types] = await Promise.all([this.repository.descriptionRows(), this.repository.describedModels(), this.repository.findAll()]);
     const counts = new Map<string, number>();
     for (const m of models) { const k = descKey(m.dnrpaDescription!); counts.set(k, (counts.get(k) ?? 0) + 1); }
     const list = rows.map((r) => {
-      const assigned = r.vehicleType.id === id;
+      const assigned = (r.vehicleType?.id ?? null) === id;
       return {
         description: r.description, key: r.descriptionKey, models: counts.get(r.descriptionKey) ?? 0,
-        vehicleType: { id: r.vehicleType.id, name: r.vehicleType.name }, assigned,
-        suggested: !assigned && suggestType(r.description, types)?.id === id,
+        vehicleType: r.vehicleType && { id: r.vehicleType.id, name: r.vehicleType.name }, assigned,
+        suggested: !assigned && (id ? suggestType(r.description, types)?.id === id : suggestNotAdmitted(r.description)),
       };
     });
     const rank = (d: { assigned: boolean; suggested: boolean }) => (d.assigned ? 0 : d.suggested ? 1 : 2);
@@ -82,18 +82,20 @@ export class VehicleTypeService {
 
   // Deja en este tipo exactamente las descripciones pedidas (por su clave). Las que eran de este tipo y no vienen
   // vuelven a la sugerencia automática sin este tipo. Mueve modelos y vehículos (409 con reservas activas).
-  async setDescriptions(id: string, keys: string[], dryRun: boolean) {
-    const type = await this.repository.findOne({ id });
-    if (!type) return null;
+  // `id` null (L-33): deja exactamente esas como no admitidas. Sus modelos ya cargados no cambian (la importación nunca borra);
+  // solo dejan de importarse nuevos. Las que se sacan de no admitidas vuelven a la sugerencia y mueven sus modelos.
+  async setDescriptions(id: string | null, keys: string[], dryRun: boolean) {
+    if (id && !(await this.repository.findOne({ id }))) return null;
     const [rows, types] = await Promise.all([this.repository.descriptionRows(), this.repository.findAll()]);
     const wanted = new Set(keys);
     const unknown = keys.filter((k) => !rows.some((r) => r.descriptionKey === k));
     if (unknown.length) throw new AppError(`Descripción del DNRPA desconocida: ${unknown.slice(0, 3).join(', ')}. Importá el CSV para cargarla.`, 400);
-    const changes: { rowId: string; typeId: string }[] = [];
+    const changes: { rowId: string; typeId: string | null }[] = [];
     for (const r of rows) {
-      if (wanted.has(r.descriptionKey)) { if (r.vehicleType.id !== id) changes.push({ rowId: r.id, typeId: id }); }
-      else if (r.vehicleType.id === id) {
-        const back = suggestType(r.description, types, id);
+      const current = r.vehicleType?.id ?? null;
+      if (wanted.has(r.descriptionKey)) { if (current !== id) changes.push({ rowId: r.id, typeId: id }); }
+      else if (current === id) {
+        const back = suggestType(r.description, types, id ?? undefined);
         if (back) changes.push({ rowId: r.id, typeId: back.id });
       }
     }

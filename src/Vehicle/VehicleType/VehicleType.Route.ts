@@ -7,7 +7,9 @@ import { orm } from '../../Shared/db/orm.js';
 import { VehicleTypeController } from './VehicleType.Controller.js';
 import { VehicleTypeRepository } from './VehicleType.Repository.js';
 import { VehicleTypeService } from './VehicleType.Service.js';
-import { createVehicleTypeSchema, updateVehicleTypeSchema, vehicleTypeDescriptionsSchema, vehicleTypeIdSchema } from './VehicleType.Schema.js';
+import {
+  createVehicleTypeSchema, notAdmittedDescriptionsSchema, updateVehicleTypeSchema, vehicleTypeDescriptionsSchema, vehicleTypeIdSchema,
+} from './VehicleType.Schema.js';
 
 export const vehicleTypeRouter = Router();
 
@@ -16,6 +18,9 @@ const vehicleTypeService = new VehicleTypeService(vehicleTypeRepository);
 const vehicleTypeController = new VehicleTypeController(vehicleTypeService);
 
 vehicleTypeRouter.get('/', vehicleTypeController.findAll);
+// L-33: descripciones del DNRPA no admitidas (la importación omite sus modelos). Antes de /:id.
+vehicleTypeRouter.get('/not-admitted/descriptions', auth(UserType.ADMINISTRADOR), vehicleTypeController.descriptions);
+vehicleTypeRouter.put('/not-admitted/descriptions', auth(UserType.ADMINISTRADOR), validateSchema(notAdmittedDescriptionsSchema), vehicleTypeController.setDescriptions);
 vehicleTypeRouter.get('/:id', validateSchema(vehicleTypeIdSchema), vehicleTypeController.findOne);
 vehicleTypeRouter.post('/', auth(UserType.ADMINISTRADOR), validateSchema(createVehicleTypeSchema), vehicleTypeController.create);
 vehicleTypeRouter.put('/:id', auth(UserType.ADMINISTRADOR), validateSchema(vehicleTypeIdSchema), validateSchema(updateVehicleTypeSchema), vehicleTypeController.update);

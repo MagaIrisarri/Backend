@@ -17,12 +17,15 @@ export const vehicleTypeIdSchema = z.object({
   }),
 });
 // RA-26: claves de las descripciones del DNRPA que quedan en este tipo (las que se sacan vuelven a la sugerencia).
+const descriptionsBody = z.object({
+  descriptions: z.array(z.string().min(1).max(100)).max(1000),
+  dryRun: z.boolean().default(false),
+});
 export const vehicleTypeDescriptionsSchema = z.object({
   params: z.object({
     id: z.string().uuid('ID de tipo de vehículo inválido'),
   }),
-  body: z.object({
-    descriptions: z.array(z.string().min(1).max(100)).max(1000),
-    dryRun: z.boolean().default(false),
-  }),
+  body: descriptionsBody,
 });
+// L-33: las descripciones que quedan como no admitidas.
+export const notAdmittedDescriptionsSchema = z.object({ body: descriptionsBody });
