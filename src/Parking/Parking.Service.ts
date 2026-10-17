@@ -5,7 +5,8 @@ import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.
 import type { Reservation } from '../Reservation/Reservation.Entity.js';
 import { CreateParkingInput } from './Parking.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ReservationStatus } from '../Shared/constants/status.js';
+import { NotificationType, ReservationStatus } from '../Shared/constants/status.js';
+import type { NotificationService } from '../Notification/Notification.Service.js';
 import { VEHICLE_CATEGORIES, spacePrefix } from '../Shared/utils/vehicleTypes.js';
 
 // Plazas vigentes: las dadas de baja (isActive = false) siguen en la colección pero no cuentan.
@@ -21,10 +22,13 @@ const typeOrder = (a: { name: string }, b: { name: string }) => {
 // Capacidad, libres ahora y en mantenimiento de un tipo de plaza (R-30: la capacidad es la cantidad de plazas activas).
 export interface SpaceTypeSummary { vehicleTypeId: string; name: string; capacity: number; available: number; maintenance: number }
 
+const PAUSE_REASON = 'la sucursal se pausó y no atiende reservas por ahora';
+
 export class ParkingService {
   constructor(
     private readonly parkingRepository: ParkingRepository,
-    private readonly parkingSpaceRepository: ParkingSpaceRepository
+    private readonly parkingSpaceRepository: ParkingSpaceRepository,
+    private readonly notifications: NotificationService,
   ) {}
 
   // Disponibilidad "en vivo": vehículos adentro ahora (reservas EN CURSO) o plazas marcadas OCUPADO a mano, sin contar dos veces
@@ -201,11 +205,24 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(updated);
   }
 
-  // L-42: pausar corta las reservas nuevas (getDependencies exige isActive); las pendientes y en curso siguen y se atienden
-  // o se cancelan con motivo. Devuelve cuántas quedan para que el dueño lo sepa; la baja del dueño espera a que terminen.
-  async remove(id: string): Promise<{ activeReservations: number } | null> {
-    if (!await this.parkingRepository.remove({ id })) return null;
-    return { activeReservations: await this.parkingRepository.countActiveReservations(id) };
+  // L-42: pausar deja de aceptar reservas (online y de mostrador: getDependencies exige isActive), cancela las pendientes
+  // con motivo y avisa a cada cliente (D-13); las que están en curso siguen hasta su salida. El personal recibe el aviso.
+  // shortcut: L-44, pausar corta también el mostrador, ofrecer "solo online" si la sucursal sigue atendiendo en persona
+  async remove(id: string, actorId: string): Promise<{ cancelled: number; inProgress: number } | null> {
+    const paused = await this.parkingRepository.pause(id, PAUSE_REASON);
+    if (!paused) return null;
+    const { parking, cancelled, inProgress } = paused;
+    for (const r of cancelled) {
+      await this.notifications.notify([r.vehicle.client.id], {
+        type: NotificationType.RESERVA_CANCELADA, title: 'Reserva cancelada', reservationId: r.id,
+        message: `La sucursal canceló tu reserva. Motivo: ${PAUSE_REASON}`,
+      });
+    }
+    await this.notifications.notifyStaff(parking, {
+      type: NotificationType.SUCURSAL_PAUSADA, title: `${parking.name} pausada`,
+      message: `No acepta reservas nuevas. Se cancelaron ${cancelled.length} pendiente(s); las ${inProgress} en curso siguen hasta su salida.`,
+    }, actorId);
+    return { cancelled: cancelled.length, inProgress };
   }
 
   async findByOwnerId(ownerId: string): Promise<any[]> {

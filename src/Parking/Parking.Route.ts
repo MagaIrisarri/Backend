@@ -8,6 +8,7 @@ import { ParkingController } from './Parking.Controller.js';
 import { ParkingRepository } from './Parking.Repository.js';
 import { ParkingService } from './Parking.Service.js';
 import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
+import { notificationService } from '../Notification/Notification.Route.js';
 import { createParkingSchema, updateParkingSchema, parkingIdSchema, parkingIdOwnerSchema, listParkingsQuerySchema } from './Parking.Schema.js';
 
 export const parkingRouter = Router();
@@ -15,7 +16,7 @@ export const parkingRouter = Router();
 const parkingRepository = new ParkingRepository(orm.em);
 const parkingSpaceRepository = new ParkingSpaceRepository(orm.em);
 // Compartido con las reservas: el aviso de sucursal llena usa sus plazas libres en vivo.
-export const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository);
+export const parkingService = new ParkingService(parkingRepository, parkingSpaceRepository, notificationService);
 const parkingController = new ParkingController(parkingService);
 
 parkingRouter.get('/', auth(UserType.ADMINISTRADOR), validateSchema(listParkingsQuerySchema), parkingController.findAll);

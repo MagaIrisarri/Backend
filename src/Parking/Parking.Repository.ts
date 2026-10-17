@@ -1,4 +1,4 @@
-import { EntityManager, raw } from '@mikro-orm/mysql';
+import { EntityManager, LockMode, raw } from '@mikro-orm/mysql';
 import { Parking } from './Parking.Entity.js';
 import { User } from '../User/User.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
@@ -91,8 +91,20 @@ export class ParkingRepository implements Repository<Parking> {
     return await this.em.findOne(User, { id: userId });
   }
 
-  async countActiveReservations(parkingId: string): Promise<number> {
-    return await this.em.count(Reservation, { parkingSpace: { parking: { id: parkingId } }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
+  // L-42: pausa y cancela las pendientes en una transacción, con la fila bloqueada como el alta de reservas: una que se
+  // está creando espera y después ve la sucursal pausada. Las que están en curso siguen hasta su salida.
+  async pause(id: string, cancelReason: string): Promise<{ parking: Parking; cancelled: Reservation[]; inProgress: number } | null> {
+    return await this.em.transactional(async (em) => {
+      const parking = await em.findOne(Parking, { id }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
+      if (!parking) return null;
+      parking.isActive = false;
+      const atParking = { parkingSpace: { parking: { id } } };
+      const cancelled = await em.find(Reservation, { ...atParking, status: ReservationStatus.PENDIENTE },
+        { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });
+      for (const r of cancelled) Object.assign(r, { status: ReservationStatus.CANCELADA, cancelReason });
+      const inProgress = await em.count(Reservation, { ...atParking, status: ReservationStatus.EN_CURSO });
+      return { parking, cancelled, inProgress };
+    });
   }
 
   async hasActivePrices(parkingId: string): Promise<boolean> {

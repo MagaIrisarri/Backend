@@ -24,6 +24,7 @@ export enum NotificationType {
   INGRESO = 'INGRESO',
   RESERVA_TRANSFERIDA = 'RESERVA_TRANSFERIDA',
   SUCURSAL_LLENA = 'SUCURSAL_LLENA',
+  SUCURSAL_PAUSADA = 'SUCURSAL_PAUSADA',
 }
 
 // Avisos que el usuario puede apagar desde su perfil (User.mutedNotifications). Cancelaciones, salidas, vencidas y cambios

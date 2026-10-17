@@ -28,6 +28,11 @@ export interface CreateReservationParams {
 const lockParking = (em: EntityManager, parkingId: string) =>
   em.findOneOrFail(Parking, { id: parkingId }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
 
+// Las altas lo vuelven a mirar con la fila bloqueada: una pausa (L-42) que terminó mientras esperaban la deja inactiva.
+const lockActiveParking = async (em: EntityManager, parkingId: string) => {
+  if (!(await lockParking(em, parkingId)).isActive) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
+};
+
 export class ReservationRepository implements Repository<Reservation> {
   constructor(private entityManager: EntityManager) {}
 
@@ -253,7 +258,7 @@ export class ReservationRepository implements Repository<Reservation> {
   async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
     const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById, hourlyRate } = params;
     return await this.entityManager.transactional(async (transactionalEntityManager) => {
-      await lockParking(transactionalEntityManager, parking.id);
+      await lockActiveParking(transactionalEntityManager, parking.id);
       await this.validateVehicleOverlap(transactionalEntityManager, vehicle, reqStartTime, reqEndTime);
 
       // La elegida si está libre en el horario, o la primera libre del tipo del vehículo (findFreeSpaces).
@@ -382,7 +387,7 @@ export class ReservationRepository implements Repository<Reservation> {
     const c = p.client;
     let accountCreated = false;
     const reservation = await this.entityManager.transactional(async (em) => {
-      await lockParking(em, p.parking.id);
+      await lockActiveParking(em, p.parking.id);
       let vehicle = await em.findOne(Vehicle, { plate: p.plate, isActive: true }, { populate: ['vehicleType'] as any });
       if (vehicle) {
         if (vehicle.vehicleType.id !== p.model.vehicleType.id) throw new AppError(`La patente ${p.plate} está registrada con otro tipo de vehículo`, 409);

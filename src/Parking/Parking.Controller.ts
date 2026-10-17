@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ParkingService } from './Parking.Service.js';
 import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { actorId } from '../Shared/utils/actorId.js';
 
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
@@ -91,7 +92,7 @@ export class ParkingController {
 
   public remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const paused = await this.parkingService.remove(id);
+    const paused = await this.parkingService.remove(id, actorId(req, 'pausar la sucursal'));
 
     if (!paused) {
       throw new AppError('Estacionamiento no encontrado', 404);
