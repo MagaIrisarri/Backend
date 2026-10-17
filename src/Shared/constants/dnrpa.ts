@@ -1,0 +1,20 @@
+// Descripciones del DNRPA que no entran en una cochera. La siembra las carga como no admitidas (DnrpaTypeMap sin tipo);
+// después el administrador edita la lista desde Tipos de vehículo. Salen del CSV de inscripciones de 09/2026.
+export const NOT_ADMITTED_DESCRIPTIONS = [
+  'ACOPLADO', 'SEMIRREMOLQUE', 'SEMIRREMOLQUE BITREN T', 'SEMIRREMOLQUE BITREN D',
+  'TRACTOR C/CABINA DORMITORIO', 'TRACTOR DE CARRETERA',
+  'CHASIS CON CABINA', 'CHASIS C/CABINA', 'CHASIS SIN CABINA', 'CHASIS S/CABINA', 'CHASIS C/CABINA DORMITORIO',
+  'CHASIS CON CABINA DORMITORIO', 'CHASIS CON CABINA DOBLE',
+  'OMNIBUS', 'MIDIBUS', 'MINIBUS (O MICROOMNIBUS)',
+  'CAMION', 'CAMION AUTOBOMBA', 'CAMION C/CABINA DORMITORIO', 'CAMION HORMIGONERO', 'CAMION CISTERNA', 'CAMION GRUA',
+  'CASA RODANTE', 'CASA RODANTE C/MOTOR', 'CASA RODANTE S/MOTOR',
+  'TRAILER (CAT.O1)', 'REMOLQUE GASTRONOMICO', 'ARENERO', 'CARRETON', 'VOLQUETE', 'COMPENSADOR DE CARGA',
+  'AMBULANCIA', 'UNIDAD DE BOMBEROS',
+];
+
+// Para una descripción que aparece por primera vez, la vista previa sugiere "No admitir" si tiene alguna de estas palabras.
+// `\bCAMION\b` para no tomar CAMIONETA.
+export const NOT_ADMITTED_HINT = new RegExp([
+  'ACOPLADO', 'SEMIRREMOLQUE', 'TRACTOR', 'CHASIS', 'OMNIBUS', 'MIDIBUS', 'MINIBUS', 'TRANSP?\\.? ?DE PASAJEROS',
+  '\\bCAMION\\b', 'CASA RODANTE', 'TRAILER', 'REMOLQUE', 'ARENERO', 'CARRETON', 'VOLQUETE', 'AMBULANCIA', 'BOMBEROS', 'COMPENSADOR DE CARGA',
+].join('|'));

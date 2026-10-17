@@ -7,7 +7,7 @@ import { Brand } from '../../../Vehicle/Brand/Brand.Entity.js';
 import { Model } from '../../../Vehicle/Model/Model.Entity.js';
 import { VEHICLE_CATEGORIES, categorizeVehicleType, findBaseType, VehicleCategory } from '../../utils/vehicleTypes.js';
 import { nameKey } from '../../utils/names.js';
-import { fillMissingRows } from '../../../Vehicle/Catalog/typeMap.js';
+import { fillMissingRows, seedNotAdmitted } from '../../../Vehicle/Catalog/typeMap.js';
 
 interface VehiculoModelo { nombre: string; tipoOriginal?: string; }
 interface VehiculoMarca  { marca: string; modelos: VehiculoModelo[]; }
@@ -67,4 +67,6 @@ export const seedVehicles = async (em: EntityManager): Promise<void> => {
   await em.flush();
   const rows = await fillMissingRows(em);
   if (rows) console.log(`  → ${rows} descripciones del DNRPA en la tabla de tipos.`);
+  const notAdmitted = await seedNotAdmitted(em);
+  if (notAdmitted) console.log(`  → ${notAdmitted} descripciones del DNRPA no admitidas (camiones, remolques…).`);
 };

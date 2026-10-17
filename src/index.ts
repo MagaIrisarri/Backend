@@ -8,7 +8,7 @@ import { errorHandler } from './Shared/middlewares/errorHandler.js';
 
 import { userRouter } from './User/User.Route.js';
 import employeeShiftRouter from './EmployeeShift/EmployeeShift.Route.js';
-import holidayRouter from './Holiday/Holiday.Route.js';
+import holidayRouter, { holidayService } from './Holiday/Holiday.Route.js';
 
 import { VehicleRouter } from './Vehicle/Vehicle.Route.js';
 import { vehicleTypeRouter } from './Vehicle/VehicleType/VehicleType.Route.js'; 
@@ -26,9 +26,11 @@ import servicePriceRouter from './ServicePrice/ServicePrice.Route.js';
 
 import reservationRouter, { reservationService } from './Reservation/Reservation.Route.js';
 import { EXPIRED_RESERVATIONS_CHECK_MINUTES, REMINDER_CHECK_MINUTES } from './Shared/constants/schedule.js';
+import { NOTIFICATIONS_PURGE_HOURS } from './Shared/constants/notifications.js';
+import { HOLIDAYS_SYNC_HOURS } from './Shared/constants/holidays.js';
 import invoiceRouter from './Invoice/Invoice.Route.js';
 import statsRouter from './Stats/Stats.Route.js';
-import notificationRouter from './Notification/Notification.Route.js';
+import notificationRouter, { notificationService } from './Notification/Notification.Route.js';
 
 const app = express();
 // ==========================================
@@ -106,6 +108,22 @@ async function startServer() {
       .catch(err => console.error('Error al enviar recordatorios:', err));
     await sendReminders();
     setInterval(sendReminders, REMINDER_CHECK_MINUTES * 60 * 1000);
+
+    // L-31: los avisos de más de NOTIFICATIONS_RETENTION_DAYS días se borran al arrancar y una vez por día.
+    const purgeNotifications = () => notificationService.purgeOld()
+      .then(n => { if (n) console.log(`Notificaciones viejas borradas: ${n}`); })
+      .catch(err => console.error('Error al borrar notificaciones viejas:', err));
+    await purgeNotifications();
+    setInterval(purgeNotifications, NOTIFICATIONS_PURGE_HOURS * 3600 * 1000);
+
+    // L-12: agrega los feriados nuevos del calendario oficial al arrancar y una vez por día. Sin await: depende de internet
+    // y no debe demorar el arranque; si falla, se reintenta al día siguiente y el administrador puede importar a mano.
+    // shortcut: L-12, tarea en memoria del proceso, pasar a un job programado si el backend corre en varias instancias
+    const syncHolidays = () => holidayService.syncOfficial()
+      .then(n => { if (n) console.log(`Feriados nuevos del calendario oficial: ${n}`); })
+      .catch(err => console.error('Error al sincronizar el calendario oficial de feriados:', err));
+    void syncHolidays();
+    setInterval(syncHolidays, HOLIDAYS_SYNC_HOURS * 3600 * 1000);
 
     const port = Number(process.env.PORT) || 3000;
     app.listen(port, () => {

@@ -5,7 +5,8 @@ import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.
 import type { Reservation } from '../Reservation/Reservation.Entity.js';
 import { CreateParkingInput } from './Parking.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { ReservationStatus } from '../Shared/constants/status.js';
+import { NotificationType, ReservationStatus } from '../Shared/constants/status.js';
+import type { NotificationService } from '../Notification/Notification.Service.js';
 import { VEHICLE_CATEGORIES, spacePrefix } from '../Shared/utils/vehicleTypes.js';
 
 // Plazas vigentes: las dadas de baja (isActive = false) siguen en la colección pero no cuentan.
@@ -21,10 +22,14 @@ const typeOrder = (a: { name: string }, b: { name: string }) => {
 // Capacidad, libres ahora y en mantenimiento de un tipo de plaza (R-30: la capacidad es la cantidad de plazas activas).
 export interface SpaceTypeSummary { vehicleTypeId: string; name: string; capacity: number; available: number; maintenance: number }
 
+const PAUSE_REASON = 'la sucursal se pausó y no atiende reservas por ahora';
+const WALK_IN_ONLY_REASON = 'la sucursal dejó de tomar reservas online por ahora y atiende solo en el lugar';
+
 export class ParkingService {
   constructor(
     private readonly parkingRepository: ParkingRepository,
-    private readonly parkingSpaceRepository: ParkingSpaceRepository
+    private readonly parkingSpaceRepository: ParkingSpaceRepository,
+    private readonly notifications: NotificationService,
   ) {}
 
   // Disponibilidad "en vivo": vehículos adentro ahora (reservas EN CURSO) o plazas marcadas OCUPADO a mano, sin contar dos veces
@@ -94,6 +99,7 @@ export class ParkingService {
       maxReservationHours: parking.maxReservationHours,
       reservationMargin: parking.reservationMargin,
       isActive: parking.isActive,
+      walkInOnly: parking.walkInOnly ?? false,
       state: parking.isActive ? 'ACTIVO' : 'INACTIVO',
       name: parking.name,
       latitude: parking.latitude,
@@ -102,6 +108,8 @@ export class ParkingService {
       image: parking.imageUrl,
       owner: sanitizedOwner,
       prices,
+      createdAt: parking.createdAt ?? null,
+      updatedAt: parking.updatedAt ?? null,
     };
   }
 
@@ -201,9 +209,26 @@ export class ParkingService {
     return await this.enrichWithLiveAvailability(updated);
   }
 
-  // shortcut: L-42, desactiva aunque tenga reservas pendientes o en curso y no avisa, rechazar con 409 como las otras bajas
-  async remove(id: string): Promise<boolean> {
-    return await this.parkingRepository.remove({ id });
+  // L-42: pausar deja de aceptar reservas, cancela las pendientes con motivo y avisa a cada cliente (D-13): reservó sin
+  // conocer la situación nueva. Las que están en curso siguen hasta su salida y el personal recibe el aviso.
+  // L-44: walkInOnly deja la sucursal en el mapa (sin reservar online) y el mostrador sigue; sin él, se cierra del todo.
+  async remove(id: string, actorId: string, walkInOnly = false): Promise<{ cancelled: number; inProgress: number } | null> {
+    const reason = walkInOnly ? WALK_IN_ONLY_REASON : PAUSE_REASON;
+    const paused = await this.parkingRepository.pause(id, reason, walkInOnly);
+    if (!paused) return null;
+    const { parking, cancelled, inProgress } = paused;
+    for (const r of cancelled) {
+      await this.notifications.notify([r.vehicle.client.id], {
+        type: NotificationType.RESERVA_CANCELADA, title: 'Reserva cancelada', reservationId: r.id,
+        message: `La sucursal canceló tu reserva. Motivo: ${reason}`,
+      });
+    }
+    await this.notifications.notifyStaff(parking, {
+      type: NotificationType.SUCURSAL_PAUSADA, parkingId: parking.id,
+      title: walkInOnly ? `${parking.name}: solo atención en el lugar` : `${parking.name} pausada`,
+      message: `${walkInOnly ? 'No acepta reservas online; el mostrador sigue atendiendo.' : 'No acepta reservas nuevas.'} Se cancelaron ${cancelled.length} pendiente(s); las ${inProgress} en curso siguen hasta su salida.`,
+    }, actorId);
+    return { cancelled: cancelled.length, inProgress };
   }
 
   async findByOwnerId(ownerId: string): Promise<any[]> {
@@ -223,7 +248,7 @@ export class ParkingService {
       );
     }
 
-    const updated = await this.parkingRepository.update(id, { isActive: true });
+    const updated = await this.parkingRepository.update(id, { isActive: true, walkInOnly: false });
     if (!updated) return null;
     return await this.enrichWithLiveAvailability(updated);
   }

@@ -88,6 +88,11 @@ export class UserRepository implements Repository<User> {
     return await this.em.count(Parking, { owner: { id: ownerId }, isActive: true });
   }
 
+  // L-42: también las de sus sucursales pausadas, que siguen en pie hasta terminar o cancelarse.
+  async countActiveReservationsOfOwner(ownerId: string): Promise<number> {
+    return await this.em.count(Reservation, { parkingSpace: { parking: { owner: { id: ownerId } } }, status: { $in: [...ACTIVE_RESERVATION_STATUSES] } });
+  }
+
   // Para la baja de un empleado: turnos de la semana tipo, días especiales desde hoy y reservas activas que tiene asignados.
   async countPendingWorkOfEmployee(employee: User): Promise<{ shifts: number; reservations: number }> {
     const [template, exceptions, reservations] = await Promise.all([

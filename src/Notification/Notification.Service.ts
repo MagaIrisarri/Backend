@@ -1,5 +1,15 @@
-import { NotificationRepository, type NewNotification } from './Notification.Repository.js';
+import { NotificationRepository, type NewNotification, type NotificationCursor } from './Notification.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
+import { NOTIFICATIONS_RETENTION_DAYS } from '../Shared/constants/notifications.js';
+
+// Cursor de la API: "<fecha ISO>_<id>" del último aviso de la página anterior.
+const encodeCursor = (n: { createdAt?: Date; id: string }) => `${n.createdAt!.toISOString()}_${n.id}`;
+export const decodeCursor = (raw: string): NotificationCursor => {
+  const [iso, id] = raw.split('_');
+  const at = new Date(iso ?? '');
+  if (!id || Number.isNaN(at.getTime())) throw new AppError('Cursor de notificaciones inválido', 400);
+  return { at, id };
+};
 
 export class NotificationService {
   constructor(private repo: NotificationRepository) {}
@@ -28,9 +38,16 @@ export class NotificationService {
     }
   }
 
-  async list(userId: string) {
-    const [data, unread] = await Promise.all([this.repo.listFor(userId), this.repo.countUnread(userId)]);
-    return { data, unread };
+  // L-31: últimos NOTIFICATIONS_WINDOW_DAYS días, de a páginas (`next` sigue la lista); `unread` cuenta sobre la misma ventana.
+  async list(userId: string, opts: { unreadOnly?: boolean; cursor?: string } = {}) {
+    const after = opts.cursor ? decodeCursor(opts.cursor) : undefined;
+    const [{ items, hasMore }, unread] = await Promise.all([this.repo.listFor(userId, { unreadOnly: opts.unreadOnly, after }), this.repo.countUnread(userId)]);
+    return { data: items, unread, next: hasMore ? encodeCursor(items[items.length - 1]!) : null };
+  }
+
+  // Borra los avisos de más de NOTIFICATIONS_RETENTION_DAYS días; lo corre un timer al arrancar y una vez por día.
+  async purgeOld(now = Date.now()): Promise<number> {
+    return await this.repo.purgeBefore(new Date(now - NOTIFICATIONS_RETENTION_DAYS * 86_400_000));
   }
 
   async markRead(id: string, userId: string): Promise<void> {

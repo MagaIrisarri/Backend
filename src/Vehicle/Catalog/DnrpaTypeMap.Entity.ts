@@ -18,6 +18,7 @@ export class DnrpaTypeMap {
   @Property({ type: 'string' })
   description!: string;
 
-  @ManyToOne(() => VehicleType, { eager: true })
-  vehicleType!: Rel<VehicleType>;
+  // null: no admitida (camiones, remolques…). La importación omite sus modelos; el administrador la edita desde Tipos de vehículo.
+  @ManyToOne(() => VehicleType, { eager: true, nullable: true })
+  vehicleType!: Rel<VehicleType> | null;
 }

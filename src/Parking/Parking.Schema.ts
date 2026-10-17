@@ -83,6 +83,11 @@ export const parkingIdSchema = z.object({
   }),
 });
 
+// L-44: walkInOnly pausa solo las reservas online (la sucursal sigue atendiendo en el lugar); sin él, la cierra.
+export const pauseParkingSchema = parkingIdSchema.extend({
+  body: z.object({ walkInOnly: z.boolean().optional() }).optional(),
+});
+
 export const parkingIdOwnerSchema = z.object({
   params: z.object({
     ownerId: z.string().uuid("El ID del dueño debe ser un UUID válido"),

@@ -15,6 +15,9 @@ export class HolidayController {
   public create = catchAsync(async (req: Request, res: Response) =>
     res.status(201).json({ message: 'Feriado creado', data: await this.service.create(req.body, req.user!) }));
 
+  public importOfficial = catchAsync(async (req: Request, res: Response) =>
+    res.status(200).json({ data: await this.service.importOfficial(req.user!, req.body.dryRun, req.body.remove) }));
+
   public remove = catchAsync(async (req: Request, res: Response) => {
     if (!(await this.service.remove(req.params.id as string, req.user!))) throw new AppError('Feriado no encontrado', 404);
     return res.status(200).json({ message: 'Feriado eliminado' });

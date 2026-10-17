@@ -74,8 +74,8 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     );
   }
 
-  // Tarifa para cobrar la salida (R-14): la vigente o, si el dueño la dio de baja con el vehículo adentro, la última que tuvo ese tipo.
-  // shortcut: L-43, cobra la tarifa vigente al salir aunque cambió después de reservar, decidir tarifa al reservar o avisar
+  // Tarifa para cobrar la salida (R-14) de una reserva sin tarifa guardada (anterior a L-43): la vigente o, si el dueño
+  // la dio de baja con el vehículo adentro, la última que tuvo ese tipo.
   async findForCheckout(parkingId: string, vehicleTypeId: string): Promise<ParkingPrice | null> {
     const active = await this.findActive(parkingId, vehicleTypeId);
     if (active) return active;

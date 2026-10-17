@@ -21,11 +21,22 @@ export interface CreateReservationParams {
   parkingSpaceId?: string;
   serviceIds?: string[];
   attendedById?: string | null; // R-07
+  hourlyRate: number; // L-43
 }
+
+export const WALK_IN_ONLY = 'La sucursal no toma reservas online por ahora: atiende solo en el lugar';
 
 // Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
 const lockParking = (em: EntityManager, parkingId: string) =>
   em.findOneOrFail(Parking, { id: parkingId }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
+
+// Las altas lo vuelven a mirar con la fila bloqueada: una pausa (L-42) que terminó mientras esperaban la deja inactiva,
+// o solo para el mostrador (L-44), que corta las reservas online.
+const lockActiveParking = async (em: EntityManager, parkingId: string, online: boolean) => {
+  const parking = await lockParking(em, parkingId);
+  if (!parking.isActive) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
+  if (online && parking.walkInOnly) throw new AppError(WALK_IN_ONLY, 409);
+};
 
 export class ReservationRepository implements Repository<Reservation> {
   constructor(private entityManager: EntityManager) {}
@@ -250,9 +261,9 @@ export class ReservationRepository implements Repository<Reservation> {
   }
 
   async createReservationAtomically(params: CreateReservationParams): Promise<Reservation> {
-    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById } = params;
+    const { parking, vehicle, reqStartTime, reqEndTime, parkingSpaceId, serviceIds, attendedById, hourlyRate } = params;
     return await this.entityManager.transactional(async (transactionalEntityManager) => {
-      await lockParking(transactionalEntityManager, parking.id);
+      await lockActiveParking(transactionalEntityManager, parking.id, true);
       await this.validateVehicleOverlap(transactionalEntityManager, vehicle, reqStartTime, reqEndTime);
 
       // La elegida si está libre en el horario, o la primera libre del tipo del vehículo (findFreeSpaces).
@@ -274,6 +285,7 @@ export class ReservationRepository implements Repository<Reservation> {
         parkingSpace: targetSpace,
         status: ReservationStatus.PENDIENTE,
         attendedBy: attendedById ? transactionalEntityManager.getReference(User, attendedById) : null,
+        hourlyRate,
       });
 
       if (serviceIds && serviceIds.length > 0) {
@@ -374,13 +386,13 @@ export class ReservationRepository implements Repository<Reservation> {
 
   // Alta de mostrador en una sola transacción: cliente y vehículo (si la patente es nueva), reserva EN CURSO y plaza ocupada.
   async createWalkIn(p: {
-    parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[];
+    parking: Parking; plate: string; model: Model; start: Date; end: Date; employeeId: string; serviceIds?: string[]; hourlyRate: number;
     client: { name: string; last_name: string; dni: string; email: string; phone?: string; passwordHash: string };
   }): Promise<{ reservation: Reservation; accountCreated: boolean }> {
     const c = p.client;
     let accountCreated = false;
     const reservation = await this.entityManager.transactional(async (em) => {
-      await lockParking(em, p.parking.id);
+      await lockActiveParking(em, p.parking.id, false);
       let vehicle = await em.findOne(Vehicle, { plate: p.plate, isActive: true }, { populate: ['vehicleType'] as any });
       if (vehicle) {
         if (vehicle.vehicleType.id !== p.model.vehicleType.id) throw new AppError(`La patente ${p.plate} está registrada con otro tipo de vehículo`, 409);
@@ -416,6 +428,7 @@ export class ReservationRepository implements Repository<Reservation> {
       const reservation = em.create(Reservation, {
         id, code: reservationCode(id), startTime: p.start, endTime: p.end, vehicle, parkingSpace: space,
         status: ReservationStatus.EN_CURSO, checkedInBy: employee, attendedBy: employee, contactName: `${c.name} ${c.last_name}`, contactPhone: c.phone ?? null,
+        hourlyRate: p.hourlyRate,
       });
       if (p.serviceIds?.length) await this.attachServices(em, reservation, p.serviceIds, p.parking);
       return reservation;

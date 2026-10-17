@@ -9,6 +9,10 @@ export const listHolidaysSchema = z.object({
   }),
 });
 export const createHolidaySchema = z.object({ body: z.object({ date, name: z.string().trim().min(1, 'Nombre requerido') }) });
+// L-12: sin dryRun agrega las fechas nuevas del calendario oficial y quita las de `remove` (ids que la vista previa listó como faltantes).
+export const importHolidaysSchema = z.object({
+  body: z.object({ dryRun: z.boolean().default(false), remove: z.array(z.string().uuid()).max(100).default([]) }),
+});
 export const holidayIdSchema = z.object({ params: z.object({ id: z.string().uuid() }) });
 export const holidayOpenSchema = z.object({
   params: z.object({ id: z.string().uuid(), parkingId: z.string().uuid() }),

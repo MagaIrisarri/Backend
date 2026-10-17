@@ -72,4 +72,9 @@ export class Reservation {
 
   @ManyToMany(() => ServicePrice)
   services = new Collection<ServicePrice>(this);
+
+  // L-43: precio por hora vigente al reservar (como la factura): la salida cobra este aunque el dueño cambie la tarifa después.
+  // Nulo en las reservas anteriores a la columna, que cobran la vigente al salir (findForCheckout).
+  @Property({ type: 'decimal', nullable: true })
+  hourlyRate?: number | null;
 }

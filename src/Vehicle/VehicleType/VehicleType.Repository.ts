@@ -68,13 +68,13 @@ export class VehicleTypeRepository implements Repository<VehicleType> {
    * RA-26: pasa cada fila de la tabla a su tipo nuevo y, con ella, los modelos de esa descripción y la copia del tipo
    * en sus vehículos, en una transacción. No se hace mientras alguno de esos vehículos tenga una reserva pendiente o en curso:
    * su plaza es del tipo viejo y la salida se cobraría con la tarifa del nuevo (como R-25). Responde 409 con esas reservas.
-   * Con dryRun solo cuenta lo que cambiaría.
+   * Con dryRun solo cuenta lo que cambiaría. `typeId` null (no admitida, L-33) solo cambia la fila: sus modelos quedan como están.
    */
-  async reassignDescriptions(changes: { rowId: string; typeId: string }[], dryRun: boolean): Promise<DescriptionChange> {
+  async reassignDescriptions(changes: { rowId: string; typeId: string | null }[], dryRun: boolean): Promise<DescriptionChange> {
     return await this.em.transactional(async (tx) => {
       const target = new Map(changes.map((c) => [c.rowId, c.typeId]));
       const rows = changes.length ? await tx.find(DnrpaTypeMap, { id: { $in: [...target.keys()] } }) : [];
-      const typeByKey = new Map(rows.map((r) => [r.descriptionKey, target.get(r.id)!]));
+      const typeByKey = new Map(rows.filter((r) => target.get(r.id)).map((r) => [r.descriptionKey, target.get(r.id)!]));
       const models = (await tx.find(Model, { dnrpaDescription: { $ne: null } }))
         .filter((m) => { const t = typeByKey.get(descKey(m.dnrpaDescription!)); return t && t !== m.vehicleType.id; });
       const modelType = new Map(models.map((m) => [m.id, typeByKey.get(descKey(m.dnrpaDescription!))!]));
@@ -95,7 +95,7 @@ export class VehicleTypeRepository implements Repository<VehicleType> {
       if (active.length) {
         throw new AppError(`No se puede cambiar el tipo: ${result.reservations.length === 1 ? 'hay 1 reserva activa' : `hay ${result.reservations.length} reservas activas`} de vehículos de esos modelos. Reintentá cuando terminen o se cancelen.`, 409, { reservations: result.reservations });
       }
-      for (const r of rows) r.vehicleType = tx.getReference(VehicleType, target.get(r.id)!);
+      for (const r of rows) { const t = target.get(r.id); r.vehicleType = t ? tx.getReference(VehicleType, t) : null; }
       for (const m of models) m.vehicleType = tx.getReference(VehicleType, modelType.get(m.id)!);
       for (const v of vehicles) v.vehicleType = tx.getReference(VehicleType, modelType.get(v.model.id)!);
       return result;

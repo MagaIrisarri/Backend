@@ -171,6 +171,8 @@ export class UserService {
     if (user.type === UserType.DUENO) {
       const n = await this.userRepository.countActiveParkingsOfOwner(user.id);
       if (n) throw new AppError(`No se puede dar de baja: tiene ${n} sucursal(es) activa(s). Pausalas primero desde su panel.`, 409);
+      const r = await this.userRepository.countActiveReservationsOfOwner(user.id);
+      if (r) throw new AppError(`No se puede dar de baja: sus sucursales tienen ${r} reserva(s) pendiente(s) o en curso. Cancelalas o esperá a que terminen.`, 409);
     }
     return await this.userRepository.remove(params);
   }

@@ -6,6 +6,7 @@ import { User } from '../User/User.Entity.js';
 // Aviso dentro de la aplicación para un usuario; se lee con polling (GET /api/notifications).
 @Entity()
 @Index({ properties: ['recipient', 'readAt'] })
+@Index({ properties: ['recipient', 'createdAt'] }) // L-31: la ventana de días y la paginación van por fecha
 export class Notification {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
@@ -24,6 +25,10 @@ export class Notification {
 
   @Property({ type: 'string', nullable: true })
   reservationId?: string | null;
+
+  // Avisos de una sucursal sin reserva (SUCURSAL_LLENA, SUCURSAL_PAUSADA): al tocarlos, el panel abre esa sucursal.
+  @Property({ type: 'string', nullable: true })
+  parkingId?: string | null;
 
   @Property({ type: 'datetime' })
   createdAt?: Date = new Date();

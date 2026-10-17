@@ -67,7 +67,8 @@ async function normalizeVehicleTypes(em: EntityManager): Promise<number> {
     const category = m.dnrpaDescription ? demoCategory(m.dnrpaDescription) : categorizeVehicleType(m.vehicleType?.name);
     m.vehicleType = base.get(category)!;
   }
-  for (const row of await em.find(DnrpaTypeMap, {})) row.vehicleType = base.get(demoCategory(row.description))!;
+  // Las no admitidas (sin tipo) siguen así.
+  for (const row of await em.find(DnrpaTypeMap, { vehicleType: { $ne: null } })) row.vehicleType = base.get(demoCategory(row.description))!;
   await em.flush();
 
   const keep = new Set([...base.values()].map((t) => t.id));

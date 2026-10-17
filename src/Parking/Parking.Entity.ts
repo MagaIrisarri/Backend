@@ -50,6 +50,10 @@ export class Parking {
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;
 
+  // L-44: pausada solo para las reservas online: sigue en el mapa (sin reservar) y el mostrador atiende. isActive sigue en true.
+  @Property({ type: 'boolean', default: false })
+  walkInOnly?: boolean = false;
+
   @Property({ type: 'string', nullable: false })
   name!: string;
 
@@ -76,4 +80,11 @@ export class Parking {
     cascade: [Cascade.REMOVE],
   })
   parkingSpaces = new Collection<ParkingSpace>(this);
+
+  // Alta y última modificación (como en User). Nullable: las sucursales que ya existían quedan sin fecha al actualizar el esquema.
+  @Property({ type: 'datetime', nullable: true })
+  createdAt?: Date | null = new Date();
+
+  @Property({ type: 'datetime', nullable: true, onUpdate: () => new Date() })
+  updatedAt?: Date | null = new Date();
 }

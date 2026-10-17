@@ -2,7 +2,8 @@ import { EntityManager } from '@mikro-orm/core';
 import { DnrpaTypeMap } from './DnrpaTypeMap.Entity.js';
 import { Model } from '../Model/Model.Entity.js';
 import { VehicleType } from '../VehicleType/VehicleType.Entity.js';
-import { descKey } from '../../Shared/utils/names.js';
+import { descKey, nameKey } from '../../Shared/utils/names.js';
+import { NOT_ADMITTED_DESCRIPTIONS, NOT_ADMITTED_HINT } from '../../Shared/constants/dnrpa.js';
 import { categorizeVehicleType, findBaseType, isBaseVehicleType } from '../../Shared/utils/vehicleTypes.js';
 
 // Tipo sugerido para una descripción del DNRPA que todavía no está en la tabla (RA-26): el tipo creado por el administrador
@@ -14,6 +15,24 @@ export function suggestType(description: string, types: VehicleType[], exceptId?
     .filter((t) => t.isActive !== false && t.id !== exceptId && !isBaseVehicleType(t.name) && descKey(t.name).length >= 3 && key.includes(descKey(t.name)))
     .sort((a, b) => descKey(b.name).length - descKey(a.name).length)[0];
   return own ?? findBaseType(types.filter((t) => t.isActive !== false), categorizeVehicleType(description));
+}
+
+// Si a una descripción nueva se le sugiere "No admitir" (camión, remolque…). Es solo la sugerencia: decide el administrador.
+export const suggestNotAdmitted = (description: string) => NOT_ADMITTED_HINT.test(nameKey(description));
+
+// Siembra: las descripciones que no entran en una cochera, como no admitidas, salvo las que ya están en la tabla
+// (con un tipo elegido o porque ya tienen modelos). Corre después de fillMissingRows.
+export async function seedNotAdmitted(em: EntityManager): Promise<number> {
+  const have = new Set((await em.find(DnrpaTypeMap, {})).map((r) => r.descriptionKey));
+  let created = 0;
+  for (const description of NOT_ADMITTED_DESCRIPTIONS) {
+    const key = descKey(description);
+    if (have.has(key)) continue;
+    have.add(key);
+    em.create(DnrpaTypeMap, { descriptionKey: key, description, vehicleType: null });
+    created++;
+  }
+  return created;
 }
 
 // Crea la fila de cada descripción que ya tiene modelos y todavía no está en la tabla, con el tipo que ya tienen
