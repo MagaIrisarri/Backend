@@ -8,11 +8,11 @@
 
 | Entrega | Backend | Frontend |
 |---|---|---|
-| Regularidad | https://github.com/MagaIrisarri/Backend/pull/9 | https://github.com/MagaIrisarri/Frontend/pull/13 |
+| Regularidad |[Backend #9](https://github.com/MagaIrisarri/Backend/pull/9) | [Frontend #13](https://github.com/MagaIrisarri/Frontend/pull/13) | 
 
 ## Instalación y ejecución
 
-- Backend: [README](../README.md#instalación)
+- Backend: [README](../README.MD#instalación)
 - Frontend: [README](https://github.com/MagaIrisarri/Frontend#instalación)
 
 ## Minutas de reunión y avance
