@@ -50,6 +50,10 @@ export class Parking {
   @Property({ type: 'boolean', default: true })
   isActive?: boolean = true;
 
+  // L-44: pausada solo para las reservas online: sigue en el mapa (sin reservar) y el mostrador atiende. isActive sigue en true.
+  @Property({ type: 'boolean', default: false })
+  walkInOnly?: boolean = false;
+
   @Property({ type: 'string', nullable: false })
   name!: string;
 

@@ -93,11 +93,12 @@ export class ParkingRepository implements Repository<Parking> {
 
   // L-42: pausa y cancela las pendientes en una transacción, con la fila bloqueada como el alta de reservas: una que se
   // está creando espera y después ve la sucursal pausada. Las que están en curso siguen hasta su salida.
-  async pause(id: string, cancelReason: string): Promise<{ parking: Parking; cancelled: Reservation[]; inProgress: number } | null> {
+  // L-44: con walkInOnly sigue activa (en el mapa y en el mostrador) y solo deja de tomar reservas online.
+  async pause(id: string, cancelReason: string, walkInOnly: boolean): Promise<{ parking: Parking; cancelled: Reservation[]; inProgress: number } | null> {
     return await this.em.transactional(async (em) => {
       const parking = await em.findOne(Parking, { id }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
       if (!parking) return null;
-      parking.isActive = false;
+      Object.assign(parking, { isActive: walkInOnly, walkInOnly });
       const atParking = { parkingSpace: { parking: { id } } };
       const cancelled = await em.find(Reservation, { ...atParking, status: ReservationStatus.PENDIENTE },
         { populate: ['vehicle', 'vehicle.client', 'parkingSpace', 'parkingSpace.parking'] as any });

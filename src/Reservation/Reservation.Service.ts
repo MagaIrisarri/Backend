@@ -1,4 +1,4 @@
-import { ReservationRepository } from './Reservation.Repository.js';
+import { ReservationRepository, WALK_IN_ONLY } from './Reservation.Repository.js';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { CreateReservationInput, WalkInInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
@@ -152,6 +152,7 @@ export class ReservationService {
   const { parking, vehicle } = await this.repo.getDependencies(data.parkingId, data.vehicleId);
   
   if (!parking) throw new AppError("Estacionamiento no encontrado o inactivo", 404);
+  if (parking.walkInOnly) throw new AppError(WALK_IN_ONLY, 409); // L-44
   if (!vehicle) throw new AppError("Vehículo no encontrado o inactivo", 404);
   if (vehicle.client.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
   const hourlyRate = await this.assertRate(parking.id, vehicle.vehicleType.id);

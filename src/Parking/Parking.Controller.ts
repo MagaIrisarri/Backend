@@ -92,7 +92,7 @@ export class ParkingController {
 
   public remove = catchAsync(async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const paused = await this.parkingService.remove(id, actorId(req, 'pausar la sucursal'));
+    const paused = await this.parkingService.remove(id, actorId(req, 'pausar la sucursal'), req.body?.walkInOnly === true);
 
     if (!paused) {
       throw new AppError('Estacionamiento no encontrado', 404);
