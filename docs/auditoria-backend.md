@@ -4,6 +4,8 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 
 **Carga supuesta:** un solo proceso y la demo de la presentación: 45 sucursales, pocos empleados por sucursal, unas 15.000 reservas y la terminal del empleado consultando cada 30 segundos.
 
+**Guías:** las reglas para que estos casos no se repitan están en [guias-backend.md](guias-backend.md). Cada hallazgo nuevo se suma a la guía que lo cubre, o crea una nueva.
+
 **Qué se revisó:** autenticación y permisos de todas las rutas, reservas (alta, mostrador, ingreso, salida, extender, cambio de plaza, cancelación), facturas, usuarios, feriados, notificaciones, plazas y el arranque con sus tareas periódicas. El generador y la carga de la demo (`src/Shared/db/demo/`) y el detalle de turnos (`Schedule.ts`) se leyeron por arriba.
 
 ## Estado
@@ -98,10 +100,444 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 
 ## Hallazgos menores no incluidos
 
-- El comentario de `sendReminders` dice que un recordatorio fallido se reintenta, pero se marca como enviado antes de crear el aviso.
-- `cancelExpired` puede avisar "vencida" a una reserva que ingresó un instante antes.
+Quedan anotados y sin arreglar: afectan avisos al cliente, no datos ni cobros, y son poco probables.
+
+### Un recordatorio fallido no se reintenta (`ReservationService.sendReminders`)
+
+- **Qué hace:** cada 5 minutos busca las reservas pendientes que empiezan en las próximas 2 horas sin recordatorio (R-28). Para cada una, primero la marca como recordada (`markReminderSent`) y después crea el aviso.
+- **Problema:** el comentario dice que un recordatorio fallido queda sin marcar y se reintenta, pero no es así. Si falla la creación del aviso, `NotificationService.notify` atrapa el error a propósito (un aviso nunca rompe la acción) y la reserva ya quedó marcada. El cliente se queda sin recordatorio, y solo queda en el log.
+- **Arreglo posible:** corregir el comentario y aceptar que un recordatorio fallido se pierde, como cualquier otro aviso. Si se quiere reintentar, `notify` tendría que devolver si creó el aviso y la reserva marcarse solo en ese caso; invertir el orden no alcanza, porque `notify` nunca lanza.
+
+### Aviso de "vencida" a una reserva que acaba de ingresar (`ReservationRepository.cancelExpired`)
+
+- **Qué hace:** cada 5 minutos lee las reservas pendientes cuyo inicio pasó hace más de la tolerancia de llegada (15 min, R-17), las cancela con una escritura que solo cambia las que siguen `PENDIENTE` y devuelve la lista leída para avisar a cada cliente.
+- **Problema:** si un empleado registra el ingreso entre la lectura y la escritura, la reserva no se cancela (bien), pero el cliente igual recibe "Reserva vencida" con el auto adentro. Es casi imposible: el ingreso se rechaza pasada la tolerancia, así que tiene que entrar en los últimos milisegundos justo mientras corre la tarea.
+- **Arreglo posible:** avisar solo a las que la escritura canceló de verdad; por ejemplo, después de escribir, volver a leer cuáles de esos ids quedaron `CANCELADA`.
+
+## Usuarios: revisión posterior
+
+Observaciones sobre `src/User/`, verificadas en el código. Quedan anotadas y sin arreglar.
+
+### U-1. `ownerId` y `parkingId` son texto, no relaciones (deuda conocida)
+
+- **Qué es:** el empleado guarda su dueño y su sucursal como texto (`User.ownerId`, `User.parkingId`, [User.Entity.ts](../src/User/User.Entity.ts)), no como `ManyToOne`. La base no tiene clave foránea.
+- **Problema:** la base no garantiza que apunten a algo que exista. La API no puede crear un empleado con una sucursal ajena o inexistente, porque el servicio lo controla con `ownsParking` (400 "no pertenece"). Pero un cambio por SQL, o un error en un script como la carga de la demo, puede dejar a un empleado con un `parkingId` que no es de nadie, y nada lo detecta. Además, no está marcada como deuda: no tiene comentario `shortcut:` ni fila en las notas del dueño.
+- **Solución:**
+  - **Ahora:** dejarla registrada como deuda: un `// shortcut: L-xx, ownerId y parkingId sin clave foránea (los controla ownsParking), pasar a ManyToOne` en la entidad y la fila L-xx en `Frontend/docs/owner/owner-turnos-notas.md`.
+  - **Después:** pasar a `ManyToOne` a `User` y a `Parking` (nullable), sobre las mismas columnas `owner_id` y `parking_id`. Antes hay que limpiar los valores que no apunten a nada, porque `schema.update` no podría crear la clave foránea. Toca unos 30 archivos que leen `parkingId`.
+- **Si lo preguntan:** es una deuda conocida, compensada en el servicio; todas las altas y ediciones pasan por `ownsParking`.
+
+### U-2. El comentario del rol dice `'ADMIN'`
+
+- **Qué es:** el comentario de `User.type` ([User.Entity.ts:41](../src/User/User.Entity.ts#L41)) lista `'CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMIN'`.
+- **Problema:** el valor real es `'ADMINISTRADOR'` (`UserType` en `Shared/constants/status.ts`). Quien escriba una consulta o una prueba guiándose por el comentario busca un rol que no existe y no encuentra al administrador.
+- **Solución:** cambiar `'ADMIN'` por `'ADMINISTRADOR'` en el comentario.
+
+### U-3. Código muerto en `UserService.update`
+
+- **Qué es:** `update` hashea `userData.password` si viene ([User.Service.ts:122-124](../src/User/User.Service.ts#L122-L124)).
+- **Problema:** `updateUserSchema` no declara `password` y `validateSchema` borra las claves que el esquema no declara, así que un `PUT /api/users/:id` con `password` llega sin ese campo y la rama nunca se ejecuta. El único que llama a `update` es el controlador. Quien lea el código cree que el perfil cambia la contraseña, y no es así: solo cambia por `PATCH /:id/password` (pide la actual) y `POST /:id/reset-password` (administrador).
+- **Solución:** borrar las tres líneas. No cambia ningún comportamiento.
+
+### U-4. `reactivate` no mira el estado anterior
+
+- **Qué es:** `POST /api/users/:id/reactivate` (administrador) pone `ACTIVO` sin mirar cómo estaba ([User.Service.ts:131](../src/User/User.Service.ts#L131)).
+- **Problema:** reactivar a un usuario que ya estaba activo responde 200 "Usuario reactivado". En cambio, `reactivateEmployee` (el dueño con su empleado) exige que esté de baja y si no responde 404. La misma acción tiene dos reglas.
+- **Matiz:** el 200 está probado a propósito: la e2e `users.failure.api`, prueba 22, espera que "reactivar a un activo no cambia nada".
+- **Solución, a decidir:**
+  - **Dejarlo idempotente** (recomendado: es inofensivo y está probado): agregar un comentario que diga que es a propósito.
+  - **Unificar con el empleado:** responder 409 si ya está activo, y actualizar la prueba 22 en el mismo cambio.
+
+### U-5. La contraseña se recorta al registrarse, pero no al iniciar sesión
+
+- **Qué es:** `baseUserFields.password` lleva `.trim()` ([User.Schema.ts:51](../src/User/User.Schema.ts#L51)) y se usa en el registro, el alta de empleado y el restablecimiento del administrador. `loginSchema` y `updatePasswordSchema` no recortan.
+- **Problema:** la misma regla, aplicada distinto en dos lugares. Alguien se registra con `clave123 ` (un espacio al final, fácil al pegar) y se guarda `clave123`. Al iniciar sesión escribiendo lo mismo que al registrarse recibe 401, y tampoco puede cambiarla, porque la contraseña actual no coincide. Al revés, `PATCH /:id/password` guarda la nueva con los espacios, y después el registro y el restablecimiento ya no aceptarían esa misma contraseña.
+- **Solución (decidida):** recortar todas las contraseñas, en todos los caminos, para que nunca se guarde una con espacios al principio o al final:
+  - `.trim()` en `password` de `loginSchema`, y en `currentPassword` y `newPassword` de `updatePasswordSchema`, con el mínimo de 6 caracteres después de recortar;
+  - lo mismo para el DNI como contraseña inicial del mostrador, que ya llega recortado por su esquema.
+- **Cuidado:** una contraseña que alguien ya guardó con espacios por `PATCH /:id/password` deja de coincidir cuando el login recorta. Es raro, y se resuelve con un restablecimiento del administrador.
+
+### U-6. El administrador puede darse de baja y nadie lo puede reactivar
+
+- **Qué es:** `DELETE /api/users/:id` lleva `self('id')`, que deja pasar al administrador para cualquier id, incluido el suyo. `UserService.remove` ([User.Service.ts:162-178](../src/User/User.Service.ts#L162-L178)) controla clientes, empleados y dueños, pero no al administrador.
+- **Problema:** si el administrador se da de baja a sí mismo (o a otro administrador), queda en `BAJA` y `auth` ya no lo deja entrar. Reactivar exige ser administrador, y la siembra no lo arregla: busca `admin@cocheras.com` por email, lo encuentra y no lo toca. El sistema queda sin administrador y solo se recupera con SQL a mano.
+- **Solución:** que `remove` rechace a un `ADMINISTRADOR` con 400, como ya hace `resetPassword`.
+
+### U-7. La baja de un dueño deja activos a sus empleados
+
+- **Qué es:** para dar de baja a un dueño se exige que no tenga sucursales activas ni reservas activas ([User.Service.ts:171-176](../src/User/User.Service.ts#L171-L176)); a sus empleados no se los mira.
+- **Problema:** el dueño queda en `BAJA` y sus empleados siguen `ACTIVO`, con sesión. `isStaffOf` (`Shared/utils/staff.ts`) los sigue reconociendo como personal de su sucursal pausada, porque solo mira `parkingId`: pueden leer reservas, datos de clientes y facturas de un negocio que ya se fue del sistema.
+- **Solución:** seguir la regla de las demás bajas (R-20): 409 si el dueño tiene empleados activos ("Dalos de baja primero"). La otra opción es darlos de baja en el mismo paso, en una transacción.
+
+### U-8. `excludePassword` repite lo que ya hace la entidad (opcional)
+
+- **Qué es:** el servicio quita `password` a mano en siete lugares (`excludePassword` y el `const { password, ...rest }` de `createUser`, [User.Service.ts:27-30](../src/User/User.Service.ts#L27-L30)).
+- **Problema:** `User.password` ya es `hidden: true` y nunca se convierte a JSON, tampoco anidado en reservas o sucursales. Son dos protecciones que hay que mantener juntas sin necesidad.
+- **Solución:** devolver la entidad tal cual y borrar `excludePassword`: unas 15 líneas menos, la respuesta no cambia.
+
+### Lo que está bien y lo que queda fuera
+
+- **Bien:** unicidad de email, DNI y teléfono en alta y edición (`assertUnique`, más los índices únicos); el mismo 401 para email inexistente, contraseña incorrecta o usuario de baja; las bajas y cambios de sucursal de empleados con turnos o reservas responden 409; el registro no deja elegir `EMPLEADO` ni `ADMINISTRADOR`, y los esquemas de edición no dejan pasar `type`, `status` ni `password`.
+- **Decisión a documentar:** el login no limita los intentos. Con la carga de un TP no se arregla, pero conviene registrarlo como `shortcut:` con su fila L-xx.
+- **No revisado:** la paginación (`findPage`), cubierta por `pagination.db.test.ts`.
+
+## Cocheras: revisión posterior
+
+Revisión de `src/Parking/` (servicio, repositorio, rutas y esquemas) y de quién usa sus datos en el Frontend. Siete problemas, anotados y sin arreglar (de P-7 solo se corrigió el comentario).
+
+### P-1. Los datos de contacto de todos los dueños son públicos (arreglar ya)
+
+- **Qué es:** cada cochera que devuelve la API trae a su dueño con `name`, `last_name`, `email` y `phone` (`formatParkingResponse`, [Parking.Service.ts:53-66](../src/Parking/Parking.Service.ts#L53-L66)).
+- **Problema:** `GET /api/parkings/active` y `GET /api/parkings/:id` son públicas, porque el mapa se ve sin sesión. Cualquiera, sin iniciar sesión, obtiene con un solo pedido el email y el teléfono de todos los dueños con sucursales activas. El único que usa esos dos datos es el panel del administrador (`Frontend/src/pages/Admin/AdminParkings.tsx:131-132`), que llega por `GET /api/parkings`, una ruta que exige sesión.
+- **Solución:** que `formatParkingResponse` incluya `email` y `phone` solo en el listado del administrador (`findAll` y `findPage`). Las rutas públicas quedan con `id`, `name` y `last_name`.
+- **Si no se arregla:** son datos personales expuestos a cualquiera; si en la defensa preguntan por seguridad, es fácil de encontrar.
+
+### P-2. El alta guarda la cochera y sus plazas en dos pasos
+
+- **Qué es:** `ParkingService.create` ([Parking.Service.ts:172-193](../src/Parking/Parking.Service.ts#L172-L193)) guarda la cochera (`ParkingRepository.add`, que hace `flush` y la deja pausada) y después las plazas (`ParkingSpaceRepository.createBulk`, con otro `flush`).
+- **Problema:**
+  - Si falla el segundo paso, queda una cochera pausada y sin plazas, y el dueño recibe un 500. Si reintenta, queda una segunda cochera igual, porque el nombre no es único.
+  - La sucursal huérfana se puede activar: una tarifa no exige plazas de su tipo y `reactivate` solo exige tarifa (P-3). Aparece en el mapa con capacidad 0 y toda reserva responde 409.
+  - Va contra la convención del proyecto: las escrituras que tocan varias entidades van en una transacción.
+- **Solución:** crear la cochera y las plazas con el mismo `em` y hacer un único `flush`, que MikroORM ejecuta en una sola transacción; por ejemplo, que `ParkingRepository.add` reciba también las plazas. No hace falta bloquear la fila, porque la cochera es nueva.
+
+### P-3. `reactivate` habilita una cochera sin plazas
+
+- **Qué es:** `POST /api/parkings/:id/reactivate` ([Parking.Service.ts:241-254](../src/Parking/Parking.Service.ts#L241-L254)) exige una tarifa vigente antes de habilitar la sucursal.
+- **Problema:** no exige plazas activas. Una sucursal sin plazas, sea la huérfana de P-2 o una con todas las plazas dadas de baja, se habilita y aparece en el mapa sin lugar para nadie: toda reserva responde 409.
+- **Solución:** exigir al menos una plaza activa además de la tarifa, con un 400 de mensaje parecido. Es una consulta más.
+
+### P-4. La foto de portada tiene dos nombres: `imageUrl` e `image`
+
+- **Qué es:** el esquema acepta los dos campos ([Parking.Schema.ts:35-36](../src/Parking/Parking.Schema.ts#L35-L36)). El servicio los junta al crear y al editar (gana `imageUrl`) y la respuesta devuelve los dos con el mismo valor ([Parking.Service.ts:107-108](../src/Parking/Parking.Service.ts#L107-L108)). La entidad tiene una sola columna, `imageUrl`.
+- **Problema:**
+  - `image` no lo manda nadie: el formulario del Frontend envía solo `imageUrl` (`ParkingDrawer.tsx:90`; ahí `image` es solo el nombre del campo del formulario). En la respuesta sobra, y obliga al Frontend a leer `p.imageUrl || p.image` en cuatro lugares (`ListDrawer.tsx:126` y `:241`, `FavoritesDrawer.tsx:48`, `OwnerDashboard.tsx:282`).
+  - Con dos nombres para lo mismo, un pedido con los dos y valores distintos guarda uno y descarta el otro sin avisar.
+  - Además, el backend acepta cualquier texto: el control de `http://` o `https://` está solo en el formulario (`ParkingDrawer.tsx:63`). Por la API se guarda `javascript:alert(1)` o un texto más largo que la columna (255), que termina en un 500.
+- **Solución:** dejar solo `imageUrl`.
+  - **Backend:** borrar `image` del esquema, del servicio (las dos líneas que lo combinan) y de la respuesta. En el esquema, validar la URL: `z.string().trim().url().regex(/^https?:\/\//i).max(255)`, opcional y nullable como ahora.
+  - **Frontend:** leer solo `p.imageUrl` en esos cuatro lugares (`types/parking.types.ts` ya declara solo `imageUrl`).
+- **Sobre la "compatibilidad con el Frontend":** no hace falta. El Frontend nunca envía `image` y lee `imageUrl` primero; `image` solo existe como respaldo de lectura y se quita junto con este cambio.
+
+### P-5. `ParkingRepository.remove` no la llama nadie, y saltea las reglas de la pausa
+
+- **Qué es:** `remove` ([Parking.Repository.ts](../src/Parking/Parking.Repository.ts)) pone `isActive = false` y nada más. La baja real es `pause` (L-42, L-44), que bloquea la fila, cancela las pendientes con motivo y avisa. Nada en `src`, `tests` ni `tests-catedra` llama a `remove`.
+- **Problema:** no rompe nada hoy, pero es una trampa. Quien la use creyendo que es "la baja" pausa una sucursal sin cancelar sus reservas pendientes: los clientes llegan a una cochera cerrada.
+- **Solución:** la exige la interfaz `Repository<T>`, que `Frontend/docs/requisitos-tp.md` usa en la defensa (la misma decisión que en el hallazgo 7). Dejarla, pero que delegue en la regla real: `remove = (item) => this.pause(item.id, …, false).then(Boolean)`, o un comentario que diga que la baja va por `pause`.
+
+### P-6. Muchos `any`: TypeScript no controla las formas de las cocheras
+
+- **Qué es:** el servicio devuelve `Promise<any>` en `findAll`, `findActive`, `findOne`, `create`, `update`, `findByOwnerId`, `reactivate` y `getMetrics`; `update` recibe `data: any`, y `formatParkingResponse` trabaja con `as any` (16 en el servicio, 12 en el repositorio).
+- **Problema:** un cambio de forma no lo detecta el build. Caso concreto: `ReservationService.notifyIfFull` lee `live.availableSpaces` de `ParkingService.findOne`. Si ese campo se renombra (por ejemplo, al limpiar la respuesta como pide P-4), `pnpm build` pasa, `undefined > 0` da `false` y se le avisa "Sucursal llena" al dueño en cada ingreso.
+- **Solución:**
+  - un tipo para la respuesta: `export type ParkingView = ReturnType<ParkingService['formatParkingResponse']>`, y que los métodos devuelvan `ParkingView` (o `ParkingView[]`);
+  - `update(id, data: UpdateParkingInput)`, con el tipo que ya sale del esquema de zod;
+  - en `formatParkingResponse`, `wrap(parking.owner).isInitialized()` de MikroORM en vez de los `as any`.
+
+### P-7. `province` admite nulos en la base aunque el alta la exige
+
+- **Qué es:** `Parking.province` es `nullable: true` (`Parking.Entity.ts:16`) solo por las filas anteriores a la columna. El alta la exige con zod (`Parking.Schema.ts:8`), y la respuesta (`?? null`, `Parking.Service.ts:88`) y `listLocalities` (`WHERE province IS NOT NULL`, `Parking.Repository.ts:14`) cubren las nulas.
+- **Problema:** el comentario de la entidad decía que la siembra completa las viejas, y nadie lo hace. Una cochera vieja sin provincia no aparece en el filtro por localidad del administrador. Hoy no pasa nada: el dato es obligatorio donde importa.
+- **Resuelto ahora:** el comentario, sin commit. Ahora dice que nadie completa las filas viejas y cuándo pasar a `nullable: false`.
+- **Después de la defensa** (antes no se toca el esquema: es un riesgo sin beneficio para la demo):
+  1. en cada base, `SELECT COUNT(*) FROM parking WHERE province IS NULL`;
+  2. si da 0, `nullable: false` en la entidad;
+  3. sacar el `?? null` de la respuesta y el `WHERE province IS NOT NULL` de `listLocalities`.
+
+### Lo que está bien
+
+- **Pausar (L-42, L-44):** transacción con la fila bloqueada; cancela las pendientes y respeta las que están en curso. Los avisos salen después de guardar.
+- **Permisos de las rutas:** todas las escrituras llevan `auth(DUENO)` y `ownParking`, y el alta además `self('ownerId')`. El administrador solo lee (RA-19).
+- **Ingresos de las métricas:** cuentan las facturas que no están anuladas, la misma regla que el resumen del administrador.
+- **No revisado:** el controlador línea por línea y la paginación (`findPage`, cubierta por `pagination.db.test.ts`). No hay prueba del alta de cochera.
+
+## Servicios adicionales: revisión posterior
+
+Revisión de `src/ServiceCatalog/` (catálogo del administrador) y `src/ServicePrice/` (precio de cada servicio por sucursal), de su uso en el Frontend y de su relación con las reservas. Tres problemas, anotados y sin arreglar.
+
+### S-1. Cambiar el precio de un servicio no es atómico y puede dejar dos precios vigentes
+
+- **Qué es:** `ServicePriceService.create` ([ServicePrice.Service.ts:13-26](../src/ServicePrice/ServicePrice.Service.ts#L13-L26)) vence el precio vigente (`repo.remove`, con su `flush`) y después crea el nuevo (`repo.add`, con otro `flush`), sin transacción ni bloqueo.
+- **Problema:**
+  - **Doble clic en "Guardar" del dueño:** los dos pedidos encuentran el mismo vigente, los dos lo vencen y los dos crean uno nuevo. Quedan dos precios vigentes del mismo servicio en la sucursal: la lista lo muestra dos veces y `findActive` devuelve cualquiera.
+  - **Falla el segundo paso:** el viejo ya quedó vencido y no hay nuevo. El servicio desaparece de la sucursal y el dueño recibe un 500.
+- **Solución:** un solo método del repositorio, en `em.transactional`, que bloquee la sucursal (`lockParking`, de `ParkingSpace.Repository.ts`), vuelva a buscar el vigente, lo venza y cree el nuevo. Agregar una prueba de que después del cambio hay un solo precio vigente; el módulo no tiene ninguna.
+- **Tarifas:** `ParkingPrice.Service` tenía el mismo patrón y ya está resuelto con `lockedFor` (PP-1). Sirve de modelo para este arreglo.
+
+### S-2. El catálogo acepta servicios repetidos, y uno dado de baja no se puede recuperar
+
+- **Qué es:** el alta y la edición del catálogo ([ServiceCatalog.Service.ts:16-22](../src/ServiceCatalog/ServiceCatalog.Service.ts#L16-L22)) guardan el nombre sin compararlo con los existentes, y no hay forma de reactivar un servicio dado de baja.
+- **Problema:** el administrador puede crear "Lavado" dos veces, o "lavado" y "Lavado ". Los dueños ven dos servicios iguales y cargan precios en uno distinto cada uno. Y como una baja no tiene vuelta atrás, la única forma de volver a ofrecer el servicio es crear otro con el mismo nombre: un repetido. Tipos de vehículo ya lo resuelven con `nameKey`.
+- **Solución:** en el alta y la edición, 409 si otro servicio activo tiene el mismo `nameKey` (`Shared/utils/names.ts`). Si el que coincide está dado de baja, reactivarlo en vez de crear otro, como hace la importación del catálogo con marcas y modelos.
+
+### S-3. Los esquemas no limitan el texto ni el precio
+
+- **Qué es:** [ServiceCatalog.Schema.ts](../src/ServiceCatalog/ServiceCatalog.Schema.ts) y [ServicePrice.Schema.ts](../src/ServicePrice/ServicePrice.Schema.ts).
+- **Problema:**
+  - Nombre y descripción no se recortan ni tienen máximo: un nombre de dos espacios pasa el mínimo de 2 y queda un servicio sin nombre visible; un texto de más de 255 caracteres termina en un 500 (`varchar(255)`).
+  - El precio no tiene máximo: por encima de lo que entra en `numeric(12,2)` también da 500, y los centavos de más se redondean sin avisar.
+- **Solución:** nombre y descripción con `.trim().min(...).max(255)`; precio con `.max(9_999_999_999.99).multipleOf(0.01)`.
+
+### Lo que está bien y lo que queda fuera
+
+- **Bien:** las bajas con reservas activas responden 409 con la lista (`assertNoActiveReservations`, R-24), al sacar el servicio de una sucursal y al darlo de baja del catálogo, que además vence sus precios en todas las sucursales en una transacción. Los precios nunca se editan en el lugar y la reserva guarda la FK al precio que tenía (D-16). El catálogo lo escribe solo el administrador y los precios solo el dueño de la sucursal (`ownParking`); las lecturas son públicas porque las usa el mapa.
+- **Menor:** las dos bajas controlan las reservas activas fuera de una transacción. Si una reserva con ese servicio se crea en el mismo instante, el servicio se da de baja igual y la salida lo cobra. Es casi imposible en la práctica.
+- **No revisado:** `ParkingPrice` (ver S-1 y PP-1).
+
+## Plazas: revisión posterior
+
+Revisión de `src/ParkingSpace/` (entidad, esquemas, repositorio, servicio, controlador y rutas) y de qué endpoints llama el Frontend. Dos problemas y un detalle menor, anotados y sin arreglar.
+
+### PS-1. Los códigos de plaza se pueden repetir dentro de una sucursal
+
+- **Qué es:** nada impide dos plazas con el mismo código en una sucursal: ni la base (no hay índice único en sucursal + código) ni el servicio ([ParkingSpace.Service.ts:53-98](../src/ParkingSpace/ParkingSpace.Service.ts#L53-L98)).
+- **Problema, tres caminos:**
+  - **Baja y alta en lote:** una sucursal tiene A-01 a A-03. El dueño da de baja A-03, que tiene reservas finalizadas, y después agrega una plaza. El lote calcula el número siguiente solo con las plazas activas (`findByParking` filtra `isActive`), así que crea otra A-03. En el historial, las reservas de la A-03 dada de baja y las de la nueva aparecen en "la misma" plaza, aunque son dos distintas.
+  - **Doble clic en "Agregar plazas":** el lote lee los códigos y después crea, sin transacción ni bloqueo. Dos pedidos a la vez calculan el mismo número y crean A-04 dos veces.
+  - **Alta individual (`POST /:parkingId/spaces`):** acepta cualquier código, también uno que ya existe. El Frontend no la usa, pero la API la expone y puede ser evidencia de un requisito de la cátedra (revisar `Frontend/docs/revision-alcance.md` antes de tocarla).
+- **Solución:**
+  - en el lote, calcular el número siguiente con todas las plazas de la sucursal, incluidas las dadas de baja;
+  - correr el lote en una transacción con `lockParking`;
+  - en el alta individual, 409 si el código ya existe en la sucursal;
+  - opcional: índice único (sucursal, código), revisando antes que no haya repetidos en la base.
+
+### PS-2. Con más de 99 plazas de un tipo, el orden de los códigos se rompe (opcional)
+
+- **Qué es:** los códigos se rellenan a dos dígitos y se ordenan como texto (`orderBy: { spaceCode: 'ASC' }` en `findByParking` y en los candidatos de `findFreeSpaces`).
+- **Problema:** una sucursal con 120 plazas lista A-10, A-100, A-101… A-109, A-11. Además, "la primera plaza libre" que se asigna a una reserva sale de ese orden. El esquema permite hasta 500 plazas por tipo.
+- **Solución:** ordenar por el número del código en vez del texto (por ejemplo, en JS después de leer). Rellenar a tres dígitos también sirve, pero cambia el formato de los códigos existentes.
+
+### PS-3. El esquema acepta `OCUPADO`, que solo debería escribir el ingreso
+
+- **Qué es:** la plaza tiene `state` (`LIBRE`, `OCUPADO`, `MANTENIMIENTO`) y la reserva tiene `status` (`EN CURSO`…). `OCUPADO` repite "hay una reserva `EN CURSO` en esta plaza". El ingreso, el mostrador, el cambio de plaza y la salida mueven los dos en la misma transacción (`Reservation.Repository.ts:163, 198, 228, 461`). Coinciden porque todas las lecturas que deciden algo miran las reservas: `busyIntervals` estira toda reserva en curso hasta `max(endTime, ahora)` (R-21, `ParkingSpace.Repository.ts:34`), y tanto el conteo de disponibles (`Parking.Service.ts:48`) como `takeOutOfService` (`ParkingSpace.Repository.ts:93-94`) suman las reservas en curso. `state` solo acelera la consulta de "libre ahora" y agrega `MANTENIMIENTO`.
+- **Problema:** `PUT /api/parkings/spaces/:id` acepta los tres estados (`ParkingSpace.Schema.ts:23`), y el repositorio los asigna sin control (`ParkingSpace.Repository.ts:157-164`). Una plaza pasada a `OCUPADO` a mano, sin reserva, queda fuera de los ingresos de ahora hasta que alguien la vuelva a `LIBRE`: ninguna salida la va a liberar. La interfaz del dueño nunca manda `OCUPADO` (solo `MANTENIMIENTO`, y `LIBRE` para rehabilitar, en `OwnerSpaces.tsx:89`), así que pasa solo llamando a la API a mano. Pasar a `LIBRE` una plaza con un vehículo adentro no permite asignarla: solo cambia el estado guardado.
+- **Solución:** sacar `OCUPADO` del enum del esquema. Es una línea, cierra el único caso real y no rompe el Frontend. Un 409 al pasar a `LIBRE` con una reserva en curso es opcional: el sistema ya se defiende por las reservas, y agregarlo solo mejora la prolijidad del dato.
+- **Guías:** G-10 (`OCUPADO` lo escribe un solo camino, el ingreso) y N-1 (`state` en la plaza frente a `status` en la reserva).
+
+### Menor: la disponibilidad no valida el horario
+
+- **Qué es:** `GET /:parkingId/spaces/availability` (`parkingSpaceavailability` en [ParkingSpace.Schema.ts](../src/ParkingSpace/ParkingSpace.Schema.ts)).
+- **Problema:** con un fin anterior al inicio, todas las plazas aparecen libres. Solo afecta esa consulta: el alta de la reserva valida el horario.
+- **Solución:** `.refine` en el esquema que exija `endTime > startTime`.
+
+### Lo que está bien
+
+- **Sacar una plaza de servicio (R-18, R-19):** transacción con la sucursal bloqueada (desde `f0583c5`); propone a qué plaza pasar cada reserva futura, responde 409 sin confirmación o si alguna no tiene lugar, avisa después de guardar y no deja sacar una plaza con un vehículo adentro.
+- **El tipo de una plaza no se edita (R-19):** el esquema solo deja cambiar el estado.
+- **Estado a mano `LIBRE`:** marcar `LIBRE` una plaza con un vehículo adentro no permite asignarla, porque `findFreeSpaces` también mira las reservas en curso. El caso de `OCUPADO` a mano es PS-3.
+- **Permisos:** todas las escrituras llevan `auth(DUENO)` y `ownParking`.
+
+## Resto de `src`: revisión posterior
+
+Revisión de los módulos que quedaban: `ParkingPrice`, `EmployeeShift`, `Invoice`, las rutas de `Reservation` que no se habían visto, `Vehicle` (con `Catalog`), `Holiday`. Solo lectura del código, sin correr pruebas. Ninguno bloquea la demo: todos piden un doble clic, dos personas a la vez o montos fuera de lo normal. Anotados y sin arreglar, salvo PP-1, PP-3 y PP-4.
+
+### PP-1. Una tarifa puede quedar vigente dos veces, y la baja no la saca ✅
+
+- **Qué es:** `ParkingPriceService.create` vencía la vigente y creaba la nueva en dos `flush`, sin transacción ni bloqueo. `update` pasa por ahí.
+- **Problema:** con un doble clic, o con dos pestañas, quedan dos vigentes del mismo tipo. `startDate` guarda solo el día (`LocalDateType`), así que `findActive` ordena dos filas empatadas y cobra cualquiera. Además, `DELETE /prices/:id` vence solo una: el dueño ve la tarifa borrada, pero la cochera sigue cobrando la otra. El comentario de `findByParking` ("la más reciente si quedó más de una") muestra que el caso ya se vio y se tapó en la lectura.
+- **Solución (`e8521e8`):** `ParkingPriceRepository.lockedFor` abre `em.transactional` y bloquea la cochera con `lockParking`. Adentro, `create` busca la vigente, la vence (`expireActiveByVehicleType`) y crea la nueva; si algo falla, no queda nada a medias. La baja también corre ahí (PP-4). `findByParking` sigue quitando repetidas, por las bases que ya tengan dos vigentes. Prueba: dos altas simultáneas terminan con una sola vigente (`tests/parkings/PauseAndTariff.db.test.ts`).
+
+### PP-3. El PUT de una tarifa devuelve otro id ✅
+
+- **Qué es:** por el versionado, `PUT /api/parkings/prices/:id` vence la tarifa y crea otra, con id nuevo.
+- **Problema:** quien edita dos veces con el id de la primera respuesta recibía 404 ("Tarifa no encontrada o inactiva"). El Frontend no lo sufre porque usa el `POST` por tipo, pero la API obligaba a seguir el id nuevo.
+- **Solución (`e8521e8`):** el id sigue cambiando, porque es el versionado, pero un id vencido ya no da 404: cambia la vigente de ese tipo en esa cochera (`ParkingPriceService.update`). La pertenencia (`ownParking(parkingOf(ParkingPrice))`) sale de la fila vencida, que es de la misma cochera. Prueba en el mismo archivo.
+
+### PP-4. Dar de baja la última tarifa saca la sucursal del mapa sin avisar ✅
+
+- **Qué es:** `DELETE /api/parkings/prices/:id` vencía cualquier tarifa vigente.
+- **Problema:** sin ninguna tarifa, la sucursal sigue activa, pero `ParkingService.findActive` la saca del mapa y toda reserva responde 409 (`assertRate`). El dueño no se entera: para él la sucursal está habilitada.
+- **Solución (`e8521e8`):** con la sucursal activa, la baja de su última tarifa vigente responde 409 y pide cargar otra o pausar la sucursal. Una sucursal pausada sí puede quedar sin tarifas. `OwnerTariffs` ya muestra el mensaje en un toast. Prueba en el mismo archivo.
+
+### INV-1. Doble cobro de una factura
+
+- **Qué es:** `InvoiceService.pay` (`Invoice.Service.ts:13-29`) lee la factura, comprueba que no esté `PAGADA` y después la guarda.
+- **Problema:** con un doble clic, o con dos empleados a la vez (uno cobra en efectivo y el otro con tarjeta), los dos pasan el control. El segundo pisa el medio de pago y el comprobante del primero, y la caja no cierra.
+- **Solución:** un `nativeUpdate` condicionado a `status: 'PENDIENTE'`, y un 409 si no actualizó ninguna fila. Es el mismo patrón que la cancelación de reservas.
+
+### ES-1. Un cambio de turnos y una reserva nueva pueden cruzarse
+
+- **Qué es:** `saveDay`, `saveTemplateDay`, `createClosure` y `setHolidayOpen` (`Schedule.Service.ts`) miran las reservas activas y después escriben, sin bloquear la cochera. El alta de reserva comprueba la cobertura (`assertCovered`, `Reservation.Service.ts:85`) y elige el empleado (`employeeFor`) antes de `lockParking`.
+- **Problema:** el dueño saca el turno del sábado de 10 a 14 mientras un cliente reserva el sábado de 11 a 12. Los dos controles pasan, y la reserva queda en horas sin empleado, asignada a alguien que ya no tiene turno.
+- **Solución:** pasar `assertCovered` y `employeeFor` adentro de la transacción del alta, después de `lockParking`, y que los cambios de turnos también bloqueen la cochera. Es poco probable. Si no se arregla, conviene dejarlo como `shortcut: L-xx`.
+
+### PP-2. Montos sin tope
+
+- **Qué es:** el precio de la tarifa (`ParkingPrice.Schema.ts:3`) y `amountReceived` (`Invoice.Schema.ts:21`) aceptan cualquier número positivo.
+- **Problema:** con 10.000.000.000, la columna `numeric(12,2)` se desborda y responde 500 en lugar de 400. Con 1000,555 se redondea sin avisar.
+- **Solución:** `.max(99_999_999).multipleOf(0.01)`. Es el mismo arreglo que S-3: conviene hacer los tres esquemas juntos.
+
+### INV-2. El mensaje de vuelto muestra decimales de punto flotante
+
+- **Problema:** para un total de 1000 con 999,9 recibidos, el mensaje dice "Faltan $0.10000000000002…" (`Invoice.Service.ts:19`).
+- **Solución:** `(total - recibido).toFixed(2)`.
+
+### V-1. Patente activa duplicada
+
+- **Qué es:** `VehicleService.create` comprueba que la patente esté libre (`assertPlateFree`) y recién después agrega el vehículo. No hay índice único, por las bajas lógicas.
+- **Problema:** con un doble clic en "Agregar vehículo" quedan dos vehículos activos con la misma patente. Después, el mostrador toma cualquiera de los dos.
+- **Solución:** un índice único sobre una columna generada que vale `plate` si el vehículo está activo y `NULL` si no. Hay que verificar que `schema.update` lo cree. La otra opción es una transacción que bloquee al cliente.
+
+### ES-2. `GET /api/shifts/coverage/:parkingId/:dayOfWeek` da resultados falsos y nadie lo usa
+
+- **Qué es:** `calculateCoverageGaps` (`EmployeeShift.Service.ts:72`).
+- **Problema:** ignora el horario de la sucursal y los cierres. En una cochera que abre a las 7 informa un hueco de 00:00 a 07:00. Además lee `isActive`, así que con un cambio que rige desde mañana muestra la versión de mañana. El Frontend no lo llama, y `revision-alcance.md` no lo menciona.
+- **Solución:** borrar la ruta y el método.
+
+### H-1. Feriados nacionales duplicados
+
+- **Qué es:** el índice único de `Holiday` es `(date, owner)` (`Holiday.Entity.ts:10`), y MySQL admite varios `NULL` en un índice único.
+- **Problema:** un doble clic del administrador, o `syncOfficial` corriendo a la vez que la importación, deja dos feriados nacionales en la misma fecha.
+- **Solución:** volver a buscar el feriado dentro de la transacción del alta. El arreglo completo es una columna generada `IFNULL(owner_id, '')` con el índice único sobre ella.
+
+### R-a. El mostrador repite la regla del personal
+
+- **Problema:** `walkIn` (`Reservation.Service.ts:189-192`) escribe a mano `isEmployee || isOwner`. CLAUDE.md pide `isStaffOf` como única fuente.
+- **Solución:** `if (!isStaffOf(user, parking)) throw …`.
+
+### Menores
+
+- `createClosure` revisa las reservas de hoy aunque el cierre empiece a regir la semana próxima (`closureFrom`). Puede dar un 409 que no corresponde.
+- `getRange` hace unas 5 consultas por día. Con 62 días son unas 300 consultas por pedido. Alcanza para la carga actual.
+- El comentario de `Invoice.Route.ts:18` dice que la factura "la anula la cancelación de la reserva", y es falso. Solo se cancelan reservas `PENDIENTE`, que todavía no tienen factura, y nadie llama a `InvoiceRepository.remove` (queda por la interfaz).
+- El cambio de modelo de un vehículo con reservas responde 400, y la baja del vehículo responde 409 por la misma causa.
+
+### Lo que está bien
+
+- Todas las rutas de reservas que escriben verifican al personal en el servicio (`assertStaffOf`), y `rate` verifica al cliente.
+- La importación del catálogo es una sola transacción.
+- El feriado propio y el nacional se fusionan bien, y la sincronización con el calendario oficial nunca quita fechas.
+- La semana tipo con vigencias (L-01) guarda la plantilla y las transferencias en un solo `flush`.
+
+## Código muerto y simplificaciones
+
+Barrido de todo `src` con tres herramientas: un script que compara cada ruta con las llamadas del Frontend (`src/`), el servicio de referencias de TypeScript (métodos y exports que nadie llama de forma directa, también contra `tests/` y `tests-catedra/`) y `tsc --noUnusedLocals --noUnusedParameters`. Cada candidata a borrar se cruzó con `revision-alcance.md` y `requisitos-tp.md`, para no sacar la evidencia de un requisito. Anotado y sin arreglar. En total se pueden sacar unas 60 líneas sin cambiar nada de lo que se ve, más las rutas que decida el equipo. No hay dependencias de npm para sacar (revisado a ojo contra los imports).
+
+### Código muerto: se puede borrar
+
+- **L-1. `VehicleService.findVehiclesByUserId`** (`Vehicle.Service.ts:17`): es una copia exacta de `findActiveByUserId` (línea 88) y nadie la llama. Borrarla.
+- **L-2. Ruta `coverage`:** es ES-2. Borrar la ruta, `getCoverage` en el controlador, `calculateCoverageGaps` y `getShiftsByParkingAndDay`, si no tiene otro uso (unas 30 líneas).
+- **L-3. Lo que detectó `tsc`:** el import de `ACTIVE_RESERVATION_STATUSES` en `Parking.Repository.ts` y `isoOf` en `demo/generate.ts`. Los otros cinco avisos son parámetros `req`/`res`/`next` que Express exige en la firma.
+- **L-4. Tipos exportados que nadie usa:** `CreateParkingPriceInput`, `UpdateReservationInput`, `PageMeta`, `PublicUserCreateInput`, `EmployeeCreateInput`, `UserUpdateInput` y `CreateVehicleInput`. Son una línea cada uno y salen de zod. Conviene usarlos en lugar de los `data: any` de los servicios (como propone P-6), o borrarlos. `UpdateParkingInput` queda, porque P-6 lo usa.
+
+### Rutas que el Frontend no llama
+
+| Ruta | Decisión |
+|---|---|
+| `GET/PUT/DELETE /api/shifts/:id` y `/api/shifts/closures` | Se quedan: son la evidencia del CRUD de TurnoEmpleado (`revision-alcance.md:35`). |
+| `GET/PUT /api/parkings/prices/:id` | Se quedan: son evidencia del CRUD de PrecioVehículoHora (`revision-alcance.md:36`), y las cubren las pruebas. |
+| `GET /api/shifts/config` | Nadie la llama y devuelve una constante. Se puede borrar. |
+| `GET/PUT/PATCH/DELETE /api/insurances/:id` | La pantalla solo lista y da de alta seguros, y no figuran en los requisitos. Lo decide el equipo: ¿se quedan como CRUD de Seguro o se borran? |
+| `GET /api/brands/:id`, `GET /api/models/:id` | Son lecturas públicas cortas y no hacen daño. Pueden quedar. |
+| `GET /api/parkings/:id/service-prices/active/:catalogId`, `GET /api/parkings/service-prices/:id` | Nadie las llama. Se pueden borrar con sus métodos, salvo que se quieran como evidencia del CRUD de servicios. |
+
+### Métodos que solo existen por la interfaz `Repository<T>`
+
+Nadie llama de forma directa a estos métodos:
+
+- `EmployeeShiftRepository.add`, `update` y `remove`
+- `InvoiceRepository.findAll`, `add` y `remove`
+- `ParkingRepository.remove`
+- `ParkingPriceRepository.findAll` y `update`
+- `ParkingSpaceRepository.findAll` y `remove`
+- `ReservationRepository.add`
+- `ServicePriceRepository.findAll` y `update`
+
+Se quedan: la interfaz es la evidencia de la cátedra (`requisitos-tp.md`), con el mismo criterio que el hallazgo 7 y P-5. Hay dos casos con riesgo:
+
+- `ParkingRepository.remove` saltea las reglas de la pausa. Es P-5.
+- `EmployeeShiftRepository.add`, `update` y `remove` escriben turnos sin pasar por `saveTemplateDay`, que según CLAUDE.md es el único camino de escritura de la semana tipo. Si alguien los llama, rompe las vigencias (L-01). Conviene un comentario de una línea en cada uno, como propone P-5.
+
+### Repetido: conviene unificar
+
+- **L-5. Dos generadores de códigos de plaza** (`Parking.Service.ts:180-188` y `ParkingSpace.Service.ts:76-97`). Los dos arman `${prefix}-${NN}`: el alta de cochera numera desde 1 y el alta de plazas, desde el máximo que ya existe. Si se arregla PS-1 o PS-2, hay que hacerlo en los dos lugares. Que el alta de cochera llame a la misma función que el alta de plazas; así se cierra también parte de P-2.
+- **L-6. Las fechas a texto están dos veces:** `pad`, `iso` y `clock` (`Schedule.Service.ts:24-28`) repiten `isoDate` y `formatTimeHHMM` de `Shared/utils/dateUtils.ts`. Importar las de `dateUtils`.
+- **L-7. La misma consulta de reservas, escrita dos veces:** `saveTemplateDay` y `createClosure` (`Schedule.Service.ts`) repiten el mismo `em.find(Reservation, …)` de las reservas activas que todavía no terminaron. Llevarla a un método `upcomingReservations(parkingId)` en `ScheduleRepository`, al lado de `activeReservations`.
+- **L-8. El mostrador repite `isStaffOf`:** es R-a.
+
+### No apareció
+
+- Ningún método de servicio o de controlador está sin usar, salvo L-1.
+- No hay helpers repetidos fuera de los de arriba.
+
+## Nombres: revisión posterior
+
+Revisión de los nombres de entidades, enums, rutas, parámetros y métodos de todo `src`. Anotado y sin arreglar.
+
+Renombrar no cuesta lo mismo en todos los casos:
+
+- **Solo código** (métodos, variables, enums): no rompe nada afuera.
+- **API** (un campo del JSON o un parámetro de ruta): hay que cambiar también el Frontend.
+- **Base** (una columna): no hay migraciones, y `schema.update({ safe: true })` no renombra columnas. Hace falta SQL a mano en cada base y otra pasada de `dropLegacy`.
+
+Antes de la defensa, solo cambios de código. Los de API y base quedan anotados.
+
+### N-1. Cinco formas de decir si un registro está vigente
+
+- **Qué es:** `User.status` (`'ACTIVO'`/`'BAJA'`); `isActive` en Parking, ParkingSpace, Vehicle, VehicleType, Brand, Model, Insurance, ServiceCatalog y EmployeeShift; `ParkingSpace.state` (`LIBRE`/`OCUPADO`/`MANTENIMIENTO`), además de su `isActive`; `Reservation.status` e `Invoice.status`. `EmployeeShift` usa `isActive` y `validTo` a la vez, y `retire` siempre los cambia juntos.
+- **Problema:** un mismo concepto tiene tres nombres. En la defensa, "¿por qué el usuario tiene `status` y el vehículo `isActive`?" no tiene respuesta. En `EmployeeShift`, los dos campos pueden contradecirse (por ejemplo, `isActive = true` con `validTo` cargado).
+- **Convención (base):** la mayoría ya sigue esta regla: `isActive` para la baja lógica y `status` para el ciclo de vida (reserva y factura). Las excepciones son `User.status`, que en realidad es una baja lógica, y `ParkingSpace.state`, que es un ciclo de vida y debería llamarse `status`. No se renombra: se documenta la regla y sus excepciones.
+
+### N-2. La factura no tiene enum de estado
+
+- **Qué es:** `ReservationStatus`, `UserStatus` y `UserType` están en `status.ts`. Los estados de la factura (`'PENDIENTE'`, `'PAGADA'`, `'ANULADA'`) van como texto suelto, y `'ACTIVO'`/`'BAJA'` aparecen escritos a mano aunque existe `UserStatus`. Hay 38 textos de estado sueltos fuera de `constants/`.
+- **Problema:** un error de tipeo (`'PAGADO'`) compila igual.
+- **Solución (solo código):** agregar `InvoiceStatus` en `status.ts` y reemplazar los textos sueltos por los enums. No cambia la API ni la base.
+
+### N-3. La vigencia tiene dos pares de nombres
+
+- **Qué es:** `ParkingPrice` y `ServicePrice` usan `startDate`/`expirationDate`. `EmployeeShift` y `ShiftClosure` usan `validFrom`/`validTo` para lo mismo: desde y hasta cuándo rige una versión.
+- **Convención (base):** el par de referencia es `validFrom`/`validTo`. Las columnas de precios no se renombran.
+
+### N-4. Los momentos se nombran con `*At` y con `*Date`
+
+- **Qué es:** `createdAt`, `readAt`, `checkedOutAt` y `reminderSentAt` frente a `paymentDate`.
+- **Convención (base):** el nombre de referencia es `*At`; `paymentDate` queda como excepción.
+
+### N-5. "Desde y hasta" se escribe de tres formas
+
+- **Qué es:** `startTime`/`endTime` en reservas y turnos, `openingTime`/`closingTime` en la cochera y `from`/`to` en la agenda (`DaySchedule`). Además, `startTime` es un `datetime` en la reserva y un texto `'HH:mm'` en el turno.
+- **Solución:** ninguna. Los nombres son razonables en su contexto; conviene saber explicarlo.
+
+### N-6. `User.last_name` y `User.date_of_birth` en snake_case
+
+- **Qué es:** son los únicos campos en snake_case. Todos los demás están en camelCase (`mustChangePassword`, `businessName`).
+- **Solución (API y base):** van en el JSON y en la base, así que tocan registro, perfil, mostrador, el Frontend y las e2e. Después de la defensa, si se hace.
+
+### N-7. `type` y `role` para el rol del usuario
+
+- **Qué es:** la columna es `User.type` y el enum `UserType`, pero el filtro del listado es `?role=` y el conteo vuelve en `counts.role` (`User.Repository.ts:21-34`, `User.Schema.ts:59`).
+- **Solución (API):** usar el mismo nombre en el filtro y en la columna. Es el cambio de API más chico de esta lista.
+
+### N-8. El cliente y la cochera aparecen con distintos parámetros en las rutas
+
+- **Qué es:** `/client/:clientId` en reservas y facturas, `/client/:id` (GET) y `/client/:userId` (POST) en vehículos; `/parking/:parkingId` en reservas y `/:id/prices` en precios.
+- **Solución (solo código):** con `/:clientId` en las dos rutas de vehículos alcanza. El nombre del parámetro no cambia la URL, así que el Frontend no se entera. Hay que acomodar `self(...)` y el controlador.
+
+### N-9. Los métodos de búsqueda se llaman distinto
+
+- **Qué es:** `findByParking` en precios, plazas y servicios, y `findByParkingId` en reservas. También `findByOwnerId` frente a `findByOwner`, y `getUserById` frente a `findActiveUser`.
+- **Solución (solo código):** `findByParking` en todos.
+
+### N-10. Cada variable del router se escribe distinto
+
+- **Qué es:** `ParkingPriceRouter` y `VehicleRouter` empiezan con mayúscula, y en `index.ts` se importan como `parkingRoutes`, `parkingspaceRoutes` y `parkingpriceRoutes`. El resto es `xRouter`.
+- **Solución (solo código):** `xRouter` en todos.
+
+### Menores, sin cambio
+
+- **Prefijo de ruta distinto del módulo:** las facturas viven en `/api/billing` y el módulo es `Invoice`; los turnos viven en `/api/shifts` y el módulo es `EmployeeShift`. Lo usa el Frontend y no confunde.
+- **Claves normalizadas:** la columna `DnrpaTypeMap.descriptionKey` se arma con `descKey`, y `ExcludedModel.modelKey` con `nameKey`.
+- **Idioma:** los nombres van en inglés y los valores de los enums en español (`PENDIENTE`, `LIBRE`, `DUEÑO` con ñ, `'EN CURSO'` con espacio). Es coherente: el código en inglés y los datos que se ven en pantalla en español. `'EN CURSO'` con espacio ya está documentado en CLAUDE.md.
+
+### Resumen por costo
+
+- **Solo código, se puede hacer sin riesgo:** N-2, N-8, N-9 y N-10. Son unas 50 líneas, con `pnpm build` como control.
+- **API, con cambios en el Frontend:** N-7 y N-6. Después de la defensa.
+- **Base, solo documentar la convención:** N-1, N-3 y N-4, con sus excepciones.
 
 ## Qué no se verificó
 
 - No se corrieron las pruebas locales de `tests/` ni las e2e.
+- Sin revisión por módulo: `Vehicle/VehicleType/` (se le pasó a otro agente; no hay informe), los detalles internos de `Vehicle/Catalog/` (`typeMap`, modelos excluidos), las consultas de `Stats/`, `Shared/db/` (siembra, demo, `dropLegacy`) y `Notification/` más allá de los dos hallazgos menores.
 - La carga de la demo (`pnpm demo:load --yes`) está pendiente después de regenerar los JSON con el ancla en el 13/11/2026.
