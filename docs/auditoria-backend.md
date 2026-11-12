@@ -13,11 +13,11 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 | 1 | Cancelar una reserva en curso dejaba la plaza ocupada y sin cobrar | Arreglar ya | ✅ Resuelto (`b99ac41`) |
 | 2 | Las columnas de dinero redondeaban los centavos | Arreglar ya | ✅ Resuelto (`5bc3d79`, `f8f2928` en el Frontend) |
 | 3 | Dos caminos eligen plaza sin bloquear la sucursal | Conviene arreglar | ✅ Resuelto (`f0583c5`) |
-| 4 | La terminal del empleado baja todo el historial cada 30 s | Conviene arreglar | ⏳ Pendiente |
-| 5 | Clave de los tokens (JWT) por defecto escrita en el código | Conviene arreglar | ⏳ Pendiente |
-| 6 | Permisos de rutas de reserva sin prueba | Conviene arreglar | 🟡 Parcial |
-| 7 | Controles repetidos y métodos sin uso | Conviene arreglar | 🟡 Parcial |
-| 8 | El validador oculta errores inesperados | Opcional | ⏳ Pendiente |
+| 4 | La terminal del empleado baja todo el historial cada 30 s | Conviene arreglar | ✅ Resuelto (sin commit) |
+| 5 | Clave de los tokens (JWT) por defecto escrita en el código | Conviene arreglar | ✅ Resuelto (sin commit) |
+| 6 | Permisos de rutas de reserva sin prueba | Conviene arreglar | ✅ Resuelto (sin commit) |
+| 7 | Controles repetidos y métodos sin uso | Conviene arreglar | ✅ Resuelto (sin commit; los métodos de la interfaz quedan, ver detalle) |
+| 8 | El validador oculta errores inesperados | Opcional | ✅ Resuelto (sin commit) |
 | 9 | `catchAsync` repite lo que Express 5 ya hace | Opcional | ⏳ Pendiente |
 | — | Prueba de notificaciones que dependía de la hora | Encontrado después | ✅ Resuelto (`cc92580`) |
 
@@ -52,34 +52,37 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
   - `lockParking` vive ahora en `ParkingSpace.Repository.ts`, junto a `findFreeSpaces`, y lo usan los dos repositorios. Se quitaron `findInProgressOnSpace` y la dependencia de `ReservationService` con `ParkingSpaceRepository`, que quedaron sin uso.
 - **Pruebas:** `Reservation.db.test.ts` (ingreso con cambio de plaza) y `Notification.db.test.ts` (reubicación al pasar a mantenimiento) pasan. No hay prueba con dos pedidos simultáneos.
 
-### 4. La terminal del empleado baja todo el historial cada 30 s ⏳
+### 4. La terminal del empleado baja todo el historial cada 30 s ✅
 
 - **Problema:** `GET /api/reservations/parking/:id` devuelve todas las reservas que tuvo la sucursal, con 10 relaciones y las facturas. En la demo son unas 1.400 por sucursal, y crece sin límite. La terminal lo pide cada 30 segundos por pestaña abierta.
-- **Solución propuesta:** filtrar las activas más las que empezaron desde ayer (`$or: [{ status: { $in: ACTIVE } }, { startTime: { $gte: ayer } }]`), después de revisar qué necesita el resumen del turno.
+- **Solución:** `findByParkingId` trae las activas, las que empezaron en los últimos `PARKING_HISTORY_DAYS` (60) días y las finalizadas que siguen sin cobrar. Los 60 días coinciden con `BACK_DAYS` del calendario de la terminal y cubren el "Mes" del resumen.
+- **Cambio visible:** la búsqueda por patente o código de la terminal ya no encuentra reservas cerradas de hace más de 60 días. El historial completo sigue en el panel del dueño.
+- **Prueba:** `Reservation.db.test.ts` crea tres reservas finalizadas de hace 70 días (sin factura, sin cobrar y cobrada) y verifica que solo aparece la que está sin cobrar, junto con una reciente.
+- **A mano:** `PARKING_HISTORY_DAYS` tiene que seguir igual a `BACK_DAYS` del Frontend (`CalendarDrawer.tsx`).
 
-### 5. Clave de los tokens (JWT) por defecto escrita en el código ⏳
+### 5. Clave de los tokens (JWT) por defecto escrita en el código ✅
 
 - **Problema:** fuera de `NODE_ENV=production`, los tokens se firman con `'dev-secret-cocheras'`, que está en el repo. Un servidor levantado sin esa variable en una red compartida (por ejemplo, el día de la presentación) acepta tokens de administrador firmados por cualquiera.
-- **Solución propuesta:** `process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex')`. En desarrollo, los tokens dejan de valer al reiniciar. Las pruebas ya fijan `JWT_SECRET`.
+- **Solución:** `process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex')`. En desarrollo, las sesiones vencen al reiniciar el backend.
+- **e2e:** `users.failure.api` firma tokens a mano. El backend de las e2e se levanta ahora con `JWT_SECRET=e2e-secret` (instrucción actualizada en `CLAUDE.md` y en la spec). Con otra clave, la spec omite esos casos y deja una anotación.
 
-### 6. Permisos de rutas de reserva sin prueba 🟡
+### 6. Permisos de rutas de reserva sin prueba ✅
 
 - **Problema:** cambio de plaza, asignar empleado, mostrador y cancelación solo tienen el rol en la ruta: el control de quién puede actuar está en el servicio. Hay pruebas de 403 para ingreso, extender, servicios y valoración, pero ninguna falla si un empleado de otra sucursal cambia la plaza o asigna el empleado, o si un cliente cancela una reserva ajena.
-- **Hecho:** prueba del 400 al cancelar una reserva en curso.
-- **Pendiente:** tres `rejects(..., 403)` en `Reservation.db.test.ts` (cambio de plaza, asignar empleado y cancelación por otro cliente).
+- **Solución:** `Reservation.db.test.ts` verifica el 400 al cancelar una reserva en curso y tres 403: cambio de plaza y asignar empleado por un empleado de otra sucursal, y cancelación por un cliente que no es el del vehículo.
 
-### 7. Controles repetidos y métodos sin uso 🟡
+### 7. Controles repetidos y métodos sin uso ✅
 
-- **Hecho:** se borró la anulación de factura que no se ejecutaba y `InvoiceRepository.findByReservationId`.
-- **Pendiente:**
-  - el chequeo de superposición del vehículo en `ReservationService.create`, que repite el que hace `validateVehicleOverlap` dentro de la transacción (el único seguro ante carreras);
-  - la consulta "figura adentro" de `createWalkIn`, que repite `findVehicleInside` con el mismo mensaje;
-  - `InvoiceRepository.add`, `InvoiceRepository.findAll` y `ReservationRepository.add`, que nadie llama (existen solo por la interfaz `Repository<T>`).
+- **Solución:**
+  - se borró la anulación de factura que no se ejecutaba y `InvoiceRepository.findByReservationId`;
+  - `ReservationService.create` ya no repite el control de superposición del vehículo: queda solo `validateVehicleOverlap`, dentro de la transacción con la sucursal bloqueada;
+  - el error "figura adentro" del ingreso y del mostrador sale de una sola función, `insideElsewhere` (`Reservation.Repository.ts`).
+- **Decisión:** `InvoiceRepository.add`, `InvoiceRepository.findAll` y `ReservationRepository.add` no se llaman, pero quedan. Los exige la interfaz `Repository<T>`, que `Frontend/docs/requisitos-tp.md` usa en la defensa como ejemplo del patrón Repository.
 
-### 8. El validador oculta errores inesperados ⏳
+### 8. El validador oculta errores inesperados ✅
 
 - **Problema:** `validateSchema` convierte cualquier error que no sea de zod en "Error interno del validador", sin registrarlo.
-- **Solución propuesta:** cambiar la última línea por `return next(error);`, así lo registra `errorHandler`.
+- **Solución:** la última línea es `return next(error);`, así lo registra `errorHandler`.
 
 ### 9. `catchAsync` repite lo que Express 5 ya hace ⏳
 
