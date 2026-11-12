@@ -13,12 +13,12 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 | 1 | Cancelar una reserva en curso dejaba la plaza ocupada y sin cobrar | Arreglar ya | ✅ Resuelto (`b99ac41`) |
 | 2 | Las columnas de dinero redondeaban los centavos | Arreglar ya | ✅ Resuelto (`5bc3d79`, `f8f2928` en el Frontend) |
 | 3 | Dos caminos eligen plaza sin bloquear la sucursal | Conviene arreglar | ✅ Resuelto (`f0583c5`) |
-| 4 | La terminal del empleado baja todo el historial cada 30 s | Conviene arreglar | ✅ Resuelto (sin commit) |
-| 5 | Clave de los tokens (JWT) por defecto escrita en el código | Conviene arreglar | ✅ Resuelto (sin commit) |
-| 6 | Permisos de rutas de reserva sin prueba | Conviene arreglar | ✅ Resuelto (sin commit) |
-| 7 | Controles repetidos y métodos sin uso | Conviene arreglar | ✅ Resuelto (sin commit; los métodos de la interfaz quedan, ver detalle) |
-| 8 | El validador oculta errores inesperados | Opcional | ✅ Resuelto (sin commit) |
-| 9 | `catchAsync` repite lo que Express 5 ya hace | Opcional | ⏳ Pendiente |
+| 4 | La terminal del empleado baja todo el historial cada 30 s | Conviene arreglar | ✅ Resuelto (`88e795b`) |
+| 5 | Clave de los tokens (JWT) por defecto escrita en el código | Conviene arreglar | ✅ Resuelto (`88e795b`) |
+| 6 | Permisos de rutas de reserva sin prueba | Conviene arreglar | ✅ Resuelto (`88e795b`) |
+| 7 | Controles repetidos y métodos sin uso | Conviene arreglar | ✅ Resuelto (`88e795b`; los métodos de la interfaz quedan, ver detalle) |
+| 8 | El validador oculta errores inesperados | Opcional | ✅ Resuelto (`88e795b`) |
+| 9 | `catchAsync` repite lo que Express 5 ya hace | Opcional | ✅ Resuelto (`4e0e214`) |
 | — | Prueba de notificaciones que dependía de la hora | Encontrado después | ✅ Resuelto (`cc92580`) |
 
 ## Detalle
@@ -84,10 +84,12 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 - **Problema:** `validateSchema` convierte cualquier error que no sea de zod en "Error interno del validador", sin registrarlo.
 - **Solución:** la última línea es `return next(error);`, así lo registra `errorHandler`.
 
-### 9. `catchAsync` repite lo que Express 5 ya hace ⏳
+### 9. `catchAsync` repite lo que Express 5 ya hace ✅
 
 - **Problema:** Express 5 ya pasa a `next` las promesas rechazadas de controladores y middlewares.
-- **Solución propuesta:** quitar el envoltorio en un commit aparte. No cambia el comportamiento.
+- **Solución (`4e0e214`):** se quitó el envoltorio de los 114 handlers de los controladores y de los dos middlewares de `auth.ts`, y se borró `Shared/utils/catchAsync.ts`. Lo hizo un script que solo borra `catchAsync(` y su paréntesis de cierre (contados por archivo).
+- **Verificación:** build, unitarias, las dos pruebas de integración de la cátedra y `tests/auth`, `users`, `catalog` y `holidays`. Con el servidor levantado, un error lanzado en un controlador (404), en `auth` (401), en la pertenencia de `allow` (403, otro dueño sobre una cochera ajena), en zod (400) y en el login (401) llega a `errorHandler`, y el proceso sigue atendiendo.
+- **Prueba ajustada:** el `run` de `tests/auth/auth.db.test.ts` trata una promesa rechazada como el error del middleware, igual que Express 5.
 
 ### Encontrado después: prueba de notificaciones que dependía de la hora ✅
 
