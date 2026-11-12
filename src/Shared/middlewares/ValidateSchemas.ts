@@ -31,6 +31,6 @@ export const validateSchema = (schema: ZodSchema<any>) =>
           })),
         });
       }
-      return res.status(500).json({ message: 'Error interno del validador' });
+      return next(error); // un error que no es de zod es un bug: lo registra y responde errorHandler
     }
   };

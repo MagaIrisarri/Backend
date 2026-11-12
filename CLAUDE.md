@@ -7,13 +7,13 @@ API de cocheras (Express 5 + MikroORM 7 + MySQL, TypeScript ESM con pnpm). La co
 ## Comandos
 
 - `pnpm build`: `tsc` a `dist/`. Sirve también como chequeo de tipos, porque no hay linter configurado.
-- `pnpm start:dev`: `tsc-watch`, que levanta `node dist/index.js` en cada compilación. Necesita MySQL. Variables: `DB_NAME` (`parkingdb`), `DB_USER` (`root`), `DB_PASSWORD` (`pass`), `DB_HOST`, `DB_PORT`, `PORT` (3000), `NODE_ENV` (fuera de `production` se loguean las queries), `JWT_SECRET` (obligatorio con `NODE_ENV=production`; fuera de producción tiene un valor por defecto).
+- `pnpm start:dev`: `tsc-watch`, que levanta `node dist/index.js` en cada compilación. Necesita MySQL. Variables: `DB_NAME` (`parkingdb`), `DB_USER` (`root`), `DB_PASSWORD` (`pass`), `DB_HOST`, `DB_PORT`, `PORT` (3000), `NODE_ENV` (fuera de `production` se loguean las queries), `JWT_SECRET` (obligatorio con `NODE_ENV=production`; sin él, fuera de producción, la clave es aleatoria y las sesiones vencen al reiniciar).
 - **Pruebas en dos carpetas**, fuera del build de `tsc`. `tests-catedra/` se versiona y es lo que se entrega a la cátedra: `unit/` (unitarias sin base: turnos, cobro de la salida, tipos de vehículo, patente y búsqueda), que corre `pnpm test`, e `integration/` (`Reservation.db.test.ts` y `Notification.db.test.ts`), que corre `DB_NAME=<base>_test pnpm test:integration`. `tests/` queda local (en `.gitignore`) con el resto, en subcarpetas por tema (`auth`, `shifts`, `users`, `vehicles`, `catalog`, `holidays`, `admin`, `db`; fuera del build de `tsc`); cada una es un archivo `*.test.ts` que se corre con `tsx`, y su primera línea dice cómo. Por ejemplo:
   - `npx tsx tests-catedra/unit/Schedule.test.ts` (reglas puras, sin base).
   - `DB_NAME=parkingdb_checkout_test npx tsx tests-catedra/integration/Reservation.db.test.ts`
   - Las `*.db.test.ts` se niegan a correr si `DB_NAME` no termina en `_test`, y **borran esa base al terminar**.
 - **e2e contra el backend real** (las specs viven en el repo Frontend, carpeta `tests/e2e/`):
-  1. `pnpm build && PORT=3100 DB_NAME=parkingdb_e2e_test node dist/index.js`
+  1. `pnpm build && PORT=3100 DB_NAME=parkingdb_e2e_test JWT_SECRET=e2e-secret node dist/index.js` (`users.failure.api` firma tokens a mano con esa clave; con otra, omite esos casos)
   2. En el Frontend: `E2E_API_URL=http://localhost:3100 npx playwright test owner.api employee.api audit.api`
   3. `pnpm verify` del Frontend corre todo, incluidas las e2e con la API simulada.
 - **Columnas viejas** (L-39): `pnpm build && pnpm db:drop-legacy` (vista previa) y `pnpm db:drop-legacy --yes` (borra, no se deshace).

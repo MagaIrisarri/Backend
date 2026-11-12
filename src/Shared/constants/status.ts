@@ -1,4 +1,3 @@
-
 export enum ReservationStatus {
   PENDIENTE = 'PENDIENTE',
   EN_CURSO = 'EN CURSO',

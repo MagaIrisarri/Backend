@@ -21,3 +21,6 @@ export const CHECKOUT_GRACE_MINUTES = 10;
 // R-28: con cuántas horas de anticipación se manda el recordatorio, y cada cuánto se buscan reservas para recordar.
 export const REMINDER_HOURS_BEFORE = 2;
 export const REMINDER_CHECK_MINUTES = 5;
+
+// Terminal del empleado: días de historial que trae (igual a BACK_DAYS del calendario del Frontend; cubre el "Mes" del resumen).
+export const PARKING_HISTORY_DAYS = 60;

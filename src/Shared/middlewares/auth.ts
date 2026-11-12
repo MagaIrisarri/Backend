@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 import { orm } from '../db/orm.js';
 import { User } from '../../User/User.Entity.js';
 import { Parking } from '../../Parking/Parking.Entity.js';
@@ -21,7 +22,8 @@ declare global {
 }
 
 if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) throw new Error('Falta JWT_SECRET');
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-cocheras';
+// Sin JWT_SECRET (desarrollo) la clave es aleatoria: nadie puede firmar tokens con una clave del repo. Las sesiones vencen al reiniciar.
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
 export const signToken = (userId: string) => jwt.sign({}, JWT_SECRET, { subject: userId, expiresIn: TOKEN_TTL });
 

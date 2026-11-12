@@ -11,6 +11,7 @@ import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
+import { PARKING_HISTORY_DAYS } from '../Shared/constants/schedule.js';
 import { findFreeSpaces, lockParking } from '../ParkingSpace/ParkingSpace.Repository.js';
 
 export interface CreateReservationParams {
@@ -25,6 +26,10 @@ export interface CreateReservationParams {
 }
 
 export const WALK_IN_ONLY = 'La sucursal no toma reservas online por ahora: atiende solo en el lugar';
+
+// Un vehículo EN CURSO en otra reserva no entra de nuevo (ingreso y mostrador).
+export const insideElsewhere = (plate: string, inside: Reservation) =>
+  new AppError(`${plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
 
 // Las altas lo vuelven a mirar con la fila bloqueada: una pausa (L-42) que terminó mientras esperaban la deja inactiva,
 // o solo para el mostrador (L-44), que corta las reservas online.
@@ -69,10 +74,26 @@ export class ReservationRepository implements Repository<Reservation> {
     );
   }
 
+  // Las activas, las de los últimos PARKING_HISTORY_DAYS días y las finalizadas sin cobrar: sin límite, el historial crece sin fin.
   async findByParkingId(parkingId: string): Promise<Reservation[]> {
+    const since = new Date();
+    since.setDate(since.getDate() - PARKING_HISTORY_DAYS);
+    since.setHours(0, 0, 0, 0);
+    const unpaid = await this.entityManager.find(
+      Invoice,
+      { status: 'PENDIENTE', reservation: { parkingSpace: { parking: { id: parkingId } } } },
+      { fields: ['reservation'] as any }
+    );
     return await this.entityManager.find(
       Reservation,
-      { parkingSpace: { parking: { id: parkingId } } },
+      {
+        parkingSpace: { parking: { id: parkingId } },
+        $or: [
+          { status: { $in: [...ACTIVE_RESERVATION_STATUSES] } },
+          { startTime: { $gte: since } },
+          { id: { $in: unpaid.map((i) => i.reservation.id) } },
+        ],
+      },
       { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy'] as any,
         orderBy: { startTime: 'DESC' }
       }
@@ -414,7 +435,7 @@ export class ReservationRepository implements Repository<Reservation> {
       if (vehicle) {
         if (vehicle.vehicleType.id !== p.model.vehicleType.id) throw new AppError(`La patente ${p.plate} está registrada con otro tipo de vehículo`, 409);
         const inside = await em.findOne(Reservation, { vehicle, status: ReservationStatus.EN_CURSO }, { populate: ['parkingSpace', 'parkingSpace.parking'] as any });
-        if (inside) throw new AppError(`${p.plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
+        if (inside) throw insideElsewhere(p.plate, inside);
       } else {
         // shortcut: L-36, email sin verificar y DNI como contraseña inicial, verificar por mail cuando haya envío
         // R-29: el email identifica al cliente. Con cuenta → el vehículo va a su nombre; sin cuenta → se crea con el DNI

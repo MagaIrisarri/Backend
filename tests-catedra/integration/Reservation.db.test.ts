@@ -225,6 +225,13 @@ try {
   em.clear();
   await rejects(svc.setServices(x.id, [old.id], employee.id), 400);
   await rejects(svc.setServices(x.id, [wash.id], client.id), 403);
+  // Las rutas de cambio de plaza, asignar empleado y cancelar solo exigen el rol: el permiso sobre la reserva lo da el servicio.
+  const outsider = person('90000098', 'EMPLEADO', { parkingId: crypto.randomUUID() }); // de otra sucursal
+  const stranger = person('90000099', 'CLIENTE'); // no es el dueño del vehículo
+  await em.flush();
+  await rejects(svc.changeSpace(x.id, a03.id, outsider.id), 403);
+  await rejects(svc.assignEmployee(x.id, employee.id, outsider.id), 403);
+  await rejects(svc.remove(x.id, stranger.id), 403);
 
   // R-26: el código se guarda al reservar, y las reservas sin código lo reciben al arrancar con el mismo que ya se veía.
   em.clear();
@@ -313,6 +320,16 @@ try {
   const paid = await invSvc.pay(out.invoice.id, { paymentMethod: 'EFECTIVO', amountReceived: due + 500 });
   assert.equal(paid?.status, 'PAGADA');
   assert.equal(Number(paid?.amountReceived), due + 500);
+
+  // Terminal del empleado: activas, las de los últimos PARKING_HISTORY_DAYS días y las finalizadas sin cobrar de cualquier fecha.
+  em.clear();
+  const aged = (plate: string) => mkRes(mkVehicle(plate), a02.id, 70 * 24 * H, 1, 'FINALIZADA');
+  const oldDone = aged('OLDD001'), oldUnpaid = aged('OLDU001'), oldPaid = aged('OLDP001');
+  em.create(Invoice, { reservation: oldUnpaid, totalAmount: 1000, paymentMethod: 'EFECTIVO', status: 'PENDIENTE' } as any);
+  em.create(Invoice, { reservation: oldPaid, totalAmount: 1000, paymentMethod: 'EFECTIVO', status: 'PAGADA' } as any);
+  await em.flush();
+  const listed = new Set((await svc.findByParkingId(parking.id)).map((r: any) => r.id));
+  assert.deepEqual([oldDone.id, oldUnpaid.id, oldPaid.id, late.id].map((id) => listed.has(id)), [false, true, false, true]);
 
   console.log('✓ Ingreso (con cambio de plaza si sigue el anterior), salida, reservas con la cochera llena hoy, extender, servicios, monto real, código (R-26), valoración (R-27) y recordatorio (R-28)');
 } finally {

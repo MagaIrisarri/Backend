@@ -1,4 +1,4 @@
-import { ReservationRepository, WALK_IN_ONLY } from './Reservation.Repository.js';
+import { ReservationRepository, WALK_IN_ONLY, insideElsewhere } from './Reservation.Repository.js';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { CreateReservationInput, WalkInInput } from './Reservation.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
@@ -156,24 +156,7 @@ export class ReservationService {
 
   await this.assertSchedule(parking, startTime, endTime);
 
-  const conflictingVehicleReservation = await this.repo.findConflictingVehicleReservation(
-    data.vehicleId,
-    startTime,
-    endTime
-  );
-
-  if (conflictingVehicleReservation) {
-    const parkingName = conflictingVehicleReservation.parkingSpace?.parking?.name
-      ? ` en "${conflictingVehicleReservation.parkingSpace.parking.name}"`
-      : '';
-    const startStr = formatTimeHHMM(conflictingVehicleReservation.startTime);
-    const endStr = formatTimeHHMM(conflictingVehicleReservation.endTime);
-    throw new AppError(
-      `Este vehículo ya posee una reserva activa${parkingName} en ese horario (${startStr} a ${endStr} hs)`,
-      400
-    );
-  }
-
+  // La superposición del vehículo la controla createReservationAtomically, con la sucursal bloqueada.
   const reservation = await this.repo.createReservationAtomically({
     parking,
     vehicle,
@@ -196,9 +179,7 @@ export class ReservationService {
   // Un vehículo que sigue EN CURSO (aunque pasado de hora) no entra de nuevo, ni acá ni en otra sucursal.
   private async assertNotInsideElsewhere(plate: string, vehicleId: string, exceptReservationId: string): Promise<void> {
     const inside = await this.repo.findVehicleInside(vehicleId, exceptReservationId);
-    if (inside) {
-      throw new AppError(`${plate} figura adentro en "${inside.parkingSpace.parking.name}" desde las ${formatTimeHHMM(inside.startTime)}. Registrá su salida allá primero`, 409);
-    }
+    if (inside) throw insideElsewhere(plate, inside);
   }
 
   // Cliente de mostrador: el inicio es ahora sin segundos y el fin, inicio + horas completas; nace EN CURSO con la plaza ocupada.
