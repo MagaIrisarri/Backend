@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { ParkingService } from './Parking.Service.js';
-import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { actorId } from '../Shared/utils/actorId.js';
 
 export class ParkingController {
   constructor(private parkingService: ParkingService) {}
   
-  public findAll = catchAsync(async (req: Request, res: Response) => {
+  public findAll = async (req: Request, res: Response) => {
     const { page, ...rest } = req.query as any; // ya validado por listParkingsQuerySchema
     if (page) {
       const { data, meta } = await this.parkingService.findPage({ page, ...rest });
@@ -18,18 +17,18 @@ export class ParkingController {
       message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
       data: parkings,
     });
-  });
+  };
 
-  public findActive = catchAsync(async (_req: Request, res: Response) => {
+  public findActive = async (_req: Request, res: Response) => {
     const parkings = await this.parkingService.findActive();
     return res.status(200).json({
       message: parkings.length === 0 ? 'No se encontraron estacionamientos activos' : 'Estacionamientos encontrados',
       data: parkings,
     });
-  });
+  };
 
 
-  public findOne = catchAsync(async (req: Request, res: Response) => {
+  public findOne = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const parking = await this.parkingService.findOne(id);
 
@@ -41,42 +40,42 @@ export class ParkingController {
       message: 'Estacionamiento encontrado',
       data: parking,
     });
-  });
+  };
   
-  public findByOwnerId = catchAsync(async (req: Request, res: Response) => {
+  public findByOwnerId = async (req: Request, res: Response) => {
     const parkings = await this.parkingService.findByOwnerId(req.params.ownerId as string);
     return res.status(200).json({
       message: parkings.length === 0 ? 'No se encontraron estacionamientos' : 'Estacionamientos encontrados',
       data: parkings,
     });
-  });
+  };
 
-  public getMetrics = catchAsync(async (req: Request, res: Response) => {
+  public getMetrics = async (req: Request, res: Response) => {
     const metrics = await this.parkingService.getMetrics(req.params.id as string);
     return res.status(200).json({
       message: 'Métricas calculadas',
       data: metrics,
     });
-  });
+  };
 
-  public reactivate = catchAsync(async (req: Request, res: Response) => {
+  public reactivate = async (req: Request, res: Response) => {
     const reactivated = await this.parkingService.reactivate(req.params.id as string);
     if (!reactivated) throw new AppError('Estacionamiento no encontrado', 404);
     return res.status(200).json({
       message: 'Estacionamiento reactivado con éxito',
       data: reactivated,
     });
-  });
+  };
   
-  public create = catchAsync(async (req: Request, res: Response) => {
+  public create = async (req: Request, res: Response) => {
     const parking = await this.parkingService.create(req.body);
     return res.status(201).json({
       message: 'Estacionamiento creado con éxito',
       data: parking,
     });
-  });
+  };
 
-  public update = catchAsync(async (req: Request, res: Response) => {
+  public update = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const updatedParking = await this.parkingService.update(id, req.body);
 
@@ -88,9 +87,9 @@ export class ParkingController {
       message: 'Estacionamiento actualizado con éxito',
       data: updatedParking,
     });
-  });
+  };
 
-  public remove = catchAsync(async (req: Request, res: Response) => {
+  public remove = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const paused = await this.parkingService.remove(id, actorId(req, 'pausar la sucursal'), req.body?.walkInOnly === true);
 
@@ -102,5 +101,5 @@ export class ParkingController {
       message: 'Estacionamiento pausado con éxito',
       data: paused,
     });
-  });
+  };
 }

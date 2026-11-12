@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
 import { VehicleService } from './Vehicle.Service.js';
-import { catchAsync } from '../Shared/utils/catchAsync.js';
 import { AppError } from '../Shared/utils/AppError.js';
 
 export class VehicleController {
   constructor(private vehicleService: VehicleService) {}
 
-  public create = catchAsync(async (req: Request, res: Response) => {
+  public create = async (req: Request, res: Response) => {
     const userId = req.params.userId as string;
     const vehicle = await this.vehicleService.create(req.body, userId);
 
     return res.status(201).json({ message: "Vehículo creado exitosamente", data: vehicle });
-  });
+  };
 
-  public findAll = catchAsync(async (req: Request, res: Response) => {
+  public findAll = async (req: Request, res: Response) => {
     const vehicleList = await this.vehicleService.findAll();
 
     const message = vehicleList.length === 0
@@ -21,9 +20,9 @@ export class VehicleController {
         : "Vehículos encontrados";
     
     return res.status(200).json({ message, data: vehicleList });
-  });
+  };
 
-  public findOne = catchAsync(async (req: Request, res: Response) => {
+  public findOne = async (req: Request, res: Response) => {
     const vehicle = await this.vehicleService.findOne(req.params.id as string);
 
     if (!vehicle) {
@@ -31,9 +30,9 @@ export class VehicleController {
     }
 
     return res.status(200).json({ message: "Vehículo encontrado", data: vehicle });
-  });
+  };
 
-  public update = catchAsync(async (req: Request, res: Response) => {
+  public update = async (req: Request, res: Response) => {
     const vehicle = await this.vehicleService.update(
       req.params.id as string, 
       req.body
@@ -44,9 +43,9 @@ export class VehicleController {
     }
 
     return res.status(200).json({ message: "Vehículo actualizado exitosamente", data: vehicle });
-  });
+  };
 
-  public remove = catchAsync(async (req: Request, res: Response) => {
+  public remove = async (req: Request, res: Response) => {
     const deleted = await this.vehicleService.remove(req.params.id as string);
 
     if (!deleted) {
@@ -54,9 +53,9 @@ export class VehicleController {
     }
 
     return res.status(200).json({ message: "Vehículo eliminado exitosamente" });
-  });
+  };
 
-  public findActiveByUserId = catchAsync(async (req: Request, res: Response) => {
+  public findActiveByUserId = async (req: Request, res: Response) => {
     const vehicleList = await this.vehicleService.findActiveByUserId(req.params.id as string);
 
     const message = vehicleList.length === 0
@@ -64,5 +63,5 @@ export class VehicleController {
         : "Vehículos encontrados";
     
     return res.status(200).json({ message, data: vehicleList });
-  });
+  };
 }

@@ -8,7 +8,6 @@ import { Vehicle } from '../../Vehicle/Vehicle.Entity.js';
 import { Reservation } from '../../Reservation/Reservation.Entity.js';
 import { Invoice } from '../../Invoice/Invoice.Entity.js';
 import { AppError } from '../utils/AppError.js';
-import { catchAsync } from '../utils/catchAsync.js';
 import { isStaffOf } from '../utils/staff.js';
 import { UserStatus, UserType } from '../constants/status.js';
 import { TOKEN_TTL } from '../constants/auth.js';
@@ -29,7 +28,7 @@ export const signToken = (userId: string) => jwt.sign({}, JWT_SECRET, { subject:
 
 // Sesión obligatoria y, si se pasan, uno de esos roles. El usuario se lee de la base en cada pedido:
 // una baja o un cambio de rol cortan el acceso enseguida, sin esperar a que venza el token.
-export const auth = (...roles: UserType[]) => catchAsync(async (req: Request, _res: Response, next: NextFunction) => {
+export const auth = (...roles: UserType[]) => async (req: Request, _res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
   if (!token) throw new AppError('Iniciá sesión para continuar', 401);
   let id: string | undefined;
@@ -43,7 +42,7 @@ export const auth = (...roles: UserType[]) => catchAsync(async (req: Request, _r
   if (roles.length && !roles.includes(user.type as UserType)) throw new AppError('No tenés permiso para esta acción', 403);
   req.user = user;
   next();
-});
+};
 
 // El id del propio usuario en la ruta o en el body (clientId, ownerId...) tiene que ser el del token; el administrador puede pedir por otros.
 export const self = (field: string) => (req: Request, _res: Response, next: NextFunction) => {
@@ -57,12 +56,12 @@ export const self = (field: string) => (req: Request, _res: Response, next: Next
 // Pertenencia (L-37): el recurso de la ruta tiene que ser del usuario. Va después de auth. Si el recurso no existe, sigue
 // y responde el servicio (404 o 400). El administrador pasa: lo que puede hacer ya lo limita el rol de la ruta (RA-19).
 const allow = (owns: (req: Request, user: User) => Promise<boolean | null | undefined>) =>
-  catchAsync(async (req: Request, _res: Response, next: NextFunction) => {
+  async (req: Request, _res: Response, next: NextFunction) => {
     if (req.user?.type !== UserType.ADMINISTRADOR && (await owns(req, req.user!)) === false) {
       throw new AppError('No tenés permiso para esta acción', 403);
     }
     next();
-  });
+  };
 
 // Cochera del dueño; con staff, también la sucursal del empleado (isStaffOf). El id sale de la ruta, del body o de parkingOf.
 export const ownParking = (parkingId: (req: Request) => unknown, staff = false) => allow(async (req, user) => {
