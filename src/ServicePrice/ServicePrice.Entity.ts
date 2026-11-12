@@ -10,7 +10,7 @@ export class ServicePrice {
   @PrimaryKey({ type: 'string' })
   id: string = crypto.randomUUID();
 
-  @Property({ type: 'decimal' })
+  @Property({ type: 'decimal', precision: 12, scale: 2 })
   price!: number;
 
   @Property({ type: LocalDateType, nullable: true })

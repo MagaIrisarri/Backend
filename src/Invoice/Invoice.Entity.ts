@@ -16,7 +16,7 @@ export class Invoice {
   @Property({ type: 'string' })
   paymentMethod!: string; 
 
-  @Property({ type: 'decimal' })
+  @Property({ type: 'decimal', precision: 12, scale: 2 })
   totalAmount!: number;
 
   // Detalle del cobro al hacer el check-out (R-14): total = (reservedHours + extraHours) × hourlyRate + servicesAmount.
@@ -27,14 +27,14 @@ export class Invoice {
   @Property({ type: 'integer', nullable: true })
   extraHours?: number | null;
 
-  @Property({ type: 'decimal', nullable: true })
+  @Property({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   hourlyRate?: number | null; // tarifa vigente en el momento del cobro
 
-  @Property({ type: 'decimal', nullable: true })
+  @Property({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   servicesAmount?: number | null;
 
   // Cobro en efectivo: lo que entregó el cliente (el vuelto se calcula). Comprobante de posnet o app, opcional.
-  @Property({ type: 'decimal', nullable: true })
+  @Property({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   amountReceived?: number | null;
 
   @Property({ type: 'string', nullable: true })

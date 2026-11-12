@@ -14,7 +14,7 @@ export class ParkingPrice {
   @ManyToOne(() => VehicleType, { eager: true })
   vehicleType!: Rel<VehicleType>;
 
-  @Property({ type: 'decimal', nullable: false })
+  @Property({ type: 'decimal', precision: 12, scale: 2, nullable: false })
   price!: number;
 
   @Property({ type: LocalDateType, nullable: true })

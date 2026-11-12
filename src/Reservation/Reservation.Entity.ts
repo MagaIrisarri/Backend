@@ -75,6 +75,6 @@ export class Reservation {
 
   // L-43: precio por hora vigente al reservar (como la factura): la salida cobra este aunque el dueño cambie la tarifa después.
   // Nulo en las reservas anteriores a la columna, que cobran la vigente al salir (findForCheckout).
-  @Property({ type: 'decimal', nullable: true })
+  @Property({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   hourlyRate?: number | null;
 }
