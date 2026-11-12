@@ -131,7 +131,7 @@ try {
 
   // R-28: el recordatorio también deja el aviso, una sola vez.
   em.clear();
-  const base = new Date(Date.now() + 10 * 24 * H); base.setMinutes(0, 0, 0);
+  const base = new Date(Date.now() + 10 * 24 * H); base.setHours(8, 0, 0, 0); // hora fija: base + 13 h no cruza la medianoche
   em.create(Reservation, { vehicle: v1, parkingSpace: a01, status: 'PENDIENTE', startTime: new Date(base.getTime() + H), endTime: new Date(base.getTime() + 2 * H) } as any);
   await em.flush();
   assert.equal(await svc.sendReminders(base), 1);
