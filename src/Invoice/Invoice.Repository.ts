@@ -24,12 +24,6 @@ export class InvoiceRepository implements Repository<Invoice> {
     return new Map(invoices.map(i => [i.reservation.id, i]));
   }
 
-  async findByReservationId(reservationId: string): Promise<Invoice | null> {
-    return await this.em.findOne( Invoice, { reservation: { id: reservationId }, status: { $ne: 'ANULADA' } },
-      { populate: ['reservation'] }
-    );
-  }
-
   async findByClientId(clientId: string): Promise<Invoice[]> {
     return await this.em.find(
       Invoice,

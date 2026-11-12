@@ -303,33 +303,26 @@ export class ReservationService {
       throw new AppError("No puedes dar de baja una reserva que ya está cancelada o finalizada", 400);
     }
 
-    if (isClient && !isAdminOrStaff) {
-      if (reservation.status === ReservationStatus.EN_CURSO) {
-        throw new AppError("No puedes dar de baja una reserva que ya está en curso", 400);
-      }
+    // Nadie cancela una en curso: el vehículo está adentro y solo la salida libera la plaza y cobra.
+    if (reservation.status === ReservationStatus.EN_CURSO) {
+      throw new AppError("No puedes dar de baja una reserva que ya está en curso: registrá la salida", 400);
     }
     const cancelReason = isClient ? null : reason?.trim() || null;
     if (!isClient && !cancelReason) throw new AppError("Indicá el motivo de la cancelación: se le avisa al cliente", 400);
 
-    // Anular factura si estuviera pendiente
-    const invoice = await this.invoiceRepo.findByReservationId(id);
-    if (invoice && invoice.status === 'PENDIENTE') {
-      await this.invoiceRepo.remove({ id: invoice.id });
-    }
-
-    const removed = await this.repo.remove({ id }, cancelReason);
+    if (!(await this.repo.remove({ id }, cancelReason))) throw new AppError("La reserva cambió de estado (¿ya ingresó?): actualizá la pantalla", 409);
     // Cancela el cliente → lo sabe el personal; cancela el personal, el dueño o el administrador → lo sabe el cliente.
-    if (removed && isClient) {
+    if (isClient) {
       await this.notifications.notifyStaff(parking!, {
         type: NotificationType.RESERVA_CANCELADA,
         title: `Reserva cancelada ${reservation.code ?? reservationCode(reservation.id)}`,
         message: `El cliente canceló la reserva de ${reservation.vehicle.plate} del ${reservation.startTime.toLocaleDateString('es-AR')} a las ${formatTimeHHMM(reservation.startTime)} (${parking!.name})`,
         reservationId: reservation.id,
       });
-    } else if (removed) {
+    } else {
       await this.notifyClient(reservation, NotificationType.RESERVA_CANCELADA, 'Reserva cancelada', `La sucursal canceló tu reserva. Motivo: ${cancelReason}`);
     }
-    return removed;
+    return true;
   }
 
   async changeSpace(id: string, parkingSpaceId: string, userId: string): Promise<Reservation> {

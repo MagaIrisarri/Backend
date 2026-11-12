@@ -246,12 +246,11 @@ export class ReservationRepository implements Repository<Reservation> {
     return updated;
 }
   async remove(item: { id: string }, cancelReason: string | null = null): Promise<boolean> {
-    const res = await this.findOne(item);
-    if (!res) return false;
-    res.status = ReservationStatus.CANCELADA;
-    res.cancelReason = cancelReason;
-    await this.entityManager.flush();
-    return true;
+    // Condicionado a PENDIENTE: un ingreso que entra entre la lectura y la escritura no se cancela.
+    const updated = await this.entityManager.nativeUpdate(Reservation,
+      { id: item.id, status: ReservationStatus.PENDIENTE },
+      { status: ReservationStatus.CANCELADA, cancelReason });
+    return updated > 0;
   }
 
   async getDependencies(parkingId: string, vehicleId: string) {

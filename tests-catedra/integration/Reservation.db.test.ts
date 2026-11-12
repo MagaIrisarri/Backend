@@ -113,6 +113,10 @@ try {
   await rejects(svc.checkIn(expired.id, employee.id), 400);
   await rejects(svc.checkIn(now.id, client.id), 403);
   assert.equal((await svc.checkIn(now.id, employee.id)).status, 'EN CURSO');
+  // En curso no se cancela, tampoco el personal: la plaza quedaría ocupada y sin cobrar.
+  await rejects(svc.remove(now.id, employee.id, 'pantalla vieja'), 400);
+  // La guarda de la base: un ingreso entre la lectura y la escritura tampoco se cancela (el 409 del servicio).
+  assert.equal(await new ReservationRepository(em).remove({ id: now.id }, 'x'), false);
   em.clear();
 
   // R-16/R-17: 15 min de tolerancia de llegada. Antes, solo dentro del margen de la sucursal (con margen 0, desde el inicio);
