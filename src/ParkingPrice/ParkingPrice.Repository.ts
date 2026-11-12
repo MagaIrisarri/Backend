@@ -3,6 +3,7 @@ import { ParkingPrice } from './ParkingPrice.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { VehicleType } from '../Vehicle/VehicleType/VehicleType.Entity.js';
 import { Repository } from '../Shared/base.Repository.js';
+import { lockParking } from '../ParkingSpace/ParkingSpace.Repository.js';
 
 // R-30: las tarifas van por el id del tipo de vehículo, no por su nombre ni su categoría.
 export class ParkingPriceRepository implements Repository<ParkingPrice> {
@@ -48,6 +49,11 @@ export class ParkingPriceRepository implements Repository<ParkingPrice> {
     price.expirationDate = new Date();
     await this.em.flush();
     return true;
+  }
+
+  // Vencer y crear (o dar de baja) van en una transacción con la cochera bloqueada: dos cambios a la vez no dejan dos vigentes.
+  async lockedFor<T>(parkingId: string, fn: (repo: ParkingPriceRepository, parking: Parking) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => fn(new ParkingPriceRepository(tx), await lockParking(tx, parkingId)));
   }
 
   async findParking(parkingId: string): Promise<Parking | null> {
