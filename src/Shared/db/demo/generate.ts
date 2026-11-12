@@ -1,5 +1,5 @@
 // Genera los JSON de la demo de la presentación en demo/data/. Determinístico: la misma semilla da los mismos datos.
-// Correr: pnpm build && pnpm demo:generate   (DEMO_ANCHOR=2026-10-23, DEMO_RESERVATIONS=15000, DEMO_SEED=2310, DEMO_OUT=demo/data)
+// Correr: pnpm build && pnpm demo:generate   (DEMO_ANCHOR=2026-11-13, DEMO_RESERVATIONS=15000, DEMO_SEED=2310, DEMO_OUT=demo/data)
 // Las reservas destacadas del día de la presentación están en demo/featured.json (a mano) y se ubican primero.
 // Todas cumplen las reglas de la API: horario y duración de la sucursal, empleado de turno (R-01), sin feriado adherido,
 // plaza del tipo libre con el margen (R-22, R-30) y un vehículo sin dos reservas a la vez.
@@ -11,7 +11,7 @@ import { demoCategory } from './reset.js';
 import type { DemoMeta, DemoParking, DemoReservation, DemoServiceCatalog, DemoStaff, DemoUsers, DemoVehicle, Person } from './data.js';
 import type { VehicleCategory } from '../../utils/vehicleTypes.js';
 
-const ANCHOR = process.env.DEMO_ANCHOR ?? '2026-10-23';
+const ANCHOR = process.env.DEMO_ANCHOR ?? '2026-11-13';
 const TOTAL = Number(process.env.DEMO_RESERVATIONS ?? 15000);
 const SEED = Number(process.env.DEMO_SEED ?? 2310);
 const OUT = path.resolve(process.env.DEMO_OUT ?? 'demo/data');

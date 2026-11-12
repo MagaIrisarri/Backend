@@ -607,7 +607,7 @@
       }
     ],
     "closedOn": [
-      31
+      10
     ],
     "exceptions": []
   },
@@ -670,9 +670,7 @@
         "price": 4100
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -1031,7 +1029,7 @@
       }
     ],
     "closedOn": [
-      31
+      10
     ],
     "exceptions": []
   },
@@ -1111,7 +1109,6 @@
       }
     ],
     "closedOn": [
-      -11,
       14
     ],
     "exceptions": []
@@ -1191,9 +1188,7 @@
         "price": 5750
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -1527,8 +1522,7 @@
       }
     ],
     "closedOn": [
-      -11,
-      31
+      10
     ],
     "exceptions": []
   },
@@ -1595,9 +1589,7 @@
         "price": 3600
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -1745,9 +1737,7 @@
         "price": 5000
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -2247,7 +2237,7 @@
       }
     ],
     "closedOn": [
-      31
+      10
     ],
     "exceptions": []
   },
@@ -2323,7 +2313,7 @@
       }
     ],
     "closedOn": [
-      31
+      10
     ],
     "exceptions": []
   },
@@ -2390,7 +2380,7 @@
     ],
     "services": [],
     "closedOn": [
-      31
+      10
     ],
     "exceptions": []
   },
@@ -2605,9 +2595,7 @@
         "price": 14100
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -2903,9 +2891,7 @@
         "price": 10050
       }
     ],
-    "closedOn": [
-      -11
-    ],
+    "closedOn": [],
     "exceptions": []
   },
   {
@@ -2976,8 +2962,7 @@
       }
     ],
     "closedOn": [
-      -11,
-      31
+      10
     ],
     "exceptions": []
   },
@@ -3057,8 +3042,7 @@
       }
     ],
     "closedOn": [
-      -11,
-      31
+      10
     ],
     "exceptions": []
   },
