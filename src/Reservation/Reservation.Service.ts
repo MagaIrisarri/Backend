@@ -10,8 +10,6 @@ import { ARRIVAL_TOLERANCE_MINUTES, REMINDER_HOURS_BEFORE } from '../Shared/cons
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
-import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.js';
-import { SpaceState } from '../ParkingSpace/ParkingSpace.Entity.js';
 import type { Parking } from '../Parking/Parking.Entity.js';
 import { ScheduleService } from '../EmployeeShift/Schedule.Service.js';
 import { NotificationService } from '../Notification/Notification.Service.js';
@@ -31,7 +29,6 @@ export class ReservationService {
     private repo: ReservationRepository,
     private invoiceRepo: InvoiceRepository,
     private parkingPriceRepo: ParkingPriceRepository,
-    private parkingSpaceRepo: ParkingSpaceRepository,
     private scheduleService: ScheduleService,
     private notifications: NotificationService,
     private parkings: ParkingService,
@@ -438,23 +435,10 @@ export class ReservationService {
       throw new AppError(`La reserva empieza a las ${formatTimeHHMM(reservation.startTime)}: el ingreso se registra desde las ${formatTimeHHMM(opensAt)}`, 400);
     }
     await this.assertNotInsideElsewhere(reservation.vehicle.plate, reservation.vehicle.id, id);
-    // R-21: si el cliente anterior de la plaza se quedó de más, su vehículo sigue adentro: la reserva pasa a la primera
-    // plaza libre del mismo tipo (misma regla que al reservar) y el ingreso se registra ahí. Si no hay ninguna, no entra.
+    // R-21: si la plaza sigue ocupada, el repositorio pasa la reserva a otra libre (con la sucursal bloqueada).
     const originalSpaceId = reservation.parkingSpace.id;
-    const inside = await this.repo.findInProgressOnSpace(reservation.parkingSpace.id, id);
-    if (inside) {
-      const [to] = await this.repo.freeSpacesFor(reservation);
-      if (!to) {
-        const overdue = inside.endTime.getTime() < Date.now() ? ', que se pasó de hora' : '';
-        throw new AppError(`La plaza ${reservation.parkingSpace.spaceCode} sigue ocupada por ${inside.vehicle?.plate ?? 'otro vehículo'}${overdue}, y no hay otra plaza libre para este vehículo.`, 409);
-      }
-      reservation.parkingSpace = to; // se guarda con el cambio de estado
-    }
-
-    const updated = await this.repo.update(id, { status: ReservationStatus.EN_CURSO, attendedById: employeeId, checkedInById: employeeId });
-    if (updated?.parkingSpace) {
-      await this.parkingSpaceRepo.update(updated.parkingSpace.id, { state: SpaceState.OCUPADO });
-    }
+    await this.repo.checkIn(id, employeeId);
+    const updated = await this.repo.findOne({ id });
     if (updated && updated.parkingSpace.id !== originalSpaceId) {
       await this.notifyClient(updated, NotificationType.PLAZA_CAMBIADA, 'Cambio de plaza', `La plaza reservada seguía ocupada: ingresás a la plaza ${updated.parkingSpace.spaceCode}`);
     } else if (updated) {

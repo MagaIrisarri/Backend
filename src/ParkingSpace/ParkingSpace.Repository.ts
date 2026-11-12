@@ -1,4 +1,5 @@
-import { EntityManager } from "@mikro-orm/core";
+import { EntityManager, LockMode } from "@mikro-orm/core";
+import { Parking } from "../Parking/Parking.Entity.js";
 import { ParkingSpace, SpaceState } from "./ParkingSpace.Entity.js";
 import { Reservation, reservationCode } from "../Reservation/Reservation.Entity.js";
 import { Repository } from "../Shared/base.Repository.js";
@@ -11,6 +12,11 @@ export interface Relocation {
   reservationId: string; code: string; plate: string; startTime: Date; endTime: Date;
   toSpaceId: string | null; toSpaceCode: string | null; // null: no hay plaza libre para esa reserva
 }
+
+// Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
+// Todo lo que elige o reasigna plaza lo llama primero.
+export const lockParking = (em: EntityManager, parkingId: string) =>
+  em.findOneOrFail(Parking, { id: parkingId }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
 
 type Interval = [number, number];
 const MINUTE_MS = 60 * 1000;
@@ -78,7 +84,9 @@ export class ParkingSpaceRepository implements Repository<ParkingSpace> {
    */
   async takeOutOfService(spaceId: string, action: 'MANTENIMIENTO' | 'BAJA', relocate: boolean): Promise<{ space: ParkingSpace; moved: Relocation[] }> {
     return await this.em.transactional(async (tx) => {
-      const space = await tx.findOne(ParkingSpace, { id: spaceId, isActive: true }, { populate: ['parking'] });
+      const found = await tx.findOne(ParkingSpace, { id: spaceId }, { fields: ['parking'] });
+      if (found) await lockParking(tx, found.parking.id);
+      const space = await tx.findOne(ParkingSpace, { id: spaceId, isActive: true }, { populate: ['parking'], refresh: true });
       if (!space) throw new AppError("Plaza no encontrada", 404);
       const verb = action === 'MANTENIMIENTO' ? 'pasar a mantenimiento' : 'dar de baja';
 

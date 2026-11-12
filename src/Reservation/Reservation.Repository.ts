@@ -1,4 +1,4 @@
-import { EntityManager, LockMode } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/core';
 import crypto from 'node:crypto';
 import { Reservation, reservationCode } from './Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
@@ -11,7 +11,7 @@ import { Repository } from '../Shared/base.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
 import { ACTIVE_RESERVATION_STATUSES, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import { formatTimeHHMM } from '../Shared/utils/dateUtils.js';
-import { findFreeSpaces } from '../ParkingSpace/ParkingSpace.Repository.js';
+import { findFreeSpaces, lockParking } from '../ParkingSpace/ParkingSpace.Repository.js';
 
 export interface CreateReservationParams {
   parking: Parking;
@@ -25,10 +25,6 @@ export interface CreateReservationParams {
 }
 
 export const WALK_IN_ONLY = 'La sucursal no toma reservas online por ahora: atiende solo en el lugar';
-
-// Bloquea la fila de la sucursal hasta el fin de la transacción: dos pedidos a la vez no eligen la misma plaza libre.
-const lockParking = (em: EntityManager, parkingId: string) =>
-  em.findOneOrFail(Parking, { id: parkingId }, { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true });
 
 // Las altas lo vuelven a mirar con la fila bloqueada: una pausa (L-42) que terminó mientras esperaban la deja inactiva,
 // o solo para el mostrador (L-44), que corta las reservas online.
@@ -103,7 +99,6 @@ export class ReservationRepository implements Repository<Reservation> {
     const reservation = await this.findOne({ id });
     if (!reservation) return null;
 
-    if (data.checkedInById) reservation.checkedInBy = this.entityManager.getReference(User, data.checkedInById);
     if (data.attendedById) {
       const employee = await this.entityManager.findOne(User, { id: data.attendedById, status: 'ACTIVO' });
       if (employee) reservation.attendedBy = employee;
@@ -153,10 +148,33 @@ export class ReservationRepository implements Repository<Reservation> {
     return await this.entityManager.findOne(User, { id, status: 'ACTIVO' });
   }
 
-  // Otro vehículo adentro de la plaza: una reserva en curso, aunque ya se haya pasado de su horario (R-21).
-  async findInProgressOnSpace(spaceId: string, exceptReservationId: string): Promise<Reservation | null> {
-    return await this.entityManager.findOne(Reservation, {
-      parkingSpace: { id: spaceId }, status: ReservationStatus.EN_CURSO, id: { $ne: exceptReservationId },
+  /**
+   * Ingreso: pasa la reserva a EN CURSO y ocupa la plaza, con la fila de la sucursal bloqueada. R-21: si otro vehículo sigue
+   * adentro de la plaza (aunque se haya pasado de hora), la reserva pasa a la primera plaza libre de su tipo (findFreeSpaces);
+   * si no hay ninguna, 409 y no cambia nada.
+   */
+  async checkIn(id: string, employeeId: string): Promise<void> {
+    await this.entityManager.transactional(async (em) => {
+      const reservation = await em.findOneOrFail(Reservation, { id },
+        { populate: ['parkingSpace', 'parkingSpace.parking', 'vehicle', 'vehicle.vehicleType'] as any });
+      await lockParking(em, reservation.parkingSpace.parking.id);
+      await em.refresh(reservation); // otro ingreso de la misma reserva pudo terminar mientras esperaba el bloqueo
+      if (reservation.status !== ReservationStatus.PENDIENTE) throw new AppError("La reserva no se encuentra en estado válido para Check-in", 400);
+
+      const inside = await em.findOne(Reservation, {
+        parkingSpace: reservation.parkingSpace, status: ReservationStatus.EN_CURSO, id: { $ne: id },
+      }, { populate: ['vehicle'] as any });
+      if (inside) {
+        const [to] = await this.freeSpacesFor(reservation, em);
+        if (!to) {
+          const overdue = inside.endTime.getTime() < Date.now() ? ', que se pasó de hora' : '';
+          throw new AppError(`La plaza ${reservation.parkingSpace.spaceCode} sigue ocupada por ${inside.vehicle?.plate ?? 'otro vehículo'}${overdue}, y no hay otra plaza libre para este vehículo.`, 409);
+        }
+        reservation.parkingSpace = to;
+      }
+      reservation.status = ReservationStatus.EN_CURSO;
+      reservation.attendedBy = reservation.checkedInBy = em.getReference(User, employeeId);
+      reservation.parkingSpace.state = SpaceState.OCUPADO;
     });
   }
 
