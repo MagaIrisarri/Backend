@@ -669,6 +669,51 @@ Lo que ya está bien: los 8 archivos de `constants/` (`auth`, `dnrpa`, `holidays
 - **Solo código, sin riesgo:** C-1, C-2 y C-3. Unas 40 líneas, con `pnpm build` como control. C-3 conviene hacerlo con N-2.
 - **Nada de API ni de base.**
 
+## Devolución de la defensa de regularidad (13/11/2026)
+
+La regularidad se aprobó. El profesor marcó estos puntos para la final:
+
+| Punto | Qué se hizo | Commit |
+|---|---|---|
+| "Revisar auth", "no debería buscar el id", "¿dónde guardo la info del rol?" | El rol viaja en el JWT y `auth` no consulta la base (D-1, L-46) | `6321bfa` |
+| Strings `'EMPLEADO'` en el backend (`Vehicle.Service`) | Se usa el enum `UserType` en entidad, esquemas, repositorios y servicios. Se quitaron el chequeo `EMPLEADO` inalcanzable de `Vehicle.Service.create` y `findVehiclesByUserId`, que no se usaba. Resuelve C-3 y N-7 para el rol | `6321bfa` |
+| Lógica del controller en el servicio | `getCoverage` (turnos), el 400/404 de `updatePassword` y el estado del listado de empleados pasaron al servicio. Los demás controllers solo traducen HTTP | `6321bfa` |
+| Rendimiento | `GET /api/reservations/owner/:id?from=&to=`: el panel del dueño ya no trae toda la historia | `797976a` |
+| Cartel antes de acciones importantes | Confirmación al quitar tarifa o servicio de sucursal, al registrar la salida y al cobrar (Frontend). El pago cobrado se corrige con `PUT /api/billing/:id/payment` (L-47) | `1d9ce72` |
+
+### D-1. Cómo era la autenticación y cómo quedó
+
+**Antes.** El token solo llevaba el id del usuario (`sub`), firmado con `JWT_SECRET` y con vencimiento a las 8 h (`TOKEN_TTL`). En cada pedido protegido, `auth`:
+
+1. verificaba la firma y el vencimiento (si fallaba, 401);
+2. con el id del token buscaba el usuario en la base, y solo si estaba activo: `findOne(User, { id, status: 'ACTIVO' })` (si no lo encontraba, 401);
+3. leía el rol de ese registro (`user.type`) y lo comparaba con los de la ruta (si no estaba, 403);
+4. dejaba el usuario completo de la base en `req.user`.
+
+La ventaja era que una baja o un cambio de rol regían en el pedido siguiente, aunque el token siguiera vigente. El costo era una consulta a la base en cada pedido protegido, antes del controller. A eso apuntaba la devolución.
+
+**Ahora.** El login firma `{ sub, role }` (`signToken(user)`). `auth` verifica la firma, exige `sub` y un rol de `UserType` (si no, 401) y compara el rol con los de la ruta (403), sin consultar la base. `req.user` es `{ id, type }` (`AuthUser`).
+
+| | Antes | Ahora |
+|---|---|---|
+| Qué lleva el token | `sub` | `sub` y `role` |
+| Consulta a la base en `auth` | Sí, en cada pedido | No |
+| De dónde sale el rol | De la base | Del token firmado |
+| `req.user` | El usuario completo | `{ id, type }` |
+| Baja o cambio de rol | Rige al instante | Rige al vencer el token (hasta 8 h) |
+
+**Qué atenúa la demora de la baja (L-46):**
+
+- El login rechaza al usuario dado de baja, así que no obtiene un token nuevo.
+- La pertenencia del personal (`ownParking` con staff, `ownReservation`, `staffOfInvoice`) lee al empleado activo de la base, porque su sucursal puede cambiar y no viaja en el token. Un empleado dado de baja deja de operar su sucursal enseguida.
+- `User.Service` no edita ni cambia la contraseña de un usuario en `BAJA` (404); solo el administrador lo reactiva.
+
+La pertenencia ya consultaba la base antes, porque busca la cochera, la reserva o la factura, y lo sigue haciendo.
+
+**Si hiciera falta cortar al instante:** una lista de tokens revocados, o un `tokenVersion` en el usuario que se incrementa con la baja. También el punto medio: el rol del token, más una consulta mínima solo del estado.
+
+Lo prueban `tests/auth/auth.db.test.ts` y las e2e `users.failure.api` y `audit.api` del Frontend.
+
 ## Qué no se verificó
 
 - No se corrieron las pruebas locales de `tests/` ni las e2e.
