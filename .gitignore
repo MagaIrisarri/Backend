@@ -54,3 +54,5 @@ scripts/ralph/
 
 # Pruebas de desarrollo, locales. Las de la cátedra viven en tests-catedra/ y se versionan.
 tests/
+
+docs/defensa-regularidad.md

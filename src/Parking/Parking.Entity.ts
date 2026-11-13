@@ -12,7 +12,7 @@ export class Parking {
   id: string = crypto.randomUUID();
 
   // Provincia: en Argentina hay localidades con el mismo nombre en distintas provincias (San Martín, Concepción…).
-  // Nullable solo por las filas previas; el alta la exige y el seeder la completa.
+  // Nullable solo por las filas previas a la columna; el alta la exige (zod). Nadie completa las viejas: con 0 nulas en cada base, pasar a nullable: false.
   @Property({ type: 'string', nullable: true })
   province?: string | null;
 

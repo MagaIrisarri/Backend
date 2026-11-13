@@ -15,13 +15,13 @@ Si una escritura depende de algo que se leyó antes (que no exista, que haya una
 
 Toda validación que decide la escritura (cobertura de turnos, plaza libre, tarifa vigente) va adentro de la misma transacción, después del bloqueo.
 
-**Casos:** 1 (cancelar en curso), 3 (bloqueos), S-1, PP-1, INV-1, ES-1, PS-1, V-1, H-1.
+**Casos:** 1 (cancelar en curso), 3 (bloqueos), S-1, PP-1, INV-1, ES-1, RS-3, PS-1, V-1, H-1, VT-2.
 
 ### G-2. Una operación, una transacción
 
 Si una operación guarda varias entidades (cochera y sus plazas; vencer un precio y crear el nuevo), van en un solo `em.transactional` o en un solo `flush`. Dos `flush` seguidos pueden dejar la primera mitad guardada si la segunda falla.
 
-**Casos:** P-2, PP-1, S-1.
+**Casos:** P-2, PP-1, S-1, VT-2.
 
 ### G-3. Unicidad entre registros activos
 
@@ -32,7 +32,7 @@ Con bajas lógicas, un índice único común no sirve: el registro dado de baja 
 
 Los nombres se comparan con `nameKey` (`Shared/utils/names.ts`): sin mayúsculas, tildes ni espacios de más.
 
-**Casos:** S-2, PS-1, V-1, H-1.
+**Casos:** S-2, PS-1, V-1, H-1, VT-1.
 
 ## Datos que entran
 
@@ -50,7 +50,9 @@ Los nombres se comparan con `nameKey` (`Shared/utils/names.ts`): sin mayúsculas
 - Al leerla, `Number(...)`, porque MikroORM la devuelve como texto.
 - En los mensajes, `toFixed(2)` o el formato de moneda. Nunca la resta directa de dos `number`.
 
-**Casos:** 2 (columnas de dinero), PP-2, INV-2.
+- Un dato que el cobro necesita (el monto recibido en efectivo) es obligatorio para ese medio de pago, no opcional.
+
+**Casos:** 2 (columnas de dinero), PP-2, INV-2, INV-3.
 
 ### G-6. Versiones ordenadas por algo que no empate
 
@@ -85,7 +87,13 @@ Se rechaza con 409 (conflicto con datos) o 400 (pedido inválido sobre uno mismo
 
 Una acción idempotente (reactivar algo activo) responde igual en todas las entidades.
 
-**Casos:** U-4, menor de Vehículos (400 frente a 409).
+**Casos:** U-4, RS-1, menor de Vehículos (400 frente a 409).
+
+### G-18. La pertenencia se declara en la ruta
+
+Una ruta con un id de cochera, vehículo o reserva lleva su middleware de pertenencia (`ownParking`, `ownVehicle`, `ownReservation`, L-37) después de `auth`, aunque el servicio también lo controle. Así quien lee la ruta ve quién puede usarla, y el control del servicio queda como segunda barrera.
+
+**Casos:** RS-2.
 
 ## Una sola fuente
 
@@ -98,9 +106,11 @@ Las reglas de una sola fuente están en CLAUDE.md ("Reglas de una sola fuente"):
 
 Si la regla existe, se importa; no se copia. Una consulta que se repite en dos métodos del mismo servicio pasa al repositorio.
 
+Un valor de negocio (un mínimo, un tope, una tolerancia) o uno que usan dos módulos va a `Shared/constants/`; una conversión de unidades (`HOUR_MS`), una sola vez en `dateUtils.ts`. Un esquema zod no repite la lista de un enum: usa `z.nativeEnum(...)`. Formatos, mensajes y límites de texto de una sola columna se quedan junto a quien los usa.
+
 Lo mismo para un dato derivado guardado como copia (`ParkingSpace.state = OCUPADO` repite "hay una reserva en curso"): lo escribe un solo camino, y ninguna ruta lo acepta a mano. Las lecturas que deciden algo miran la fuente (las reservas), no la copia.
 
-**Casos:** R-a, L-5, L-6, L-7, PS-3.
+**Casos:** R-a, L-5, L-6, L-7, PS-3, C-1, C-2, C-3, RS-4.
 
 ### G-11. Los métodos que exige `Repository<T>` y nadie llama no esquivan las reglas
 
@@ -114,7 +124,7 @@ Lo mismo para un dato derivado guardado como copia (`ParkingSpace.state = OCUPAD
 
 Una ruta o un método nuevo entra con su llamada desde el Frontend, desde otro servicio o desde una prueba, o como evidencia de un requisito anotada en `revision-alcance.md`. Antes de borrar algo, revisar que no sea esa evidencia.
 
-**Casos:** ES-2, L-1, L-2, tabla de rutas sin uso.
+**Casos:** ES-2, L-1, L-2, VT-3, tabla de rutas sin uso.
 
 ### G-13. Sin `any` en las firmas de servicios y repositorios
 

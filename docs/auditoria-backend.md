@@ -22,6 +22,17 @@ Revisión completa de la API de ServicioCocheras (Express 5, MikroORM 7, MySQL),
 | 8 | El validador oculta errores inesperados | Opcional | ✅ Resuelto (`88e795b`) |
 | 9 | `catchAsync` repite lo que Express 5 ya hace | Opcional | ✅ Resuelto (`4e0e214`) |
 | — | Prueba de notificaciones que dependía de la hora | Encontrado después | ✅ Resuelto (`cc92580`) |
+| C-1 | Reglas de negocio fuera de `Shared/constants/` | Conviene arreglar | Pendiente |
+| C-2 | Las conversiones de tiempo están escritas siete veces | Opcional | Pendiente |
+| C-3 | Los enums se repiten como listas de texto en los esquemas | Conviene arreglar (con N-2) | Pendiente |
+| RS-1 | La superposición del vehículo responde 400 y "sin plaza" 409 | Opcional | Pendiente |
+| RS-2 | Cancelar y las rutas del personal sin `ownReservation` en la ruta | Opcional | Pendiente |
+| RS-3 | Tarifa, horario y empleado se validan fuera de la transacción del alta | Opcional (con ES-1) | Pendiente |
+| RS-4 | El margen de 10 minutos del alta es un número suelto | Opcional (con C-1) | Pendiente |
+| VT-1 | El nombre único de un tipo de vehículo solo lo controla el servicio | Opcional | Pendiente |
+| VT-2 | La baja de un tipo no es atómica | Opcional | Pendiente |
+| VT-3 | `PUT` y `PATCH /api/vehicle-types/:id` hacen lo mismo | Opcional | Pendiente |
+| VT-4 | El esquema de edición exige el nombre: la rama "sin nombre" no se alcanza | Opcional | Pendiente |
 
 ## Detalle
 
@@ -372,6 +383,12 @@ Revisión de los módulos que quedaban: `ParkingPrice`, `EmployeeShift`, `Invoic
 - **Problema:** para un total de 1000 con 999,9 recibidos, el mensaje dice "Faltan $0.10000000000002…" (`Invoice.Service.ts:19`).
 - **Solución:** `(total - recibido).toFixed(2)`.
 
+### INV-3. Se cobra en efectivo sin `amountReceived`
+
+- **Qué es:** `amountReceived` es opcional en el esquema (`Invoice.Schema.ts:22`), y `InvoiceService.pay` (`Invoice.Service.ts:18`) solo compara contra el total si viene.
+- **Problema:** un cobro en efectivo sin el monto recibido pasa como `PAGADA` con `amountReceived: null`. No queda registro de cuánto entró ni del vuelto, y el control "tiene que cubrir el total" del comentario de `pay` no se cumple.
+- **Solución:** con `paymentMethod: 'EFECTIVO'`, exigir `amountReceived` (400). Va en el esquema con un `superRefine`, o en el servicio junto al control del total. Antes, revisar que el Frontend siempre lo mande.
+
 ### V-1. Patente activa duplicada
 
 - **Qué es:** `VehicleService.create` comprueba que la patente esté libre (`assertPlateFree`) y recién después agrega el vehículo. No hay índice único, por las bajas lógicas.
@@ -408,6 +425,71 @@ Revisión de los módulos que quedaban: `ParkingPrice`, `EmployeeShift`, `Invoic
 - La importación del catálogo es una sola transacción.
 - El feriado propio y el nacional se fusionan bien, y la sincronización con el calendario oficial nunca quita fechas.
 - La semana tipo con vigencias (L-01) guarda la plantilla y las transferencias en un solo `flush`.
+
+## Reservas: puntos flojos
+
+Repaso del alta de reserva y sus rutas, por si aparecen en la presentación. Ninguno da un resultado incorrecto hoy salvo RS-3, que es poco probable. Anotados y sin arreglar.
+
+### RS-1. La superposición del vehículo responde 400, y "sin plaza" responde 409
+
+- **Qué es:** `Reservation.Repository.ts:352-355` lanza 400 cuando el vehículo ya tiene otra reserva en ese horario. Extender hace lo mismo (`Reservation.Service.ts:106`). En cambio, la plaza tomada (`:214`), "no hay plazas" (`:312`) y el vehículo adentro de otra sucursal (`:32`) responden 409.
+- **Problema:** las dos son un choque con un recurso que ya existe, no un dato mal formado. El Frontend no puede distinguir por código "corregí el formulario" de "otro ya lo tiene".
+- **Solución:** pasar las dos a 409. Revisar antes que ninguna prueba ni pantalla dependa del 400.
+
+### RS-2. Cancelar y las rutas del personal no llevan `ownReservation` en la ruta
+
+- **Qué es:** `DELETE /api/reservations/:id` (`Reservation.Route.ts:41`) solo pide `auth()`; el permiso lo resuelve el servicio (cliente dueño de la reserva, administrador o `isStaffOf`). Pasa lo mismo con `/:id/space`, `/:id/end`, `/:id/services`, `/:id/check-in` y `/:id/check-out`, que verifican en el servicio con `assertStaffOf`.
+- **Problema:** funciona igual (la prueba de permisos del ítem 6 lo cubre), pero rompe la convención de L-37: "ruta nueva con un id de reserva lleva su pertenencia". Quien lea la ruta no ve quién puede usarla.
+- **Solución:** sumar `ownReservation` a esas rutas y dejar el control del servicio como segunda barrera. No cambia respuestas, salvo que un 404 de reserva inexistente siga pasando al servicio (así funciona hoy `ownReservation`).
+
+### RS-3. Tarifa, horario y empleado se validan fuera de la transacción del alta
+
+- **Qué es:** `ReservationService.create` llama a `assertRate`, `assertSchedule` (cobertura) y `employeeFor` antes de `createReservationAtomically`, que es donde se bloquea la cochera. La plaza, la superposición del vehículo y la pausa sí se revalidan con el bloqueo.
+- **Problema:** un cambio de turno o de tarifa en ese mismo instante no se ve: la reserva puede quedar sin cobertura, con un empleado que ya no tiene turno o con la tarifa anterior guardada en `hourlyRate`. Es el lado de la reserva de ES-1.
+- **Solución:** la misma de ES-1: mover esos tres controles adentro de la transacción, después de `lockParking`. Si no se arregla, dejarlo como `shortcut: L-xx` junto con ES-1.
+
+### RS-4. El margen de 10 minutos del alta es un número suelto
+
+- **Qué es:** `Reservation.Schema.ts:14` acepta un inicio hasta `10 * 60 * 1000` ms en el pasado.
+- **Problema:** es una regla de negocio fuera de `Shared/constants/` (CLAUDE.md), y está al lado de `ARRIVAL_TOLERANCE_MINUTES` (15) y `CHECKOUT_GRACE_MINUTES` (10) en `schedule.ts` sin relación visible con ninguna.
+- **Solución:** una constante en `schedule.ts` (p. ej. `START_PAST_TOLERANCE_MINUTES = 10`, con su comentario) y `MINUTE_MS` de C-2. Va con C-1.
+
+## Tipos de vehículo: revisión posterior
+
+Repaso de `src/Vehicle/VehicleType/` (RA-11, RA-26), por si aparece en la presentación. Lo usa un solo rol (el administrador), así que las carreras son poco probables. Anotado y sin arreglar.
+
+### VT-1. El nombre único solo lo controla el servicio
+
+- **Qué es:** `VehicleTypeService.assertUniqueName` (`VehicleType.Service.ts`) lee todos los tipos activos y compara con `nameKey`; después `create` o `update` escriben. `VehicleType.Entity.ts` no tiene índice único en `name`.
+- **Problema:** dos altas (o un alta y un renombre) con el mismo nombre a la vez pasan las dos el control y quedan dos tipos iguales. Un índice común tampoco alcanzaría: la comparación es sin mayúsculas, tildes ni espacios (`nameKey`), y un tipo dado de baja seguiría ocupando el nombre.
+- **Solución:** G-3. Una columna `name_key` (con `nameKey`) e `IF(is_active, name_key, NULL)` generada con índice único, o la escritura en una transacción que bloquee algo común. Por el uso real (un solo administrador), alcanza con un `shortcut: L-xx` en `assertUniqueName`.
+
+### VT-2. La baja de un tipo no es atómica
+
+- **Qué es:** `VehicleTypeService.remove` mira `usage` (modelos, vehículos, plazas y tarifas vigentes) y recién después llama a `VehicleTypeRepository.remove`, sin transacción. Adentro, `nativeDelete(DnrpaTypeMap, …)` se ejecuta en el acto y el `isActive = false` va en un `flush` aparte.
+- **Problema:** dos cosas.
+  - Entre `usage` y la baja, un dueño puede crear una plaza o una tarifa de ese tipo, o la importación del CSV un modelo: el tipo queda dado de baja con cosas activas que lo apuntan.
+  - Si el `flush` falla, las descripciones del DNRPA ya se borraron y el tipo sigue activo, sin ellas (vuelven a la sugerencia en la próxima importación).
+- **Solución:** `em.transactional` con `usage`, el borrado de las filas y la baja adentro (G-1 y G-2). La carrera con el alta de plazas sigue abierta salvo que se bloquee la fila del tipo (`PESSIMISTIC_WRITE`) también desde quien crea plazas y tarifas; la parte de las dos escrituras se arregla sola con la transacción.
+
+### VT-3. `PUT` y `PATCH /:id` hacen lo mismo
+
+- **Qué es:** `VehicleType.Route.ts` registra las dos con el mismo esquema y el mismo `controller.update`. El Frontend solo usa `PUT` (`vehicleType.service.ts`), y ni `revision-alcance.md` ni las pruebas nombran el `PATCH`.
+- **Problema:** no da un resultado incorrecto; es una ruta más que mantener y documentar (G-12).
+- **Solución:** borrar la línea del `PATCH`. Una línea, sin cambios en el Frontend.
+
+### VT-4. El esquema de edición exige el nombre: la rama "sin nombre" no se alcanza
+
+- **Qué es:** `updateVehicleTypeSchema = createVehicleTypeSchema.partial()` vuelve opcional `body`, no `name`: con body, `name` sigue obligatorio. `VehicleTypeService.update` tiene un `if (data.name === undefined) return this.findOne(id)` que solo se alcanzaría sin body.
+- **Problema:** el esquema y el servicio dicen cosas distintas sobre si el nombre es opcional. Como el único campo editable es el nombre, el `PUT` siempre lo pide.
+- **Solución:** que `updateVehicleTypeSchema` sea igual a `createVehicleTypeSchema` y sacar la rama del servicio. Va con VT-3.
+
+### Lo que está bien
+
+- Los tipos base (AUTO, MOTO, CAMIONETA) no se renombran ni se dan de baja, y el nombre se compara con `nameKey`, igual que el catálogo.
+- La baja con plazas, tarifas vigentes, modelos o vehículos activos responde 409 con el detalle de qué lo usa.
+- `reassignDescriptions` (RA-26) mueve filas, modelos y vehículos en una transacción y rechaza con 409 si hay reservas activas (D-12).
+- Plazas, tarifas, modelos y vehículos apuntan al tipo por id, así que renombrar no desincroniza nada.
 
 ## Código muerto y simplificaciones
 
@@ -535,6 +617,57 @@ Antes de la defensa, solo cambios de código. Los de API y base quedan anotados.
 - **Solo código, se puede hacer sin riesgo:** N-2, N-8, N-9 y N-10. Son unas 50 líneas, con `pnpm build` como control.
 - **API, con cambios en el Frontend:** N-7 y N-6. Después de la defensa.
 - **Base, solo documentar la convención:** N-1, N-3 y N-4, con sus excepciones.
+
+## Constantes: revisión posterior
+
+Pregunta: ¿están todas las constantes del backend en `src/Shared/constants/`, y deberían estar ahí? Barrido con `grep` de toda constante en mayúsculas, todo enum, todo `z.enum([...])` y los números sueltos de los esquemas y los timers. Anotado y sin arreglar.
+
+**Respuesta corta:** no están todas, y no todas deberían estar. CLAUDE.md pide "constantes de negocio en `src/Shared/constants/`; no se repiten números en el código". El criterio que sale de esa regla:
+
+- **Van a `Shared/constants/`:** un valor de una regla de negocio (alguien puede preguntar "¿por qué 6?") o un valor que usan dos módulos o más.
+- **Se quedan donde están:** formatos (regex), mensajes de error, datos de la siembra o de la demo, y límites de texto de una sola columna (`.max(100)` en el esquema que la valida, como pide la guía "Datos que entran").
+- **Conversiones de unidades** (`HOUR_MS`, `DAY_MS`): no son reglas de negocio. Van una sola vez en `Shared/utils/dateUtils.ts`, al lado de `isoDate`.
+
+Lo que ya está bien: los 8 archivos de `constants/` (`auth`, `dnrpa`, `holidays`, `notifications`, `pagination`, `schedule`, `stats`, `status`) tienen solo reglas de negocio, cada una con su comentario y su código de regla (R-xx, L-xx).
+
+### C-1. Reglas de negocio fuera de `constants/`
+
+| Valor | Dónde está | Por qué es de negocio |
+|---|---|---|
+| `MIN_VEHICLE_YEAR = 1960` | `Vehicle.Schema.ts:5` | Es L-28, con su `shortcut:`. |
+| `MAX_CATALOG_IMPORT_ITEMS = 5000` | `Catalog.Schema.ts:3` | Va atado al límite de body `'2mb'` de `index.ts:42`: si sube uno, tiene que subir el otro, y están en archivos distintos sin referencia entre sí. |
+| Contraseña de 6 caracteres como mínimo | `User.Schema.ts:51` y `:138` | Escrita dos veces (registro y cambio de contraseña): pueden quedar distintas. |
+| Hasta 500 plazas por tipo | `Parking.Schema.ts:24` | Límite de capacidad de una sucursal. |
+| Motivo de cancelación de hasta 300 caracteres | `Reservation.Schema.ts:47` | Límite de texto de una columna: puede quedar en el esquema. |
+| `VAT_CONDITIONS` | `User.Schema.ts:5` | Lista de AFIP. Solo la usa el esquema: puede quedar. |
+
+- **Solución (solo código):** mover las cuatro primeras a `constants/` (`MIN_VEHICLE_YEAR` y `MAX_CATALOG_IMPORT_ITEMS` a un `vehicles.ts`; `MIN_PASSWORD_LENGTH` a `auth.ts`; `MAX_SPACES_PER_TYPE` a un `parkings.ts`). El límite del body se escribe al lado de `MAX_CATALOG_IMPORT_ITEMS` (`CATALOG_BODY_LIMIT = '2mb'`) y `index.ts` lo importa. Unas 15 líneas, con `pnpm build` como control.
+
+### C-2. Las conversiones de tiempo están escritas siete veces
+
+- **Qué es:** `MS_PER_HOUR` en `billing.ts:3` y en `Reservation.Service.ts:22` (y además `1000 * 60 * 60` a mano en la línea 72 del mismo archivo); `DAY_MS` en `Notification.Repository.ts:18` y en `Stats.Service.ts:6`; `86_400_000` a mano en `Notification.Service.ts:50`; `MINUTE_MS` en `ParkingSpace.Repository.ts:22`; `* 60 * 1000` y `* 3600 * 1000` en los cuatro `setInterval` de `index.ts`; `REMINDER_HOURS_BEFORE * 60 * 60 * 1000` en `Reservation.Service.ts:348`.
+- **Problema:** no hay un error hoy, pero es el "no se repiten números en el código" que pide CLAUDE.md, y un `60 * 1000` donde iba `3600 * 1000` compila igual.
+- **Solución (solo código):** exportar `MINUTE_MS`, `HOUR_MS` y `DAY_MS` desde `Shared/utils/dateUtils.ts` y reemplazar los siete lugares. La demo (`load.ts:44`) puede usar las mismas.
+
+### C-3. Los enums se repiten como listas de texto en los esquemas
+
+- **Qué es:** los días de la semana están cuatro veces: el enum `DayOfWeek` (`EmployeeShift.Entity.ts:9`), `DaysEnum` (`EmployeeShift.Schema.ts:4`) y dos `z.enum([...])` en `Schedule.Schema.ts:23` y `:42`. `SpaceState` (`ParkingSpace.Entity.ts:7`) se repite en `ParkingSpace.Schema.ts:23`. `UserStatus` y `UserType` (`status.ts`) se repiten en `User.Schema.ts:21-22`. Los medios de pago solo existen como `PaymentMethodSchema` (`Invoice.Schema.ts:3`); la entidad los guarda como `string` y `Reservation.Repository.ts:164` e `Invoice.Service.ts:17` escriben `'EFECTIVO'` a mano.
+- **Problema:** si se agrega un valor al enum, el esquema lo rechaza con 400 hasta que alguien se acuerde de la otra lista. Es el mismo caso que N-2.
+- **Solución (solo código):** los esquemas usan `z.nativeEnum(DayOfWeek)`, `z.nativeEnum(SpaceState)`, `z.nativeEnum(UserStatus)` y `z.nativeEnum(UserType)`. Se suma `PaymentMethod` (y `InvoiceStatus`, de N-2) a `status.ts`. `DayOfWeek` y `SpaceState` pueden quedarse junto a su entidad: son de un solo módulo; lo que no puede pasar es que haya dos listas. Hacerlo junto con N-2.
+
+### Menores, sin cambio
+
+- **Mensajes:** `WALK_IN_ONLY` (`Reservation.Repository.ts:28`), `PAUSE_REASON` y `WALK_IN_ONLY_REASON` (`Parking.Service.ts:25-26`) y `MUST_CHANGE_PASSWORD` (`User.Entity.ts:5`) son textos, no reglas. Quedan junto a quien los lanza.
+- **Formatos:** `PLATE_REGEX` queda en `Vehicle.Schema.ts`, porque CLAUDE.md lo ata a su copia del Frontend (`utils/plate.ts`). `DATE_REGEX` (`Schedule.Schema.ts:4`) podría ir a `Shared/utils/validation.ts` junto a `TIME_REGEX`, si otro esquema lo necesita.
+- **Locales de un módulo:** `MIN_NAME` (`Catalog.Service.ts:10`), `DROPS` (`dropLegacy.ts`), `TABLES` (`demo/reset.ts`), los feriados de la siembra, `ADMIN_EMAIL`, `INSURANCES`, `MOTOS` y todo `demo/generate.ts` son datos de un solo archivo. Se quedan.
+- **`JWT_SECRET`** (`auth.ts:25`) sale del entorno: no es una constante.
+- **`DOW`** de `Schedule.Service.ts:19` se repite en `demo/load.ts:46` y en `demo/generate.ts:45` (como `DAYS`). Con `Object.values(DayOfWeek)` alcanza, si el enum se ordena desde el domingo; si no, queda.
+- El comentario de `PLANNING_HORIZON_MONTHS` dice que se expone en `GET /api/shifts/config`. Si se borra esa ruta (ver "Rutas que el Frontend no llama"), hay que corregir el comentario.
+
+### Resumen por costo
+
+- **Solo código, sin riesgo:** C-1, C-2 y C-3. Unas 40 líneas, con `pnpm build` como control. C-3 conviene hacerlo con N-2.
+- **Nada de API ni de base.**
 
 ## Qué no se verificó
 
