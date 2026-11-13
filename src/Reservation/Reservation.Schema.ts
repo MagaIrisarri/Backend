@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PLATE_REGEX } from "../Vehicle/Vehicle.Schema.js";
 import { baseUserFields } from "../User/User.Schema.js";
+import { DATE_REGEX } from "../EmployeeShift/Schedule.Schema.js";
 
 export const createReservationSchema = z.object({
   body: z.object({
@@ -40,6 +41,12 @@ export const reservationIdSchema = z.object({
   params: z.object({
     id: z.string().uuid("El ID de la reserva debe ser un UUID válido"),
   }),
+});
+
+// Reservas del dueño por fecha de inicio (días locales, ambos incluidos). Sin rango, todas.
+const day = z.string().regex(DATE_REGEX, "Fecha inválida (YYYY-MM-DD)").optional();
+export const ownerReservationsSchema = z.object({
+  query: z.object({ from: day, to: day }).refine((q) => !q.from || !q.to || q.from <= q.to, { message: "La fecha desde no puede ser posterior a la fecha hasta" }),
 });
 
 // El motivo lo exige el servicio cuando cancela el personal (el cliente no da explicaciones).

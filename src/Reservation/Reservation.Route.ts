@@ -7,7 +7,7 @@ import { orm } from '../Shared/db/orm.js';
 import { ReservationController } from './Reservation.Controller.js';
 import { ReservationRepository } from './Reservation.Repository.js';
 import { ReservationService } from './Reservation.Service.js';
-import { createReservationSchema, updateReservationSchema, reservationIdSchema, cancelReservationSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema, walkInSchema } from './Reservation.Schema.js';
+import { createReservationSchema, updateReservationSchema, reservationIdSchema, cancelReservationSchema, changeSpaceSchema, extendReservationSchema, reservationServicesSchema, rateReservationSchema, walkInSchema, ownerReservationsSchema } from './Reservation.Schema.js';
 
 import { InvoiceRepository } from '../Invoice/Invoice.Repository.js';
 import { ParkingPriceRepository } from '../ParkingPrice/ParkingPrice.Repository.js';
@@ -26,7 +26,7 @@ const reservationController = new ReservationController(reservationService);
 reservationRouter.get('/', auth(UserType.ADMINISTRADOR), reservationController.findAll);
 reservationRouter.get('/client/:clientId', auth(), self('clientId'), reservationController.findByClientId);
 reservationRouter.get('/parking/:parkingId', auth(UserType.DUENO, UserType.EMPLEADO), ownParking((req) => req.params.parkingId, true), reservationController.findByParkingId);
-reservationRouter.get('/owner/:ownerId', auth(UserType.DUENO), self('ownerId'), reservationController.findByOwnerId);
+reservationRouter.get('/owner/:ownerId', auth(UserType.DUENO), self('ownerId'), validateSchema(ownerReservationsSchema), reservationController.findByOwnerId);
 reservationRouter.get('/:id', auth(), ownReservation, validateSchema(reservationIdSchema), reservationController.findOne);
 reservationRouter.post('/', auth(UserType.CLIENTE), ownVehicle((req) => req.body?.vehicleId), validateSchema(createReservationSchema), reservationController.create);
 reservationRouter.post('/walk-in', auth(UserType.DUENO, UserType.EMPLEADO), validateSchema(walkInSchema), reservationController.walkIn);

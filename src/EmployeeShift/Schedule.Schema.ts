@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TIME_REGEX } from '../Shared/utils/validation.js';
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+export const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const time = z.string().regex(TIME_REGEX, 'Formato de hora inválido (HH:mm)');
 const dayParams = z.object({
   parkingId: z.string().uuid('ID de estacionamiento inválido'),

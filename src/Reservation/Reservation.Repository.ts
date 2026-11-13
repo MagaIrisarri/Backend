@@ -100,10 +100,10 @@ export class ReservationRepository implements Repository<Reservation> {
     );
   }
 
-  async findByOwnerId(ownerId: string): Promise<Reservation[]> {
+  async findByOwnerId(ownerId: string, startTime: { $gte?: Date; $lt?: Date } = {}): Promise<Reservation[]> {
     return await this.entityManager.find(
       Reservation,
-      { parkingSpace: { parking: { owner: { id: ownerId } } } },
+      { parkingSpace: { parking: { owner: { id: ownerId } } }, ...(Object.keys(startTime).length && { startTime }) },
       { populate: ['vehicle', 'vehicle.client', 'vehicle.brand', 'vehicle.model', 'vehicle.vehicleType', 'parkingSpace', 'parkingSpace.parking', 'services', 'services.serviceCatalog', 'attendedBy', 'checkedInBy'] as any,
         orderBy: { startTime: 'DESC' }
       }

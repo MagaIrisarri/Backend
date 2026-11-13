@@ -54,7 +54,7 @@ export class ReservationController {
   };
 
   public findByOwnerId = async (req: Request, res: Response) => {
-    const reservations = await this.service.findByOwnerId(req.params.ownerId as string);
+    const reservations = await this.service.findByOwnerId(req.params.ownerId as string, req.query as { from?: string; to?: string });
     return res.status(200).json({
       message: reservations.length === 0 ? 'No se encontraron reservas' : 'Reservas encontradas',
       data: reservations,

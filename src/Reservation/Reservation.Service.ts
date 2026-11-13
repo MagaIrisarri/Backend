@@ -259,8 +259,14 @@ export class ReservationService {
     return this.withInvoice(await this.repo.findByParkingId(parkingId));
   }
 
-  async findByOwnerId(ownerId: string): Promise<any[]> {
-    return this.withInvoice(await this.repo.findByOwnerId(ownerId));
+  // Con from/to, solo las que empiezan en esos días: el panel del dueño pide un rango y no toda la historia.
+  async findByOwnerId(ownerId: string, range: { from?: string; to?: string } = {}): Promise<any[]> {
+    const dayAfter = (d: string) => { const x = new Date(`${d}T00:00`); x.setDate(x.getDate() + 1); return x; }; // medianoche local
+    const startTime = {
+      ...(range.from && { $gte: new Date(`${range.from}T00:00`) }),
+      ...(range.to && { $lt: dayAfter(range.to) }),
+    };
+    return this.withInvoice(await this.repo.findByOwnerId(ownerId, startTime));
   }
 
   // El cliente cancela sin dar explicaciones; el personal, el dueño o el administrador dicen el motivo, que le llega al cliente.
