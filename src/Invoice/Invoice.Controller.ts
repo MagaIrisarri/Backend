@@ -16,4 +16,9 @@ export class InvoiceController {
     const invoice = await this.service.pay(req.params.id as string, req.body);
     res.status(200).json({ message: 'Factura pagada exitosamente', data: invoice });
   };
+
+  public editPayment = async (req: Request, res: Response) => {
+    const invoice = await this.service.editPayment(req.params.id as string, req.body);
+    res.status(200).json({ message: 'Pago corregido', data: invoice });
+  };
 }

@@ -15,8 +15,9 @@ const invoiceRepository = new InvoiceRepository(orm.em);
 const invoiceService = new InvoiceService(invoiceRepository);
 const invoiceController = new InvoiceController(invoiceService);
 
-// La factura la crea el check-out (R-14) y la anula la cancelación de la reserva: acá solo se consulta y se cobra.
+// La factura la crea el check-out (R-14): acá solo se consulta, se cobra y se corrige el pago.
 invoiceRouter.get('/client/:clientId', auth(), self('clientId'), invoiceController.findByClientId);
 invoiceRouter.post("/:id/pay", auth(UserType.DUENO, UserType.EMPLEADO), staffOfInvoice, validateSchema(invoiceIdSchema), validateSchema(payInvoiceSchema), invoiceController.pay);
+invoiceRouter.put("/:id/payment", auth(UserType.DUENO, UserType.EMPLEADO), staffOfInvoice, validateSchema(invoiceIdSchema), validateSchema(payInvoiceSchema), invoiceController.editPayment);
 
 export default invoiceRouter;
