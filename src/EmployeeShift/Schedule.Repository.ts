@@ -7,7 +7,7 @@ import { HolidayAdhesion } from '../Holiday/HolidayAdhesion.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { Parking } from '../Parking/Parking.Entity.js';
 import { User } from '../User/User.Entity.js';
-import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, UserStatus, UserType } from '../Shared/constants/status.js';
 
 // [validFrom, validTo) contiene la fecha; sin fecha, la versión sin vencer. `current` es lo que marca vigente a una fila sin validTo.
 const validAt = (date: string | undefined, current: object = {}): any => date
@@ -18,7 +18,7 @@ export class ScheduleRepository {
   constructor(public em: EntityManager) {}
 
   findParking(id: string) { return this.em.findOne(Parking, { id, isActive: true }); }
-  findEmployees(ids: string[]) { return this.em.find(User, { id: { $in: ids }, status: 'ACTIVO', type: 'EMPLEADO' }); }
+  findEmployees(ids: string[]) { return this.em.find(User, { id: { $in: ids }, status: UserStatus.ACTIVO, type: UserType.EMPLEADO }); }
 
   // L-01: la semana tipo que regía en `date`; sin fecha, la última versión (la que se edita). Las filas desactivadas antes
   // de la vigencia (sin validTo) no se sabe hasta cuándo valieron: quedan afuera.

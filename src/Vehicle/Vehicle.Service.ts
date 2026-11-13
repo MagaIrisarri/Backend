@@ -1,3 +1,4 @@
+import { UserStatus } from '../Shared/constants/status.js';
 import { Vehicle } from './Vehicle.Entity.js';
 import { VehicleRepository } from './Vehicle.Repository.js';
 import { AppError } from '../Shared/utils/AppError.js';
@@ -14,18 +15,10 @@ export class VehicleService {
     return await this.vehicleRepository.findOne({ id });
   }
 
-  async findVehiclesByUserId(userId: string): Promise<Vehicle[]> {
-    return await this.vehicleRepository.findActiveByUserId(userId);
-  }
-
   async create(data: any, userId: string): Promise<Vehicle> {
     const user = await this.vehicleRepository.getUserById(userId);
-    if (!user || user.status !== 'ACTIVO') {
+    if (!user || user.status !== UserStatus.ACTIVO) {
       throw new AppError("Cliente no encontrado o inactivo", 404);
-    }
-
-    if (user.type === 'EMPLEADO') {
-      throw new AppError("No se pueden asignar vehículos a usuarios con rol exclusivo de EMPLEADO", 403);
     }
     if (user.mustChangePassword) throw new AppError(MUST_CHANGE_PASSWORD, 403);
     await this.assertPlateFree(data.plate);

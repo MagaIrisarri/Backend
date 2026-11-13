@@ -66,13 +66,10 @@ export class EmployeeShiftService {
     return true;
   }
 
-  async getShiftsByParkingAndDay(parkingId: string, dayOfWeek: string): Promise<EmployeeShift[]> {
-    return await this.repo.findByParkingAndDay(parkingId, dayOfWeek as DayOfWeek);
-  }
-
-  async calculateCoverageGaps(parkingId: string, dayOfWeek: string) {
+  // Turnos del día y las franjas que ninguno cubre.
+  async getCoverage(parkingId: string, dayOfWeek: string) {
     const shifts = await this.repo.findByParkingAndDay(parkingId, dayOfWeek as DayOfWeek);
-    
+
     const gaps = [];
     let currentEnd = '00:00:00';
 
@@ -89,6 +86,6 @@ export class EmployeeShiftService {
       gaps.push({ gapStart: currentEnd, gapEnd: '24:00:00' });
     }
 
-    return gaps;
+    return { assignedShifts: shifts, missingHours: gaps };
   }
 }

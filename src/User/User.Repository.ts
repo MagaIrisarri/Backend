@@ -5,7 +5,7 @@ import { Parking } from '../Parking/Parking.Entity.js';
 import { Reservation } from '../Reservation/Reservation.Entity.js';
 import { EmployeeShift } from '../EmployeeShift/EmployeeShift.Entity.js';
 import { DayException } from '../EmployeeShift/DayException.Entity.js';
-import { ACTIVE_RESERVATION_STATUSES } from '../Shared/constants/status.js';
+import { ACTIVE_RESERVATION_STATUSES, UserStatus, UserType } from '../Shared/constants/status.js';
 import { isoDate } from '../Shared/utils/dateUtils.js';
 import { likeWords } from '../Shared/utils/pagination.js';
 
@@ -21,7 +21,7 @@ export class UserRepository implements Repository<User> {
   async findPage(o: { page: number; limit: number; q?: string; role?: string; status?: string }) {
     const filters = likeWords(o.q).map((w) => ({ $or: [{ name: { $like: w } }, { last_name: { $like: w } }, { email: { $like: w } }, { dni: { $like: w } }] }));
     const base: any = filters.length ? { $and: filters } : {};
-    const roles = ['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR'];
+    const roles = Object.values(UserType);
     const statuses = ['ACTIVO', 'BAJA'];
     const [[items, total], byRole, byStatus] = await Promise.all([
       this.em.findAndCount(User, { ...base, ...(o.role && { type: o.role }), ...(o.status && { status: o.status }) },
@@ -115,6 +115,6 @@ export class UserRepository implements Repository<User> {
   }
 
   async findByOwner(ownerId: string, status = 'ACTIVO'): Promise<User[]> {
-      return await this.em.find(User, { type: 'EMPLEADO', ownerId, status });
+      return await this.em.find(User, { type: UserType.EMPLEADO, ownerId, status });
     }
   }

@@ -48,8 +48,8 @@ export class UserService {
     return this.excludePassword(user);
   }
 
-  async findEmployeesByOwner(ownerId: string, status = UserStatus.ACTIVO): Promise<Omit<User, 'password'>[]> {
-    const users = await this.userRepository.findByOwner(ownerId, status);
+  async findEmployeesByOwner(ownerId: string, status?: unknown): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userRepository.findByOwner(ownerId, status === UserStatus.BAJA ? UserStatus.BAJA : UserStatus.ACTIVO);
     return users.map((user) => this.excludePassword(user));
   }
 
@@ -113,6 +113,8 @@ export class UserService {
   }
 
   async update(params: { id: string }, userData: Partial<User>): Promise<Omit<User, 'password'> | null> {
+    // Un usuario dado de baja no se edita (L-46: su token sigue vigente hasta vencer): primero se reactiva.
+    if ((await this.userRepository.findOne(params))?.status !== UserStatus.ACTIVO) return null;
     const fiscal = (['businessName', 'cuit', 'vatCondition', 'fiscalAddress'] as const).some((f) => userData[f] !== undefined);
     if (fiscal) {
       const target = await this.userRepository.findOne(params);
@@ -143,12 +145,10 @@ export class UserService {
     return true;
   }
 
-  async updatePassword(id: string, currentPass: string, newPass: string): Promise<boolean> {
+  async updatePassword(id: string, currentPass: string, newPass: string): Promise<true> {
     const user = await this.userRepository.findOne({ id });
-    if (!user) return false;
-
-    const isValid = await argon2.verify(user.password, currentPass);
-    if (!isValid) return false;
+    if (!user || user.status !== UserStatus.ACTIVO) throw new AppError('Usuario no encontrado', 404);
+    if (!(await argon2.verify(user.password, currentPass))) throw new AppError('Contraseña actual incorrecta', 400);
 
     // R-29: la cuenta del mostrador empieza con el DNI como contraseña; nadie puede volver a usarlo.
     if (newPass === user.dni) throw new AppError('La contraseña nueva no puede ser tu DNI', 400);

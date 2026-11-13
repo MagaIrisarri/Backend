@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import crypto from "node:crypto";
+import { UserType } from '../Shared/constants/status.js';
 
 // R-29: respuesta (403) a quien todavía tiene el DNI como contraseña e intenta cargar un vehículo o reservar.
 export const MUST_CHANGE_PASSWORD = 'Tenés una contraseña temporal (tu DNI, si la cuenta se creó en el mostrador): cambiala desde tu perfil para registrar vehículos y reservar';
@@ -37,8 +38,8 @@ export class User {
   @Property({ type: 'boolean', default: false })
   mustChangePassword?: boolean = false;
 
-  @Property({ type: 'string', default: 'CLIENTE' })
-  type!: string; // 'CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMIN'
+  @Property({ type: 'string', default: UserType.CLIENTE })
+  type!: UserType;
    
   @Property({ type: 'string', default: 'ACTIVO' })
   status!: string; // 'ACTIVO', 'BAJA'

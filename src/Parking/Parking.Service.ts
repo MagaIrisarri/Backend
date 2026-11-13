@@ -5,7 +5,7 @@ import { ParkingSpaceRepository } from '../ParkingSpace/ParkingSpace.Repository.
 import type { Reservation } from '../Reservation/Reservation.Entity.js';
 import { CreateParkingInput } from './Parking.Schema.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { NotificationType, ReservationStatus } from '../Shared/constants/status.js';
+import { NotificationType, ReservationStatus, UserType } from '../Shared/constants/status.js';
 import type { NotificationService } from '../Notification/Notification.Service.js';
 import { VEHICLE_CATEGORIES, spacePrefix } from '../Shared/utils/vehicleTypes.js';
 
@@ -160,7 +160,7 @@ export class ParkingService {
       throw new AppError("Dueño no encontrado o inactivo", 404);
     }
 
-    if (owner.type !== 'DUEÑO') {
+    if (owner.type !== UserType.DUENO) {
       throw new AppError("Solo los usuarios con rol DUEÑO pueden crear estacionamientos", 403);
     }
 

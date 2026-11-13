@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { pageQuery } from '../Shared/utils/pagination.js';
-import { MUTABLE_NOTIFICATIONS } from '../Shared/constants/status.js';
+import { MUTABLE_NOTIFICATIONS, UserType } from '../Shared/constants/status.js';
 
 export const VAT_CONDITIONS = ['Responsable Inscripto', 'Monotributo', 'Exento'] as const;
 
@@ -19,7 +19,7 @@ const cuitSchema = z.string().trim()
 const optionalText = (max: number) => z.string().trim().max(max, `Hasta ${max} caracteres`).transform((v) => v || null).nullable().optional();
 
 export const UserStatusSchema = z.enum(['ACTIVO', 'BAJA']);
-export const UserTypeSchema = z.enum(['CLIENTE', 'DUEÑO', 'EMPLEADO', 'ADMINISTRADOR']);
+export const UserTypeSchema = z.enum(UserType);
 
 // Solo texto: `z.coerce.date` convertiría `null`, `0` o `true` en una fecha de 1970 y pasaría la regla de edad.
 const dateOfBirthSchema = z
@@ -64,7 +64,7 @@ export const listUsersQuerySchema = z.object({
 export const createPublicUserSchema = z.object({
   body: z.object({
     ...baseUserFields,
-    type: z.enum(['CLIENTE', 'DUEÑO']).optional().default('CLIENTE'),
+    type: z.enum([UserType.CLIENTE, UserType.DUENO]).optional().default(UserType.CLIENTE),
   }),
 });
 

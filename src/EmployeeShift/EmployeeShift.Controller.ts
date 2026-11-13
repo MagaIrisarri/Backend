@@ -42,15 +42,11 @@ export class EmployeeShiftController {
     const parkingId = req.params.parkingId as string;
     const dayOfWeek = req.params.dayOfWeek as string;
 
-    const shifts = await this.service.getShiftsByParkingAndDay(parkingId, dayOfWeek);
-    const gaps = await this.service.calculateCoverageGaps(parkingId, dayOfWeek);
+    const coverage = await this.service.getCoverage(parkingId, dayOfWeek);
 
     return res.status(200).json({
       message: 'Cobertura calculada',
-      data: {
-        assignedShifts: shifts,
-        missingHours: gaps, 
-      }
+      data: coverage,
     });
   };
 }

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from './User.Service.js';
 import { AppError } from '../Shared/utils/AppError.js';
-import { UserStatus } from '../Shared/constants/status.js';
 import { signToken } from '../Shared/middlewares/auth.js';
 
 export class UserController {
@@ -21,8 +20,7 @@ export class UserController {
   };
 
   public findEmployeesByOwner = async (req: Request, res: Response) => {
-    const status = req.query.status === UserStatus.BAJA ? UserStatus.BAJA : UserStatus.ACTIVO;
-    const users = await this.userService.findEmployeesByOwner(req.params.ownerId as string, status);
+    const users = await this.userService.findEmployeesByOwner(req.params.ownerId as string, req.query.status);
     res.status(200).json({ data: users });
   };
 
@@ -70,8 +68,7 @@ export class UserController {
 
   public updatePassword = async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body;
-    const success = await this.userService.updatePassword(req.params.id as string, currentPassword, newPassword);
-    if (!success) throw new AppError('Contraseña actual incorrecta', 400);
+    await this.userService.updatePassword(req.params.id as string, currentPassword, newPassword);
     res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   };
 
@@ -84,6 +81,6 @@ export class UserController {
   public login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await this.userService.login(email, password);
-    res.status(200).json({ data: user, token: signToken(user.id) });
+    res.status(200).json({ data: user, token: signToken(user) });
   };
 }
